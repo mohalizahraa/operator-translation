@@ -172,3 +172,5 @@ The selected collaborator's assigned books now show source-page progress even at
 
 
 **Latest successful full-corpus physical verification (2026-10-04):** Nexus self-hosted run `37192187766`, rerun job `111409353320`, verified **172 available PDFs / 4 missing / 0 unchecked / 172 physical page counts / 72 historical catalogue mismatches** against Workbench head `7d2b29f7629229773cd5665e9f4cde53e4c1269d`. The deployed Workbench has been re-read after propagation: all **172 available** records report `page_count_verified=true` with `physical_pdf` basis, and the four missing records remain explicit. Earlier run `37192638039` independently reached the same 172/4/0/72 corpus result.
+
+<!-- temporary Cloudflare auto-deploy probe: 2026-10-04 -->
