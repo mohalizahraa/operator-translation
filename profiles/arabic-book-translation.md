@@ -419,7 +419,9 @@ This is a contamination-control rule, not a ban on efficient setup.
 - Preserve an explicit active-book identity at every mutation: source artifact/book ID, target document ID, source-page range, and current verified source-page denominator. If any one of those is ambiguous, stop before writing.
 - A book may move to the next book only after its required translation-text scope is complete and the applicable formatting/structural QA state has been recorded. Publication-ready review may remain a distinct later gate where the project separates translation completion from publication review.
 
-When the translation project designates a **live website/dashboard/status surface** as its progress tracker, treat progress publication as part of the batch commit:
+When the translation project designates a **live website/dashboard/status surface** as its progress tracker, treat that surface as an active translation-project artifact, not a passive afterthought. Keep its translation-relevant project records, links, assignments, status/progress fields, and presentation behavior synchronized with verified project truth as those facts change. When the tracker implementation lives in a translator-accessible project repository (for example the Haydari Translation Workbench under `operator-translation/workbench/`), ordinary authorized translation work includes maintaining that implementation/data surface when needed for the workflow; do not require separate hosting-provider access for repository-level website tweaks when repository commits are the deployment path. Hosting/account administration remains a separate authorization boundary.
+
+Treat progress publication as part of the batch commit:
 
 1. translate the source-page batch into the correct target;
 2. read back the target mutation and run the batch's required structural/rendered checks;
