@@ -1,20 +1,9 @@
 # Operator Translation Projection
 
-This repository is a **translation-only synchronized projection** of the private canonical Operator Protocol repository.
+This directory defines the source-controlled translation-only projection published from the private canonical Operator Protocol repository to the separate translator-facing repository.
 
-Canonical source: `mohalizahraa/operator-protocol`
+The private canonical Operator repository remains the single source of truth. The translator-facing repository is generated and must not become an independently maintained behavior authority.
 
-Purpose: allow authorized translators/translation agents to load the current Arabic→English translation operating rules **without receiving access to unrelated private Operator projects, status data, cases, runtime state, or project-management material**.
+The projection intentionally excludes unrelated project/status/runtime/case material. Its purpose is to expose only the protocol owners and profiles materially useful to Arabic→English book/manuscript translation and publication work.
 
-## Authority
-
-- The private canonical Operator repository remains the single source of truth.
-- This repository is a generated/read-only projection. Do not maintain independent behavioral rules here.
-- `AGENTS.md` is the translation projection router.
-- `profiles/arabic-book-translation.md` is the specialized translation profile.
-- The included protocol/profile files are present only because translation work may materially depend on them.
-- If a task falls outside this projection's translation scope, do not infer or reconstruct private Operator material.
-
-## Freshness
-
-Each synchronized publication records the exact canonical source commit in `.projection-source.json`.
+`manifest.txt` is the allowlist of canonical files copied verbatim. `AGENTS.md` is the projection-specific router. The publishing workflow records the exact canonical source commit in the destination's `.projection-source.json`.
