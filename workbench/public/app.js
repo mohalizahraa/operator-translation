@@ -506,6 +506,8 @@ function clearProjectFilters() {
 function openProjectsPreset(preset) {
   resetProjectFilters();
   if (preset === 'active') $('filter-status').value='__active__';
+  if (preset === 'translating') $('filter-status').value='in_progress';
+  if (preset === 'needs_formatting') $('filter-status').value='review';
   if (preset === 'needs_review') $('filter-status').value='completed';
   if (preset === 'deadlines') $('filter-schedule').value='with_deadline';
   if (preset === 'missing_pdf') $('filter-missing-pdf').checked=true;
@@ -529,26 +531,27 @@ function openPersonWork(person) {
   renderProjects();
 }
 
-function paceModel() {
-  const total = state.projects.length;
-  const translated = state.projects.filter(isTranslated).length;
-  const published = state.projects.filter(p => p.published).length;
-  const completedProjects = state.projects
+function paceModel({projects=state.projects, paceEvents=state.paceEvents}={}) {
+  const projectIds=new Set(projects.map(p=>Number(p.id)));
+  const total = projects.length;
+  const translated = projects.filter(isTranslated).length;
+  const published = projects.filter(p => p.published).length;
+  const completedProjects = projects
     .map(p=>({project:p,date:parseDateTime(p.completed_at)}))
     .filter(x=>x.date)
     .sort((a,b)=>a.date-b.date);
   const events=completedProjects.map(x=>x.date);
 
-  const knownPages=state.projects.map(p=>Number(p.pages)).filter(n=>Number.isFinite(n)&&n>0);
+  const knownPages=projects.map(p=>Number(p.pages)).filter(n=>Number.isFinite(n)&&n>0);
   const fallbackPages=Math.round(median(knownPages));
   const workloadOf=p=>estimatedPages(p,fallbackPages);
 
   const representedSeries=new Set();
-  for (const p of state.projects) {
+  for (const p of projects) {
     const info=seriesInfo(p);
     if (info && info.item.role !== 'umbrella') representedSeries.add(info.key);
   }
-  const workloadProjects=state.projects.filter(p=>{
+  const workloadProjects=projects.filter(p=>{
     const info=seriesInfo(p);
     return !(info?.item?.role === 'umbrella' && representedSeries.has(info.key));
   });
@@ -562,9 +565,10 @@ function paceModel() {
   },0);
   const remainingWork=Math.max(0,totalWork-completedWork);
 
-  const pageEvents=(state.paceEvents?.length ? state.paceEvents : state.activity.filter(a=>a.action==='translation progress'));
+  const pageEvents=(paceEvents?.length ? paceEvents : state.activity.filter(a=>a.action==='translation progress'));
   const dailyPages=new Map();
   for (const event of pageEvents) {
+    if (!projectIds.has(Number(event.project_id))) continue;
     const before=parseActivityJson(event.before_json) || {};
     const after=parseActivityJson(event.after_json) || {};
     const delta=Number(after.translated_pages || 0)-Number(before.translated_pages || 0);
@@ -610,11 +614,12 @@ function paceModel() {
     ? now
     : (paceReady ? new Date(now.getTime()+(remainingWork/pagesPerDay)*86400000) : null);
   const workloadPercent=totalWork ? Math.round((completedWork/totalWork)*100) : 0;
+  const todayPages=dailyPages.get(localDateKey(today)) || 0;
 
   return {
     total,translated,published,events,completedProjects,
     fallbackPages,totalWork,completedWork,remainingWork,workloadPercent,
-    pagesPerDay,pagesPer30:pagesPerDay*30,observedDays,progressDays,loggedPages,
+    pagesPerDay,pagesPer30:pagesPerDay*30,observedDays,progressDays,loggedPages,todayPages,
     paceReady,forecastDate,paceHalfLifeDays:14,paceWindowDays:90
   };
 }
@@ -687,8 +692,8 @@ function renderTranslationLive() {
 }
 
 function renderDashboard() {
-  const model = paceModel();
-  const {total,translated,published} = model;
+  const corpusModel = paceModel();
+  const {total,translated,published} = corpusModel;
   $('translation-ratio').textContent = `${translated} / ${total}`;
   $('publication-ratio').textContent = `${published} / ${total}`;
   $('translation-percent').textContent = `${pct(translated,total)}%`;
@@ -696,14 +701,28 @@ function renderDashboard() {
   $('translation-bar').style.width = `${pct(translated,total)}%`;
   $('publication-bar').style.width = `${pct(published,total)}%`;
 
-  const active = state.projects.filter(p => ['in_progress','review','completed'].includes(p.status));
+  const translating = state.projects.filter(p => p.status === 'in_progress').length;
+  const needsFormatting = state.projects.filter(p => p.status === 'review').length;
+  const needsReview = state.projects.filter(p => p.status === 'completed').length;
   const due = state.projects.filter(p => p.due_date && !isPublishReady(p));
+  const todayKey=localDateKey();
+  const overdue=due.filter(p=>p.due_date<todayKey).length;
+  const dueToday=due.filter(p=>p.due_date===todayKey).length;
+  const deadlineBits=[];
+  if (overdue) deadlineBits.push(`${overdue} overdue`);
+  if (dueToday) deadlineBits.push(`${dueToday} today`);
+  const deadlineLabel=deadlineBits.length ? `With deadlines · ${deadlineBits.join(' · ')}` : 'With deadlines';
   const missingPdf = state.projects.filter(p => p.pdf_missing).length;
   const uncheckedPdf = state.projects.filter(p => p.pdf_unchecked).length;
-  $('now-list').innerHTML = [
-    ['active','Active', active.length], ['needs_review','Needs review', state.projects.filter(p=>p.status==='completed').length],
-    ['deadlines','With deadlines', due.length], ['missing_pdf','Missing PDF', missingPdf], ['checking_pdf','PDFs still checking', uncheckedPdf]
-  ].map(([preset,label,n])=>`<button type="button" class="summary-row summary-link" data-dashboard-preset="${preset}"><span>${label}</span><strong>${n}</strong></button>`).join('');
+  const rightNowRows = [
+    ['translating','Translating', translating],
+    ['needs_formatting','Needs formatting', needsFormatting],
+    ['needs_review','Needs review', needsReview],
+    ['deadlines',deadlineLabel, due.length],
+    ['missing_pdf','Missing PDF', missingPdf],
+  ];
+  if (uncheckedPdf) rightNowRows.push(['checking_pdf','PDFs still checking', uncheckedPdf]);
+  $('now-list').innerHTML = rightNowRows.map(([preset,label,n])=>`<button type="button" class="summary-row summary-link" data-dashboard-preset="${preset}"><span>${label}</span><strong>${n}</strong></button>`).join('');
 
   const people = ['Zahraa','Mohammed','Both','Unassigned'];
   $('people-summary').innerHTML = people.map(person => {
@@ -714,27 +733,28 @@ function renderDashboard() {
   $('now-list').querySelectorAll('[data-dashboard-preset]').forEach(button=>button.addEventListener('click',()=>openProjectsPreset(button.dataset.dashboardPreset)));
   $('people-summary').querySelectorAll('[data-dashboard-person]').forEach(button=>button.addEventListener('click',()=>openPersonWork(button.dataset.dashboardPerson)));
 
-  const paceValue=model.pagesPerDay>0 ? (model.pagesPerDay>=10 ? model.pagesPerDay.toFixed(0) : model.pagesPerDay.toFixed(1)) : '—';
-  const forecast = model.remainingWork===0
-    ? 'Translation workload complete'
-    : (model.forecastDate
-      ? `Projected finish: ${model.forecastDate.toLocaleDateString(undefined,{month:'long',year:'numeric'})}`
-      : (model.loggedPages ? 'Learning your translation pace' : 'No page-pace history yet'));
-  const paceDetail = model.remainingWork===0
-    ? 'No source-page workload remains.'
-    : (model.paceReady
-      ? `${Math.round(model.remainingWork).toLocaleString()} page-equivalents remain · recent work is weighted more heavily.`
-      : (model.loggedPages
-        ? `${model.loggedPages.toLocaleString()} pages logged across ${model.progressDays} progress day${model.progressDays===1?'':'s'}; a finish date starts after 7 observed days and 3 progress days.`
-        : 'Update translated-page counters to start the forecast.'));
-  $('pace-summary').innerHTML = `
-    <div class="pace-number"><strong>${paceValue}</strong><span>source pages / day</span></div>
-    <div class="pace-copy"><strong>${escapeHtml(forecast)}</strong><span>${escapeHtml(paceDetail)}</span></div>`;
-
   const assigned = sortProjects(
     state.projects.filter(p => p.assignee === state.actor || p.assignee === 'Both'),
     'title'
   );
+  const personalModel=paceModel({projects:assigned});
+  const paceValue=personalModel.pagesPerDay>0 ? (personalModel.pagesPerDay>=10 ? personalModel.pagesPerDay.toFixed(0) : personalModel.pagesPerDay.toFixed(1)) : '—';
+  const finishValue=personalModel.remainingWork===0
+    ? 'Done'
+    : (personalModel.forecastDate ? personalModel.forecastDate.toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'}) : 'Learning');
+  const finishNote=personalModel.remainingWork===0
+    ? 'assigned translation workload complete'
+    : (personalModel.forecastDate ? 'projected from recent verified page pace' : (personalModel.loggedPages ? 'needs 7 observed days + 3 progress days' : 'starts after verified page progress'));
+  const evidenceText=personalModel.loggedPages
+    ? `Today: ${personalModel.todayPages.toLocaleString()} pages · sample: ${personalModel.observedDays}/7 observed days, ${personalModel.progressDays}/3 progress days · 14-day recency weighting`
+    : 'No verified page-pace history for these assigned books yet.';
+  $('pace-panel-title').textContent=`${state.actor}'s pace & projection`;
+  $('pace-summary').innerHTML = `
+    <div class="pace-metric"><span>Recent pace</span><strong>${paceValue}</strong><small>source pages / day</small></div>
+    <div class="pace-metric"><span>At this rate</span><strong>${escapeHtml(finishValue)}</strong><small>${escapeHtml(finishNote)}</small></div>
+    <div class="pace-metric"><span>Remaining</span><strong>${Math.round(personalModel.remainingWork).toLocaleString()}</strong><small>page-equivalents</small></div>
+    <div class="pace-metric"><span>Workload translated</span><strong>${personalModel.workloadPercent}%</strong><small>assigned books only</small></div>
+    <div class="pace-evidence">${escapeHtml(evidenceText)}</div>`;
   $('my-projects-title').textContent = `${state.actor}'s assigned projects`;
   $('my-projects-count').textContent = `${assigned.length} book${assigned.length===1?'':'s'}`;
   $('my-projects').innerHTML = assigned.map(assignedProjectMarkup).join('') || `<div class="assigned-empty">No books are assigned to ${escapeHtml(state.actor)} yet.</div>`;
@@ -1059,11 +1079,11 @@ function renderTimeline() {
 function renderStats() {
   const model = paceModel();
   const today = localDateKey();
-  const active = state.projects.filter(p=>!isPublishReady(p));
-  const overdue = active.filter(p=>p.due_date && p.due_date < today).length;
+  const open = state.projects.filter(p=>!isPublishReady(p));
+  const overdue = open.filter(p=>p.due_date && p.due_date < today).length;
   const next30 = localDateKeyAfterDays(30);
-  const dueSoon = active.filter(p=>p.due_date && p.due_date >= today && p.due_date <= next30).length;
-  const unscheduled = active.filter(p=>!p.due_date).length;
+  const dueSoon = open.filter(p=>p.due_date && p.due_date >= today && p.due_date <= next30).length;
+  const unscheduled = open.filter(p=>!p.due_date).length;
 
   $('stat-translated').textContent = model.translated;
   $('stat-translated-sub').textContent = `of ${model.total} books · ${pct(model.translated,model.total)}%`;
@@ -1074,12 +1094,12 @@ function renderStats() {
   const paceSub=$('stat-pace-sub');
   if (paceSub) {
     paceSub.textContent = model.loggedPages
-      ? `source pages/day · ${model.paceHalfLifeDays}-day half-life · ${model.observedDays} observed day${model.observedDays===1?'':'s'}`
-      : 'source pages/day · waiting for page progress';
+      ? `source pages/day · ${model.todayPages.toLocaleString()} today · ${model.observedDays} observed / ${model.progressDays} progress days`
+      : 'source pages/day · waiting for verified page progress';
   }
   $('stat-forecast').textContent = model.remainingWork===0
     ? 'Done'
-    : (model.forecastDate ? model.forecastDate.toLocaleDateString(undefined,{month:'short',year:'numeric'}) : 'Learning');
+    : (model.forecastDate ? model.forecastDate.toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'}) : 'Learning');
   $('stat-forecast-sub').textContent = model.remainingWork===0
     ? 'Translation workload complete'
     : (model.forecastDate
@@ -1103,7 +1123,7 @@ function renderStats() {
     return `<div class="summary-row"><span>${person}</span><strong>${done}/${list.length} · ${pct(done,list.length)}%${['Zahraa','Mohammed'].includes(person) ? ` · ${recentByPerson}/30d` : ''}</strong></div>`;
   }).join('');
   $('stats-deadlines').innerHTML = [
-    ['Overdue',overdue],['Due in next 30 days',dueSoon],['Active without deadline',unscheduled]
+    ['Overdue',overdue],['Due in next 30 days',dueSoon],['Without deadline (not Publish Ready)',unscheduled]
   ].map(([label,n])=>`<div class="summary-row"><span>${label}</span><strong>${n}</strong></div>`).join('');
 
   $('progress-chart').innerHTML = progressChartMarkup(model);
@@ -1114,8 +1134,7 @@ function progressChartMarkup(model) {
   const width=760, height=280, left=46, right=18, top=18, bottom=42;
   const start = new Date(model.events[0]); start.setHours(0,0,0,0);
   const now = new Date(); now.setHours(23,59,59,999);
-  const projectedEnd=model.forecastDate && model.forecastDate>now ? model.forecastDate : now;
-  const span = Math.max(86400000,projectedEnd-start);
+  const span = Math.max(86400000,now-start);
   const dayCounts = new Map();
   for (const d of model.events) {
     const key=d.toISOString().slice(0,10);
@@ -1127,16 +1146,12 @@ function progressChartMarkup(model) {
     running += n;
     points.push({date:new Date(`${key}T12:00:00Z`),count:running});
   }
-  points.push({date:now,count:running});
+  points.push({date:now,count:model.translated});
   const x=d=>left+((d-start)/span)*(width-left-right);
   const y=n=>top+(1-(n/Math.max(1,model.total)))*(height-top-bottom);
   const path=points.map((p,i)=>`${i?'L':'M'} ${x(p.date).toFixed(1)} ${y(p.count).toFixed(1)}`).join(' ');
   const pctNow=pct(model.translated,model.total);
-  const projection=model.forecastDate && model.forecastDate>now
-    ? `<line class="chart-projection" x1="${x(now)}" y1="${y(model.translated)}" x2="${x(model.forecastDate)}" y2="${y(model.total)}"></line>
-       <text class="chart-label" x="${width-right}" y="${top+12}" text-anchor="end">Projected finish</text>`
-    : '';
-  return `<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="Cumulative translation progress">
+  return `<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="Cumulative translation completion history">
     <line class="chart-axis" x1="${left}" y1="${top}" x2="${left}" y2="${height-bottom}"></line>
     <line class="chart-axis" x1="${left}" y1="${height-bottom}" x2="${width-right}" y2="${height-bottom}"></line>
     <line class="chart-grid" x1="${left}" y1="${y(model.total/2)}" x2="${width-right}" y2="${y(model.total/2)}"></line>
@@ -1144,11 +1159,10 @@ function progressChartMarkup(model) {
     <text class="chart-label" x="${left-8}" y="${y(model.total/2)+4}" text-anchor="end">50%</text>
     <text class="chart-label" x="${left-8}" y="${height-bottom+4}" text-anchor="end">0%</text>
     <path class="chart-line" d="${path}"></path>
-    ${projection}
     <circle class="chart-point" cx="${x(now)}" cy="${y(model.translated)}" r="4"></circle>
     <text class="chart-value" x="${Math.max(left+30,x(now)-6)}" y="${Math.max(top+14,y(model.translated)-10)}" text-anchor="end">${pctNow}%</text>
     <text class="chart-label" x="${left}" y="${height-12}">${start.toLocaleDateString(undefined,{month:'short',year:'2-digit'})}</text>
-    <text class="chart-label" x="${width-right}" y="${height-12}" text-anchor="end">${projectedEnd===now ? 'Today' : model.forecastDate.toLocaleDateString(undefined,{month:'short',year:'2-digit'})}</text>
+    <text class="chart-label" x="${width-right}" y="${height-12}" text-anchor="end">Today</text>
   </svg>`;
 }
 
