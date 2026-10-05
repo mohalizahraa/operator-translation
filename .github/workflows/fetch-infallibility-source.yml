@@ -1,0 +1,38 @@
+name: Fetch Infallibility Source
+
+on:
+  push:
+    branches:
+      - 'ops/supplication-native-toc-2026-10-04'
+    paths:
+      - '.github/workflows/fetch-infallibility-source.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  fetch-source:
+    runs-on: [self-hosted, operator-translation, macOS, ARM64]
+    timeout-minutes: 10
+    steps:
+      - name: Fetch authoritative Arabic PDF
+        shell: bash
+        run: |
+          set -euo pipefail
+          out="$RUNNER_TEMP/esmatanbiya.pdf"
+          curl -L --fail --silent --show-error \
+            'https://archive.alhaydari.com/ebook/ar/esmatanbiya.pdf' \
+            -o "$out"
+          test -s "$out"
+          shasum -a 256 "$out" | tee "$RUNNER_TEMP/esmatanbiya.sha256"
+          ls -lh "$out"
+
+      - name: Upload source PDF
+        uses: actions/upload-artifact@v4
+        with:
+          name: infallibility-arabic-source
+          path: |
+            ${{ runner.temp }}/esmatanbiya.pdf
+            ${{ runner.temp }}/esmatanbiya.sha256
+          if-no-files-found: error
+          retention-days: 1
