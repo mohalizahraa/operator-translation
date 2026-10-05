@@ -1,0 +1,51 @@
+name: One-shot Translation Runtime Inventory
+
+on:
+  push:
+    paths:
+      - '.github/workflows/one-shot-translation-runtime-inventory.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  inventory:
+    runs-on: [self-hosted, operator-translation, macOS, ARM64]
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inventory local zero-cost translation runtimes
+        shell: bash
+        run: |
+          set -euo pipefail
+          out="workbench/handoffs/translation-runtime-inventory.json"
+          mkdir -p "$(dirname "$out")"
+          python3 - <<'PY'
+          import json, os, shutil, subprocess, datetime
+          cmds=["ollama","mlx_lm.generate","mlx_lm","llama-cli","llamafile","python3","uv","node","codex","claude","aider"]
+          data={"checked_at":datetime.datetime.now(datetime.timezone.utc).isoformat(),"runner":os.environ.get("RUNNER_NAME"),"commands":{}}
+          for c in cmds:
+              p=shutil.which(c)
+              item={"path":p}
+              if p:
+                  try:
+                      cp=subprocess.run([p,"--version"],capture_output=True,text=True,timeout=8)
+                      item["version"]=(cp.stdout or cp.stderr).strip()[:500]
+                  except Exception as e:
+                      item["version_error"]=type(e).__name__
+              data["commands"][c]=item
+          if shutil.which("ollama"):
+              try:
+                  cp=subprocess.run(["ollama","list"],capture_output=True,text=True,timeout=15)
+                  data["ollama_list"]=(cp.stdout or cp.stderr).strip()[:5000]
+              except Exception as e:
+                  data["ollama_list_error"]=type(e).__name__
+          with open("workbench/handoffs/translation-runtime-inventory.json","w") as f:
+              json.dump(data,f,indent=2)
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$out"
+          git commit -m "workbench: record translation runtime inventory" || true
+          git pull --rebase origin main
+          git push origin HEAD:main
