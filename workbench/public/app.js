@@ -531,7 +531,7 @@ function openPersonWork(person) {
   renderProjects();
 }
 
-function paceModel({projects=state.projects, paceEvents=state.paceEvents}={}) {
+function paceModel({projects=state.projects, paceEvents=state.paceEvents, actor=null}={}) {
   const projectIds=new Set(projects.map(p=>Number(p.id)));
   const total = projects.length;
   const translated = projects.filter(isTranslated).length;
@@ -569,6 +569,7 @@ function paceModel({projects=state.projects, paceEvents=state.paceEvents}={}) {
   const dailyPages=new Map();
   for (const event of pageEvents) {
     if (!projectIds.has(Number(event.project_id))) continue;
+    if (actor && event.actor !== actor) continue;
     const before=parseActivityJson(event.before_json) || {};
     const after=parseActivityJson(event.after_json) || {};
     const delta=Number(after.translated_pages || 0)-Number(before.translated_pages || 0);
@@ -737,7 +738,7 @@ function renderDashboard() {
     state.projects.filter(p => p.assignee === state.actor || p.assignee === 'Both'),
     'title'
   );
-  const personalModel=paceModel({projects:assigned});
+  const personalModel=paceModel({projects:assigned,actor:state.actor});
   const paceValue=personalModel.pagesPerDay>0 ? (personalModel.pagesPerDay>=10 ? personalModel.pagesPerDay.toFixed(0) : personalModel.pagesPerDay.toFixed(1)) : '—';
   const finishValue=personalModel.remainingWork===0
     ? 'Done'
