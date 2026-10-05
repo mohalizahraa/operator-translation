@@ -10,10 +10,10 @@ permissions:
 
 jobs:
   refresh:
-    runs-on: [self-hosted, operator-translation, macOS, ARM64]
+    runs-on: [self-hosted, macOS, ARM64]
     timeout-minutes: 15
     env:
-      DOC_URL: https://docs.google.com/document/d/1KJBqjZ41Zasg_LqrKNr4wJXZCkpOcJ77PXQal2KU1qM/edit?usp=drivesdk
+      DOC_URL: https://docs.google.com/document/d/1KJBqjZ41Zasg_LqrKNr4wJXZCkpOcJ77PXQal2KU1qM/edit
       PLAYWRIGHT_BROWSERS_PATH: /tmp/operator-playwright-browsers
     steps:
       - uses: actions/checkout@v4
@@ -27,69 +27,56 @@ jobs:
       - name: Refresh native Google Docs TOC
         shell: bash
         run: |
-          node <<'NODE'
-          const { chromium } = require('playwright');
+          cat > ./refresh-prophets-toc.mjs <<'NODE'
+          import { chromium } from "playwright";
           const sleep = ms => new Promise(r => setTimeout(r, ms));
-          async function clickIfVisible(locator, timeout=1200) {
-            try { if (await locator.isVisible({timeout})) { await locator.click(); return true; } } catch {}
-            return false;
-          }
-          async function focusEditor(page) {
-            for (const label of ['Got it','No thanks','Dismiss','Close']) {
-              await clickIfVisible(page.getByRole('button',{name:label,exact:true}));
-            }
-            for (const loc of [page.locator('.kix-appview-editor'),page.locator('.kix-page-paginated'),page.locator('[role="textbox"]')]) {
-              try { if (await loc.first().isVisible({timeout:2500})) { await loc.first().click({position:{x:160,y:180}}); return; } } catch {}
-            }
-            await page.mouse.click(790,450);
-          }
-          async function findInDocument(page, query) {
-            await focusEditor(page);
-            await page.keyboard.press('Meta+f');
-            await sleep(300);
-            await page.keyboard.type(query,{delay:25});
-            await sleep(700);
-            const closeFind=page.getByLabel('Close',{exact:true}).first();
-            if (await closeFind.isVisible({timeout:1200}).catch(()=>false)) await closeFind.click();
-            else await page.keyboard.press('Escape');
-            await sleep(500);
-          }
-          const browser=await chromium.launch({headless:true});
-          const context=await browser.newContext({viewport:{width:1440,height:1000},locale:'en-US'});
-          const page=await context.newPage();
+          const browser = await chromium.launch({headless:true});
+          const context = await browser.newContext({viewport:{width:1440,height:1000},locale:"en-US"});
+          const page = await context.newPage();
           try {
-            await page.goto(process.env.DOC_URL,{waitUntil:'domcontentloaded',timeout:120000});
-            await page.waitForTimeout(8000);
-            console.log('PAGE_TITLE='+await page.title());
-            if (/sign in/i.test(await page.title()) && /accounts\.google\.com/.test(page.url())) throw new Error('Document unexpectedly requires sign-in');
-            await findInDocument(page,'Introduction');
-            await page.keyboard.press('ArrowRight');
+            await page.goto(process.env.DOC_URL,{waitUntil:"domcontentloaded",timeout:120000});
+            await sleep(8000);
+            const editor = page.locator(".kix-appview-editor").first();
+            if (await editor.isVisible({timeout:3000}).catch(()=>false)) {
+              await editor.click({position:{x:520,y:220},force:true});
+            } else {
+              await page.mouse.click(800,450);
+            }
+            await page.keyboard.press("Meta+f");
+            await sleep(300);
+            await page.keyboard.type("Introduction",{delay:25});
             await sleep(700);
-            const selectors=[
+            const close = page.getByLabel("Close",{exact:true}).first();
+            if (await close.isVisible({timeout:1200}).catch(()=>false)) await close.click();
+            else await page.keyboard.press("Escape");
+            await sleep(500);
+            await page.keyboard.press("ArrowRight");
+            await sleep(700);
+            const candidates=[
               page.getByLabel(/(?:Refresh|Update) table of contents/i).last(),
               page.getByLabel(/^(?:Refresh|Update)$/i).last(),
               page.locator('[aria-label*="Refresh" i][aria-label*="table" i]').last(),
               page.locator('[aria-label*="Update" i][aria-label*="table" i]').last(),
               page.locator('[data-tooltip*="Refresh" i][data-tooltip*="table" i]').last(),
-              page.locator('[data-tooltip*="Update" i][data-tooltip*="table" i]').last(),
-              page.locator('[title*="Refresh" i][title*="table" i]').last(),
-              page.locator('[title*="Update" i][title*="table" i]').last(),
+              page.locator('[data-tooltip*="Update" i][data-tooltip*="table" i]').last()
             ];
             let clicked=false;
-            for (const loc of selectors) {
+            for (const loc of candidates) {
               if (await loc.isVisible({timeout:1400}).catch(()=>false)) {
-                await loc.click(); clicked=true; console.log('NATIVE_TOC_REFRESH_CLICKED'); break;
+                await loc.click(); clicked=true; break;
               }
             }
-            if (!clicked) throw new Error('Could not find native TOC refresh control');
-            await page.waitForTimeout(7000);
-            console.log('NATIVE_TOC_REFRESH_COMPLETED');
+            if (!clicked) throw new Error("Native TOC refresh control not found");
+            await sleep(7000);
+            console.log("NATIVE_TOC_REFRESH_COMPLETED");
           } finally {
             await browser.close();
           }
           NODE
+          node ./refresh-prophets-toc.mjs
       - name: Remove ephemeral browser payload
         if: always()
         run: |
+          rm -f ./refresh-prophets-toc.mjs
           rm -rf /tmp/operator-playwright-browsers
           rm -rf node_modules/playwright node_modules/playwright-core node_modules/.bin/playwright
