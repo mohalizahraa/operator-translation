@@ -1,0 +1,43 @@
+name: Mark Supplication Formatting Complete
+
+on:
+  push:
+    branches:
+      - 'ops/supplication-native-toc-2026-10-04'
+    paths:
+      - '.github/workflows/supplication-formatting-complete.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: [self-hosted, operator-translation, macOS, ARM64]
+    timeout-minutes: 5
+    steps:
+      - name: Move Supplication to Needs Review
+        shell: bash
+        env:
+          BASE: https://haydari-translation-workbench.pages.dev
+        run: |
+          set -euo pipefail
+          before="$(curl --fail --silent --show-error "$BASE/api/projects/4")"
+          python3 - "$before" <<'PY'
+          import json,sys
+          p=json.loads(sys.argv[1])["project"]
+          assert int(p["pages"]) == 280, p
+          assert int(p.get("translated_pages") or 0) == 280, p
+          assert p["status"] == "review", p
+          print("BEFORE_OK", p["status"], p["translated_pages"], "/", p["pages"])
+          PY
+
+          curl --fail-with-body --silent --show-error             -X PATCH "$BASE/api/projects/4"             -H 'Content-Type: application/json'             -H 'x-workbench-actor: Zahraa'             --data-binary '{"status":"completed"}' > "$RUNNER_TEMP/supplication-status.json"
+
+          after="$(curl --fail --silent --show-error "$BASE/api/projects/4")"
+          python3 - "$after" <<'PY'
+          import json,sys
+          p=json.loads(sys.argv[1])["project"]
+          assert p["status"] == "completed", p
+          assert int(p["translated_pages"]) == 280, p
+          print("AFTER_OK", p["status"], p["translated_pages"], "/", p["pages"])
+          PY
