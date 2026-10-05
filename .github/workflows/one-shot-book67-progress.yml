@@ -1,0 +1,35 @@
+name: One-shot Book 67 Progress
+
+on:
+  push:
+    paths:
+      - '.github/workflows/one-shot-book67-progress.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: [self-hosted, macOS, ARM64]
+    timeout-minutes: 5
+    steps:
+      - name: Publish verified 6/584 checkpoint
+        shell: bash
+        run: |
+          set -euo pipefail
+          body=$(cat <<'JSON'
+          {
+            "translated_pages": 6,
+            "expected_previous_pages": 0,
+            "source_total_pages": 584,
+            "source_pdf_sha256": "f42595fd7c50e10116b944351e7d59150f2cf90c7d8a93315bcea03fc6f41e0d",
+            "google_doc_revision": "ANLCKQkgisHI55EceTnnVd8fwowJ8z6wUI_pLnb9hGQNZQd99Z15KHYuYl_uXySoyOcO2o-xb3SjhRSmjckzUf3FFp_hyia0iOlb7R3a8wA",
+            "verification_note": "Verified authoritative source physical pages 1–6 against rendered PDF; physical page 4 is intentionally blank. Target Google Doc was read back after insertion with 0 unapproved Arabic-script hits."
+          }
+          JSON
+          )
+          curl -fsS -X PATCH \
+            -H 'content-type: application/json' \
+            -H 'x-workbench-actor: Zahraa' \
+            --data "$body" \
+            https://haydari-translation-workbench.pages.dev/api/projects/2/progress
