@@ -27,7 +27,7 @@ jobs:
       - name: Refresh native Google Docs TOC
         shell: bash
         run: |
-          cat > /tmp/refresh-supplication-toc.mjs <<'NODE'
+          cat > ./refresh-supplication-toc.mjs <<'NODE'
           import { chromium } from "playwright";
           const sleep = ms => new Promise(r => setTimeout(r, ms));
           const browser = await chromium.launch({headless:true});
@@ -73,10 +73,10 @@ jobs:
             await browser.close();
           }
           NODE
-          node /tmp/refresh-supplication-toc.mjs
+          node ./refresh-supplication-toc.mjs
       - name: Remove ephemeral browser payload
         if: always()
         run: |
-          rm -f /tmp/refresh-supplication-toc.mjs
+          rm -f ./refresh-supplication-toc.mjs
           rm -rf /tmp/operator-playwright-browsers
           rm -rf node_modules/playwright node_modules/playwright-core node_modules/.bin/playwright
