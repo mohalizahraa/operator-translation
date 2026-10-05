@@ -87,8 +87,8 @@ export async function onRequestPost(context) {
   if (outcomes.length) {
     await context.env.DB.batch(outcomes.map(result =>
       context.env.DB.prepare(
-        'UPDATE projects SET pdf_status = ?, pdf_checked_at = ?, pdf_check_note = ?, updated_at = ? WHERE id = ?'
-      ).bind(result.status, checkedAt, result.note, checkedAt, result.id)
+        'UPDATE projects SET pdf_status = ?, pdf_checked_at = ?, pdf_check_note = ? WHERE id = ?'
+      ).bind(result.status, checkedAt, result.note, result.id)
     ));
   }
 

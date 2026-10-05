@@ -25,10 +25,13 @@ if (/\.sort\([\s\S]{0,250}?\.slice\(0,\s*3\)/.test(app)) {
 
 requireText(revision, 'MAX(id)', 'activity changes in revision token');
 requireText(revision, 'MAX(updated_at)', 'project/cover changes in revision token');
+requireText(revision, 'MAX(pdf_checked_at)', 'PDF-audit freshness in revision token');
 requireText(revision, 'FROM project_covers', 'cover changes in revision token');
 requireText(revision, 'FROM workbench_meta', 'catalog/migration metadata in revision token');
 requireText(revision, 'GROUP_CONCAT', 'stable metadata projection in revision token');
 
-requireText(pdfAudit, 'pdf_check_note = ?, updated_at = ?', 'PDF-audit mutations advance project freshness');
+if (pdfAudit.includes('pdf_check_note = ?, updated_at = ?')) {
+  throw new Error('Live-sync invariant regression: background PDF audit must not overwrite semantic project updated_at.');
+}
 
 console.log('Live-sync invariant: PASS');
