@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   ocr:
-    runs-on: [self-hosted, operator-translation, macOS, ARM64]
+    runs-on: [self-hosted, macOS, ARM64]
     timeout-minutes: 10
     env:
       SOURCE_URL: "https://archive.alhaydari.com/ebook/ar/%D8%A7%D9%84%D9%83%D9%84%D8%A7%D9%85-%D9%88%D8%A7%D9%84%D8%B9%D9%82%D8%A7%D8%A6%D8%AF/%D9%81%D9%82%D9%87-%D8%A7%D9%84%D8%B9%D9%82%D9%8A%D8%AF%D8%A9.pdf"
