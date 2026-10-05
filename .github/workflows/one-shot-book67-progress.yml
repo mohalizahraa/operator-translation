@@ -13,18 +13,18 @@ jobs:
     runs-on: [self-hosted, macOS, ARM64]
     timeout-minutes: 5
     steps:
-      - name: Publish verified 110/584 checkpoint
+      - name: Publish verified 120/584 checkpoint
         shell: bash
         run: |
           set -euo pipefail
           body=$(cat <<'JSON'
           {
-            "translated_pages": 110,
-            "expected_previous_pages": 91,
+            "translated_pages": 120,
+            "expected_previous_pages": 110,
             "source_total_pages": 584,
             "source_pdf_sha256": "f42595fd7c50e10116b944351e7d59150f2cf90c7d8a93315bcea03fc6f41e0d",
-            "google_doc_revision": "ANLCKQlb6FibN2FRhMJc8XMmvCEcc3n2e34P7EpM-2ziAPpQlNJ-skDOBREA_aQrF2k7MHGE7gZPVg-nkOAGu1_vE79X--9xdBO6TnS9TCU",
-            "verification_note": "Verified continuous source coverage through physical page 110 against the authoritative 584-page PDF hash. The prior 91-page checkpoint was reconciled: omitted material spanning the page-91/92 boundary through page 94 was restored, the Ghadir section through page 96 was source-aligned, and pages 97-110 now cover the Calamity of Thursday, reactions to the first preservation measure, the three classes of objectors, Usamah-expedition resistance, and the Hawd/reversal traditions. Whole-doc native-footnote count is 132 with 0 empty notes and no temporary source-note anchors remain in the body."
+            "google_doc_revision": "ANLCKQnG3ZmnVJL3O3IL-jFzwW2K8JY03UgejSYuDMn4_4YaW4VicI6SzUiwUStK6etJBT-TIEnncXvSGSBn43JYsn3EuGha627QkSKHQRw",
+            "verification_note": "Verified continuous source coverage through physical page 120 against the authoritative 584-page PDF hash. Pages 111-115 translate the Prophet's forewarning of opposition and betrayal, the Abu Dharr warning, post-exclusion warfare against Imam Ali, and the Umayyad cursing legacy. Pages 116-120 begin Imam Ali's own defense of his right to the Caliphate and cover the Saqifah response plus the opening of the Umar-successorship episode. Whole-doc native-footnote count is 149 with 0 empty notes and no temporary source-note anchors remain in the body."
           }
           JSON
           )
