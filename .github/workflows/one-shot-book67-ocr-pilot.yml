@@ -1,0 +1,70 @@
+name: One-shot Book 67 OCR Pilot
+
+on:
+  push:
+    paths:
+      - '.github/workflows/one-shot-book67-ocr-pilot.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  ocr:
+    runs-on: [self-hosted, macOS, ARM64]
+    timeout-minutes: 15
+    env:
+      SOURCE_URL: "https://archive.alhaydari.com/ebook/ar/%D8%A7%D9%84%D9%83%D9%84%D8%A7%D9%85-%D9%88%D8%A7%D9%84%D8%B9%D9%82%D8%A7%D8%A6%D8%AF/%D8%A7%D9%84%D8%AA%D8%AF%D8%A7%D8%A8%D9%8A%D8%B1-%D8%A7%D9%84%D9%86%D8%A8%D9%88%D9%8A%D8%A9-%D9%84%D8%AD%D9%81%D8%B8-%D8%A7%D9%84%D8%B1%D8%B3%D8%A7%D9%84%D8%A9-%D8%A7%D9%84%D8%A5%D9%84%D9%87%D9%8A%D8%A9.pdf"
+      START_PAGE: "5"
+      END_PAGE: "8"
+    steps:
+      - name: Fetch and OCR authoritative Workbench PDF pages with macOS Vision
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --connect-timeout 30 "$SOURCE_URL" -o /tmp/book67.pdf
+          head -c 5 /tmp/book67.pdf | grep -q '%PDF-'
+          printf 'SOURCE_SHA256=%s\n' "$(shasum -a 256 /tmp/book67.pdf | awk '{print $1}')"
+
+          cat >/tmp/ocr-book67.swift <<'SWIFT'
+          import Foundation
+          import PDFKit
+          import AppKit
+          import Vision
+
+          guard let doc = PDFDocument(url: URL(fileURLWithPath: "/tmp/book67.pdf")) else {
+            fputs("PDF_OPEN_FAILED\n", stderr)
+            exit(2)
+          }
+          print("SOURCE_PAGE_COUNT=\(doc.pageCount)")
+          let start = max(1, Int(ProcessInfo.processInfo.environment["START_PAGE"] ?? "1") ?? 1)
+          let end = min(doc.pageCount, Int(ProcessInfo.processInfo.environment["END_PAGE"] ?? "\(start)") ?? start)
+
+          for physical in start...end {
+            guard let page = doc.page(at: physical - 1) else { continue }
+            let img = page.thumbnail(of: NSSize(width: 2400, height: 3400), for: .mediaBox)
+            guard let cg = img.cgImage(forProposedRect: nil, context: nil, hints: nil) else { continue }
+
+            let req = VNRecognizeTextRequest()
+            req.recognitionLevel = .accurate
+            req.usesLanguageCorrection = true
+            if (try? req.supportedRecognitionLanguages()).map({$0.contains("ar-SA")}) == true {
+              req.recognitionLanguages = ["ar-SA"]
+            }
+
+            let handler = VNImageRequestHandler(cgImage: cg, options: [:])
+            try handler.perform([req])
+            let obs = (req.results ?? []).sorted {
+              let ay = $0.boundingBox.midY, by = $1.boundingBox.midY
+              if abs(ay - by) > 0.012 { return ay > by }
+              return $0.boundingBox.midX > $1.boundingBox.midX
+            }
+            let txt = obs.compactMap { $0.topCandidates(1).first?.string }.joined(separator: "\n")
+            print("=== PAGE \(physical) OCR BEGIN ===")
+            print(Data(txt.utf8).base64EncodedString())
+            print("=== PAGE \(physical) OCR END ===")
+          }
+          SWIFT
+          swift /tmp/ocr-book67.swift
+      - name: Cleanup
+        if: always()
+        run: rm -f /tmp/book67.pdf /tmp/ocr-book67.swift
