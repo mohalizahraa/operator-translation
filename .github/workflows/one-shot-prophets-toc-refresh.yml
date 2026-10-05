@@ -27,7 +27,7 @@ jobs:
       - name: Refresh native Google Docs TOC after whole-book pagination
         shell: bash
         run: |
-          # Trigger: invoke the real Google Docs Update table of contents DOM control discovered by diagnostics.
+          # Trigger: refresh after stabilizing the existing Story of Joseph page-90 boundary for TOC/render agreement.
           cat > ./refresh-prophets-toc.mjs <<'NODE'
           import { chromium } from "playwright";
           const sleep=ms=>new Promise(r=>setTimeout(r,ms));
