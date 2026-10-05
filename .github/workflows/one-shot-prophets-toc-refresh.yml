@@ -27,6 +27,7 @@ jobs:
       - name: Refresh native Google Docs TOC
         shell: bash
         run: |
+          # Terminal refresh pass after the final pagination-changing cleanup.
           cat > ./refresh-prophets-toc.mjs <<'NODE'
           import { chromium } from "playwright";
           const sleep=ms=>new Promise(r=>setTimeout(r,ms));
@@ -65,7 +66,6 @@ jobs:
               await page.mouse.click(800,450);
             }
 
-            // Use Docs Find only to scroll the virtualized editor to the TOC page.
             await page.keyboard.press("Meta+f");
             await sleep(300);
             await page.keyboard.type("Contents",{delay:25});
@@ -75,7 +75,6 @@ jobs:
             else await page.keyboard.press("Escape");
             await sleep(1000);
 
-            // First try keyboard movement from the active search match into the following TOC.
             for(const key of ["ArrowRight","End","ArrowDown","ArrowDown"]){
               await page.keyboard.press(key).catch(()=>{});
               await sleep(350);
@@ -86,7 +85,6 @@ jobs:
               }
             }
 
-            // Docs virtualizes the canvas; search has made the TOC page one of the few visible pages.
             const pages=page.locator(".kix-page-paginated:visible");
             const count=await pages.count();
             console.log("VISIBLE_PAGE_COUNT="+count);
