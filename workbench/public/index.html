@@ -71,7 +71,7 @@
           <section class="panel"><div class="panel-head"><h3>By person</h3></div><div id="people-summary" class="stack"></div></section>
         </div>
         <section class="panel pace-panel">
-          <div class="panel-head"><h3>Pace & projection</h3><button class="text-button" type="button" data-jump-view="stats">See full stats</button></div>
+          <div class="panel-head"><h3 id="pace-panel-title">Pace & projection</h3><button class="text-button" type="button" data-jump-view="stats">See corpus stats</button></div>
           <div id="pace-summary" class="pace-summary"></div>
         </section>
         <section class="panel live-translation-panel">
@@ -98,7 +98,7 @@
           <div id="filter-content" class="filter-content active filters">
             <select id="filter-topic"><option value="">All topics</option></select>
             <select id="filter-assignee"><option value="">All people</option><option value="__mine__">My assignments</option><option>Zahraa</option><option>Mohammed</option><option>Both</option><option>Unassigned</option></select>
-            <select id="filter-status"><option value="">All statuses</option><option value="__active__">Active work</option><option value="not_started">Not Started</option><option value="in_progress">Translating</option><option value="review">Needs Formatting</option><option value="completed">Needs Review</option><option value="published">Publish Ready</option></select>
+            <select id="filter-status"><option value="">All statuses</option><option value="__active__">Started, not Publish Ready</option><option value="not_started">Not Started</option><option value="in_progress">Translating</option><option value="review">Needs Formatting</option><option value="completed">Needs Review</option><option value="published">Publish Ready</option></select>
             <select id="filter-schedule"><option value="">Any schedule</option><option value="with_deadline">Has deadline</option><option value="overdue">Overdue</option><option value="due_month">Due this month</option><option value="no_deadline">No deadline</option></select>
             <select id="sort-projects" aria-label="Sort projects">
               <option value="updated">Sort: Recently updated</option>
@@ -177,13 +177,13 @@
         <div class="stats-grid">
           <article class="stat-card"><span class="stat-label">Translated</span><strong id="stat-translated">0</strong><small id="stat-translated-sub">of 0 books</small></article>
           <article class="stat-card"><span class="stat-label">Published</span><strong id="stat-published">0</strong><small id="stat-published-sub">of 0 books</small></article>
-          <article class="stat-card"><span class="stat-label">Translation pace</span><strong id="stat-pace">—</strong><small id="stat-pace-sub">source pages per day</small></article>
-          <article class="stat-card"><span class="stat-label">Projected finish</span><strong id="stat-forecast">—</strong><small id="stat-forecast-sub">Learns from real page progress</small></article>
-          <article class="stat-card"><span class="stat-label">Page-weighted progress</span><strong id="stat-workload-pace">—</strong><small id="stat-workload-pace-sub">source-page equivalent</small></article>
+          <article class="stat-card"><span class="stat-label">Recent corpus pace</span><strong id="stat-pace">—</strong><small id="stat-pace-sub">source pages per day</small></article>
+          <article class="stat-card"><span class="stat-label">At this rate</span><strong id="stat-forecast">—</strong><small id="stat-forecast-sub">Learns from real page progress</small></article>
+          <article class="stat-card"><span class="stat-label">Workload translated</span><strong id="stat-workload-pace">—</strong><small id="stat-workload-pace-sub">source-page equivalent</small></article>
           <article class="stat-card"><span class="stat-label">Remaining workload</span><strong id="stat-workload-forecast">—</strong><small id="stat-workload-forecast-sub">source-page equivalent</small></article>
         </div>
         <section class="panel chart-panel">
-          <div class="panel-head"><h3>Translation progress over time</h3><span class="muted">Translation finished</span></div>
+          <div class="panel-head"><h3>Translation completion history</h3><span class="muted">Books reaching Needs Formatting or later</span></div>
           <div id="progress-chart" class="progress-chart" aria-label="Translation completion graph"></div>
         </section>
         <div class="dashboard-grid">
