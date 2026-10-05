@@ -13,18 +13,18 @@ jobs:
     runs-on: [self-hosted, macOS, ARM64]
     timeout-minutes: 5
     steps:
-      - name: Publish verified 380/584 checkpoint
+      - name: Publish verified 400/584 checkpoint
         shell: bash
         run: |
           set -euo pipefail
           body=$(cat <<'JSON'
           {
-            "translated_pages": 380,
-            "expected_previous_pages": 360,
+            "translated_pages": 400,
+            "expected_previous_pages": 380,
             "source_total_pages": 584,
             "source_pdf_sha256": "f42595fd7c50e10116b944351e7d59150f2cf90c7d8a93315bcea03fc6f41e0d",
-            "google_doc_revision": "ANLCKQklYjmhQtKUTzng9Iw9aiRTv83c2gnmJ2slkaZXUFlczAAhG2nOJkHtWbyZ36eUQP0E0GXTtrxu1dCocTaGeRs_9MZoX2uCFT6Bo5k",
-            "verification_note": "Verified continuous English translation coverage through physical source page 380 in the live Google Doc. Chapter Seven is complete through its concluding note, and Chapter Eight's title and contents page are translated. Blank physical source pages within this span were accounted for. Source-note text remains staged pending native-footnote migration and final formatting/publication QA; this checkpoint certifies continuous draft coverage/readback, not publication readiness."
+            "google_doc_revision": "ANLCKQnz5BgnzYGGU24RR4J7XhH-Rs2kyRU1x6uF-vxQOp_oUL1Eqo0p-m5_n7EdIdHJlxf0wzTGwdHgXxmiRcilj_J9mg0oZOatc8OprkQ",
+            "verification_note": "Verified continuous English translation coverage through physical source page 400 in the live Google Doc. Chapter Eight now covers the Usamah expedition, Saqifah, the separation-of-prophethood-and-rule argument, and the author's discussion of caliph- and Companion-level efforts to frustrate the Prophetic measures. Source-note text remains staged pending native-footnote migration and final formatting/publication QA; this checkpoint certifies continuous draft coverage/readback, not publication readiness."
           }
           JSON
           )
