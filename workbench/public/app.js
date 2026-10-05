@@ -1493,7 +1493,7 @@ async function syncVerifiedTranslationMarkers() {
   lastMarkerSyncAt=now;
 
   const candidates=state.projects
-    .filter(p=>p.status==='in_progress' && p.google_doc_url && Number(p.translated_pages || 0) > 0)
+    .filter(p=>p.status==='in_progress' && p.google_doc_url)
     .sort((a,b)=>String(b.translation_progress_at || '').localeCompare(String(a.translation_progress_at || '')))
     .slice(0,3);
 
