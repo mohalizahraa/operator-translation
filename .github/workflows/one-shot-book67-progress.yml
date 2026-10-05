@@ -13,18 +13,18 @@ jobs:
     runs-on: [self-hosted, macOS, ARM64]
     timeout-minutes: 5
     steps:
-      - name: Publish verified 360/584 checkpoint
+      - name: Publish verified 380/584 checkpoint
         shell: bash
         run: |
           set -euo pipefail
           body=$(cat <<'JSON'
           {
-            "translated_pages": 360,
-            "expected_previous_pages": 280,
+            "translated_pages": 380,
+            "expected_previous_pages": 360,
             "source_total_pages": 584,
             "source_pdf_sha256": "f42595fd7c50e10116b944351e7d59150f2cf90c7d8a93315bcea03fc6f41e0d",
-            "google_doc_revision": "ANLCKQm7q74Pnkim1dYiDPpoXLfi6g56dRn_CA9DjgxwPEfPYFOVTMm1pnpRXuSV2ldSwGDnRTZvwZ9BN25Lzf6FyA6gAhL3-hFJFKrmHtE",
-            "verification_note": "Verified continuous English translation coverage through physical source page 360 in the live Google Doc. Chapter Seven has begun and the translation now covers the importance of the Prophetic measures against the Umayyad coup through al-Tabari's assessment of Umayyad irreligion. Source-note text is preserved in explicit staging markers pending native-footnote migration and final formatting/publication QA; this checkpoint certifies continuous draft coverage/readback, not publication readiness."
+            "google_doc_revision": "ANLCKQklYjmhQtKUTzng9Iw9aiRTv83c2gnmJ2slkaZXUFlczAAhG2nOJkHtWbyZ36eUQP0E0GXTtrxu1dCocTaGeRs_9MZoX2uCFT6Bo5k",
+            "verification_note": "Verified continuous English translation coverage through physical source page 380 in the live Google Doc. Chapter Seven is complete through its concluding note, and Chapter Eight's title and contents page are translated. Blank physical source pages within this span were accounted for. Source-note text remains staged pending native-footnote migration and final formatting/publication QA; this checkpoint certifies continuous draft coverage/readback, not publication readiness."
           }
           JSON
           )
