@@ -105,13 +105,7 @@ jobs:
 
           for attempt in {1..20}; do
             curl --fail --silent --show-error "https://operator-status.pages.dev/?verify=$attempt" > "$root" || true
-            asset_path="$(python3 - "$root" <<'PY'
-import re,sys
-text=open(sys.argv[1],encoding='utf-8',errors='replace').read()
-m=re.search(r"src=['\"]([^'\"]+\.js)['\"]", text)
-print(m.group(1) if m else '')
-PY
-)"
+            asset_path="$(python3 -c 'import re,sys; text=open(sys.argv[1],encoding="utf-8",errors="replace").read(); m=re.search(r"src=[\"'\'' ]?([^\"'\'' >]+\\.js)",text); print(m.group(1) if m else "")' "$root")"
             if [ -n "$asset_path" ] && curl --fail --silent --show-error "https://operator-status.pages.dev$asset_path" > "$asset"; then
               if grep -q "milestoneTotal" "$asset" && grep -q "milestoneUnit" "$asset"; then
                 echo "Public Operator Status asset is live."
@@ -129,8 +123,5 @@ PY
         shell: bash
         run: |
           if [ -n "${OPERATOR_SOURCE:-}" ] && [ -d "${OPERATOR_SOURCE:-}" ]; then
-            source_parent="$(git -C "$OPERATOR_SOURCE" rev-parse --path-format=absolute --git-common-dir 2>/dev/null | sed 's#/.git$##' || true)"
-            if [ -n "$source_parent" ]; then
-              git -C "$source_parent" worktree remove --force "$OPERATOR_SOURCE" || true
-            fi
+            git -C "$OPERATOR_SOURCE" worktree remove --force "$OPERATOR_SOURCE" || true
           fi
