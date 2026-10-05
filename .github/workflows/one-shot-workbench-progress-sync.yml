@@ -13,10 +13,28 @@ jobs:
     runs-on: [self-hosted, operator-translation, macOS, ARM64]
     timeout-minutes: 5
     steps:
-      - name: Publish verified Prophets progress marker
+      - name: Reconcile completed Prophets state
         shell: bash
         run: |
           set -euo pipefail
-          # Trigger refreshed after Prophets reached its verified 209/209 endpoint.
-          curl --fail --silent --show-error --request POST \
-            https://haydari-translation-workbench.pages.dev/api/projects/1/progress-sync
+          base=https://haydari-translation-workbench.pages.dev/api/projects/1
+          before="$(curl --fail --silent --show-error "$base")"
+          printf '%s
+' "$before"
+          pages="$(printf '%s' "$before" | python3 -c 'import json,sys; print(json.load(sys.stdin)["project"]["translated_pages"])')"
+          total="$(printf '%s' "$before" | python3 -c 'import json,sys; print(json.load(sys.stdin)["project"]["pages"])')"
+          status="$(printf '%s' "$before" | python3 -c 'import json,sys; print(json.load(sys.stdin)["project"]["status"])')"
+          test "$pages" = "209"
+          test "$total" = "209"
+          if [ "$status" = "review" ]; then
+            curl --fail --silent --show-error --request PATCH               --header 'content-type: application/json'               --header 'x-workbench-actor: System'               --data '{"status":"completed"}'               "$base"
+            printf '
+'
+          elif [ "$status" != "completed" ]; then
+            echo "Unexpected Prophets status: $status" >&2
+            exit 1
+          fi
+          after="$(curl --fail --silent --show-error "$base")"
+          printf '%s
+' "$after"
+          printf '%s' "$after" | python3 -c 'import json,sys; p=json.load(sys.stdin)["project"]; assert p["translated_pages"]==209 and p["pages"]==209 and p["status"]=="completed"; print("WORKBENCH_PROPHETS_FINAL_STATE_OK")'
