@@ -17,5 +17,6 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          # Trigger refreshed after Prophets reached its verified 209/209 endpoint.
           curl --fail --silent --show-error --request POST \
             https://haydari-translation-workbench.pages.dev/api/projects/1/progress-sync
