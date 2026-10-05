@@ -1,0 +1,69 @@
+name: One-shot Fiqh al-Aqidah OCR 91-110
+
+on:
+  push:
+    paths:
+      - '.github/workflows/one-shot-fiqh-ocr-91-110.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  ocr:
+    runs-on: [self-hosted, macOS, ARM64]
+    timeout-minutes: 20
+    env:
+      SOURCE_URL: "https://archive.alhaydari.com/ebook/ar/%D8%A7%D9%84%D9%83%D9%84%D8%A7%D9%85-%D9%88%D8%A7%D9%84%D8%B9%D9%82%D8%A7%D8%A6%D8%AF/%D9%81%D9%82%D9%87-%D8%A7%D9%84%D8%B9%D9%82%D9%8A%D8%AF%D8%A9.pdf"
+      OUT: "workbench/handoffs/fiqh-al-aqidah-pages-91-110-ocr.txt"
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - name: OCR source pages 91 through 110
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --connect-timeout 30 "$SOURCE_URL" -o /tmp/fiqh.pdf
+          cat >/tmp/ocr-fiqh.swift <<'SWIFT'
+          import Foundation
+          import PDFKit
+          import AppKit
+          import Vision
+          guard let doc = PDFDocument(url: URL(fileURLWithPath: "/tmp/fiqh.pdf")) else { exit(2) }
+          guard doc.pageCount == 408 else { exit(3) }
+          var all = "SOURCE_SHA256_PLACEHOLDER\nSOURCE_PAGE_COUNT=\(doc.pageCount)\n"
+          for physical in 91...110 {
+            guard let page = doc.page(at: physical - 1) else { continue }
+            let img = page.thumbnail(of: NSSize(width: 2400, height: 3400), for: .mediaBox)
+            guard let cg = img.cgImage(forProposedRect: nil, context: nil, hints: nil) else { continue }
+            let req = VNRecognizeTextRequest()
+            req.recognitionLevel = .accurate
+            req.usesLanguageCorrection = true
+            if (try? req.supportedRecognitionLanguages()).map({ $0.contains("ar-SA") }) == true { req.recognitionLanguages = ["ar-SA"] }
+            try VNImageRequestHandler(cgImage: cg, options: [:]).perform([req])
+            let obs=(req.results ?? []).sorted {
+              let ay=$0.boundingBox.midY, by=$1.boundingBox.midY
+              if abs(ay-by)>0.012 { return ay>by }
+              return $0.boundingBox.midX>$1.boundingBox.midX
+            }
+            all += "\n=== PHYSICAL PAGE \(physical) ===\n" + obs.compactMap{$0.topCandidates(1).first?.string}.joined(separator:"\n") + "\n"
+          }
+          try all.write(toFile: ProcessInfo.processInfo.environment["OUT"]!, atomically: true, encoding: .utf8)
+          SWIFT
+          mkdir -p "$(dirname "$OUT")"
+          swift /tmp/ocr-fiqh.swift
+          sha=$(shasum -a 256 /tmp/fiqh.pdf | awk '{print $1}')
+          python3 - "$OUT" "$sha" <<'PY'
+          import sys
+          p,sha=sys.argv[1],sys.argv[2]
+          s=open(p).read().replace("SOURCE_SHA256_PLACEHOLDER",f"SOURCE_SHA256={sha}")
+          open(p,"w").write(s)
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$OUT"
+          git commit -m "workbench: OCR Fiqh pages 91-110"
+          git pull --rebase origin main
+          git push origin HEAD:main
+      - name: Cleanup
+        if: always()
+        run: rm -f /tmp/fiqh.pdf /tmp/ocr-fiqh.swift
