@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   native-toc:
-    runs-on: [self-hosted, macOS, ARM64]
+    runs-on: [self-hosted, operator-translation, macOS, ARM64]
     timeout-minutes: 15
     env:
       DOC_URL: https://docs.google.com/document/d/15MMgcj6TPtdCotBecPUJW9xX59-Py_ODsHqRqh_dDLc/edit
