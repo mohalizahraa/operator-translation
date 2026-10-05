@@ -13,18 +13,18 @@ jobs:
     runs-on: [self-hosted, macOS, ARM64]
     timeout-minutes: 5
     steps:
-      - name: Publish verified 130/584 checkpoint
+      - name: Publish verified 140/584 checkpoint
         shell: bash
         run: |
           set -euo pipefail
           body=$(cat <<'JSON'
           {
-            "translated_pages": 130,
-            "expected_previous_pages": 120,
+            "translated_pages": 140,
+            "expected_previous_pages": 130,
             "source_total_pages": 584,
             "source_pdf_sha256": "f42595fd7c50e10116b944351e7d59150f2cf90c7d8a93315bcea03fc6f41e0d",
-            "google_doc_revision": "ANLCKQmdRC-edtgjsn2j7CxETpQM84HjAgXCifAi1Xmu3bUHh0vbWnBAUjF-Yzr2TbggNx5D1BVn8lWqobCMQV4s0ha0fJtiTpuUvcOKCg4",
-            "verification_note": "Verified continuous source coverage through physical page 130 against the authoritative 584-page PDF hash. Pages 121-125 cover the Umar-era military consultation, the formal shura, Uthman's accession, and the opening of Ali's elected Caliphate. Pages 126-130 cover Ali's diagnosis of the prior governments and the 'inner garment, companions, treasurers, and doors' sermon, including all source-note continuations. Whole-doc native-footnote count is 167 with 0 empty notes and no temporary source-note anchors remain in the body."
+            "google_doc_revision": "ANLCKQn1Rnsv47LfSvIxyinX01fixl6YAxdAW9O8N2bNlESwfhu7okD3hvKI2-1BXnfAINVsTpNeoowEKy8G9bedsbLg4QIwzDNDRXTNhNk",
+            "verification_note": "Verified continuous source coverage through physical page 140 against the authoritative 584-page PDF hash. Pages 131-136 translate Ali's Ahl al-Bayt/knowledge arguments, the 'no one is comparable to the family of Muhammad' and Caliphate-in-Ali passages, and the Muawiyah/plunder analogy. Pages 137-140 cover Ali's explanation for restraint, Lady Fatimah al-Zahra's confrontation with the Saqifah outcome, Imam al-Hasan's childhood objection to Abu Bakr, and the opening of Imam al-Husayn's objection to Umar. Whole-doc native-footnote count is 191 with 0 empty notes and no temporary source-note anchors remain in the body."
           }
           JSON
           )
