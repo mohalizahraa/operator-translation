@@ -13,18 +13,18 @@ jobs:
     runs-on: [self-hosted, macOS, ARM64]
     timeout-minutes: 5
     steps:
-      - name: Publish verified 6/584 checkpoint
+      - name: Publish verified 10/584 checkpoint
         shell: bash
         run: |
           set -euo pipefail
           body=$(cat <<'JSON'
           {
-            "translated_pages": 6,
-            "expected_previous_pages": 0,
+            "translated_pages": 10,
+            "expected_previous_pages": 6,
             "source_total_pages": 584,
             "source_pdf_sha256": "f42595fd7c50e10116b944351e7d59150f2cf90c7d8a93315bcea03fc6f41e0d",
-            "google_doc_revision": "ANLCKQkgisHI55EceTnnVd8fwowJ8z6wUI_pLnb9hGQNZQd99Z15KHYuYl_uXySoyOcO2o-xb3SjhRSmjckzUf3FFp_hyia0iOlb7R3a8wA",
-            "verification_note": "Verified authoritative source physical pages 1–6 against rendered PDF; physical page 4 is intentionally blank. Target Google Doc was read back after insertion with 0 unapproved Arabic-script hits."
+            "google_doc_revision": "ANLCKQnbmhrxPdkoHyNSdL2xtE9Tip7doV88hva60e15cEvaR1n9uO9ikabt4ygZg1dqMXb6hMvewapcRQuDGWAvzErzeyBrryRNyu2iOxo",
+            "verification_note": "Verified authoritative source physical pages 7–10 against the same 584-page PDF hash; pages 7–9 are the complete translated Preface and physical page 10 is intentionally blank. The source footnote on page 7 is a populated native Google Docs footnote, connector readback shows 0 unapproved Arabic-script hits in the new body/note text, and a fresh rendered PDF verifies the footnote at the page bottom."
           }
           JSON
           )
