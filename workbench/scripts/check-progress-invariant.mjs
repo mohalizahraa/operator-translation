@@ -20,6 +20,10 @@ assert(
   !/translated_pages\s*:\s*Number\(\$\('translated-pages'\)/.test(app),
   'Project editor must not submit translated_pages.'
 );
+assert(
+  !app.includes("Number(p.translated_pages || 0) > 0"),
+  'Verified marker sync must bootstrap in-progress projects from 0 translated pages.'
+);
 for (const required of ['expected_previous_pages','source_total_pages','source_pdf_sha256','google_doc_revision']) {
   assert(progress.includes(required), `Progress endpoint missing required checkpoint field: ${required}`);
 }
