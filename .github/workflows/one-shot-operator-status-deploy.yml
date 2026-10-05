@@ -1,4 +1,4 @@
-name: One-shot Operator Status deploy via translation runner
+name: One-shot Cloudflare secret probe
 
 on:
   push:
@@ -11,117 +11,25 @@ permissions:
   contents: read
 
 jobs:
-  deploy:
+  probe:
     runs-on: [self-hosted, macOS, ARM64]
-    timeout-minutes: 20
+    timeout-minutes: 5
     env:
-      OPERATOR_STATUS_SHA: 548753b8754c037db82b23107bd163a3d837f1ab
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-      PAGES_PROJECT: operator-status
     steps:
-      - name: Locate exact Operator source
+      - name: Confirm Cloudflare deployment secret availability
         shell: bash
         run: |
           set -euo pipefail
-          source_dir=""
-
-          candidates=(
-            "$HOME/operator-protocol"
-            "$HOME/GitHub/operator-protocol"
-            "$HOME/Projects/operator-protocol"
-            "$RUNNER_WORKSPACE/operator-protocol/operator-protocol"
-            "$RUNNER_WORKSPACE/../operator-protocol/operator-protocol"
-          )
-
-          for candidate in "${candidates[@]}"; do
-            if [ -d "$candidate/.git" ] || git -C "$candidate" rev-parse --git-dir >/dev/null 2>&1; then
-              if git -C "$candidate" cat-file -e "$OPERATOR_STATUS_SHA^{commit}" 2>/dev/null; then
-                source_dir="$candidate"
-                break
-              fi
-            fi
-          done
-
-          if [ -z "$source_dir" ]; then
-            while IFS= read -r candidate; do
-              if git -C "$candidate" cat-file -e "$OPERATOR_STATUS_SHA^{commit}" 2>/dev/null; then
-                source_dir="$candidate"
-                break
-              fi
-            done < <(find "$RUNNER_WORKSPACE" "$HOME" -maxdepth 4 -type d -name operator-protocol 2>/dev/null | head -20)
-          fi
-
-          if [ -z "$source_dir" ]; then
-            echo "No local operator-protocol clone containing $OPERATOR_STATUS_SHA was found on this runner." >&2
+          if [ -z "${CLOUDFLARE_API_TOKEN:-}" ]; then
+            echo "CLOUDFLARE_API_TOKEN is unavailable in operator-translation." >&2
             exit 2
           fi
-
-          echo "Using local Operator source: $source_dir"
-          worktree="$RUNNER_TEMP/operator-status-548753b"
-          rm -rf "$worktree"
-          git -C "$source_dir" worktree add --detach "$worktree" "$OPERATOR_STATUS_SHA"
-          echo "OPERATOR_SOURCE=$worktree" >> "$GITHUB_ENV"
-
-      - name: Verify and build exact Status commit
-        shell: bash
-        run: |
-          set -euo pipefail
-          cd "$OPERATOR_SOURCE"
-          test "$(git rev-parse HEAD)" = "$OPERATOR_STATUS_SHA"
-          npm run test:status-hierarchy
-          cd apps/operator-status
-          npm ci
-          npm run build
-
-      - name: Verify Cloudflare authorization
-        shell: bash
-        run: |
-          set -euo pipefail
-          cd "$OPERATOR_SOURCE/apps/operator-status"
-          if [ -n "${CLOUDFLARE_API_TOKEN:-}" ]; then
-            echo "Using repository Cloudflare API token."
+          echo "::add-mask::$CLOUDFLARE_API_TOKEN"
+          echo "Cloudflare API token is available."
+          if [ -n "${CLOUDFLARE_ACCOUNT_ID:-}" ]; then
+            echo "Cloudflare account ID is also available."
           else
-            echo "No repository Cloudflare token; checking runner-local Wrangler auth."
-            npx --yes wrangler@latest whoami
-          fi
-
-      - name: Deploy existing Operator Status Pages project
-        shell: bash
-        run: |
-          set -euo pipefail
-          cd "$OPERATOR_SOURCE/apps/operator-status"
-          npx --yes wrangler@latest pages deploy dist \
-            --project-name "$PAGES_PROJECT" \
-            --branch main \
-            --commit-hash "$OPERATOR_STATUS_SHA"
-
-      - name: Verify public deployment
-        shell: bash
-        run: |
-          set -euo pipefail
-          root="$RUNNER_TEMP/operator-status-root.html"
-          asset="$RUNNER_TEMP/operator-status-asset.js"
-
-          for attempt in {1..20}; do
-            curl --fail --silent --show-error "https://operator-status.pages.dev/?verify=$attempt" > "$root" || true
-            asset_path="$(python3 -c 'import re,sys; text=open(sys.argv[1],encoding="utf-8",errors="replace").read(); m=re.search(r"src=[\"'\'' ]?([^\"'\'' >]+\\.js)",text); print(m.group(1) if m else "")' "$root")"
-            if [ -n "$asset_path" ] && curl --fail --silent --show-error "https://operator-status.pages.dev$asset_path" > "$asset"; then
-              if grep -q "milestoneTotal" "$asset" && grep -q "milestoneUnit" "$asset"; then
-                echo "Public Operator Status asset is live."
-                exit 0
-              fi
-            fi
-            sleep 2
-          done
-
-          echo "Public Operator Status did not expose the expected milestone asset after deployment." >&2
-          exit 1
-
-      - name: Cleanup detached worktree
-        if: always()
-        shell: bash
-        run: |
-          if [ -n "${OPERATOR_SOURCE:-}" ] && [ -d "${OPERATOR_SOURCE:-}" ]; then
-            git -C "$OPERATOR_SOURCE" worktree remove --force "$OPERATOR_SOURCE" || true
+            echo "Cloudflare account ID secret is absent; canonical account ID can be supplied explicitly."
           fi
