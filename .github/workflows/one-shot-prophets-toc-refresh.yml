@@ -27,7 +27,7 @@ jobs:
       - name: Refresh native Google Docs TOC after whole-book pagination
         shell: bash
         run: |
-          # Trigger: direct-DOM native-TOC targeting after repeated keyboard/coordinate selection misses.
+          # Trigger: invoke the real Google Docs Update table of contents DOM control discovered by diagnostics.
           cat > ./refresh-prophets-toc.mjs <<'NODE'
           import { chromium } from "playwright";
           const sleep=ms=>new Promise(r=>setTimeout(r,ms));
@@ -36,6 +36,14 @@ jobs:
           const page=await context.newPage();
 
           async function clickRefresh(){
+            const exact=page.getByLabel("Update table of contents",{exact:true}).last();
+            if(await exact.count().catch(()=>0)){
+              try{
+                await exact.evaluate(el=>el.click());
+                console.log("TOC_REFRESH_DOM_CLICK");
+                return true;
+              }catch{}
+            }
             const candidates=[
               page.getByLabel(/(?:Refresh|Update) table of contents/i).last(),
               page.getByLabel(/^(?:Refresh|Update)$/i).last(),
