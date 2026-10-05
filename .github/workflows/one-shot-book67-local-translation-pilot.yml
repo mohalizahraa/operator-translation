@@ -1,0 +1,103 @@
+name: One-shot Book 67 Local Translation Pilot
+
+on:
+  push:
+    paths:
+      - '.github/workflows/one-shot-book67-local-translation-pilot.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  translate:
+    runs-on: [self-hosted, operator-translation, macOS, ARM64]
+    timeout-minutes: 30
+    env:
+      SOURCE_URL: "https://archive.alhaydari.com/ebook/ar/%D8%A7%D9%84%D9%83%D9%84%D8%A7%D9%85-%D9%88%D8%A7%D9%84%D8%B9%D9%82%D8%A7%D8%A6%D8%AF/%D8%A7%D9%84%D8%AA%D8%AF%D8%A7%D8%A8%D9%8A%D8%B1-%D8%A7%D9%84%D9%86%D8%A8%D9%88%D9%8A%D8%A9-%D9%84%D8%AD%D9%81%D8%B8-%D8%A7%D9%84%D8%B1%D8%B3%D8%A7%D9%84%D8%A9-%D8%A7%D9%84%D8%A5%D9%84%D9%87%D9%8A%D8%A9.pdf"
+      START_PAGE: "260"
+      END_PAGE: "264"
+      MODEL: "zahraa-brain:latest"
+      OUT: "workbench/handoffs/book67-local-translation-pilot-260-264.md"
+    steps:
+      - uses: actions/checkout@v4
+      - name: OCR pilot pages
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --connect-timeout 30 "$SOURCE_URL" -o /tmp/book67-pilot.pdf
+          rm -rf /tmp/book67-pilot && mkdir -p /tmp/book67-pilot
+          cat >/tmp/book67-pilot.swift <<'SWIFT'
+          import Foundation
+          import PDFKit
+          import AppKit
+          import Vision
+          guard let doc = PDFDocument(url: URL(fileURLWithPath: "/tmp/book67-pilot.pdf")) else { exit(2) }
+          let env = ProcessInfo.processInfo.environment
+          let start = Int(env["START_PAGE"]!)!
+          let end = Int(env["END_PAGE"]!)!
+          for physical in start...end {
+            guard let page = doc.page(at: physical - 1) else { continue }
+            let img = page.thumbnail(of: NSSize(width: 2400, height: 3400), for: .mediaBox)
+            guard let cg = img.cgImage(forProposedRect: nil, context: nil, hints: nil) else { continue }
+            let req = VNRecognizeTextRequest()
+            req.recognitionLevel = .accurate
+            req.usesLanguageCorrection = true
+            if (try? req.supportedRecognitionLanguages()).map({ $0.contains("ar-SA") }) == true { req.recognitionLanguages = ["ar-SA"] }
+            try VNImageRequestHandler(cgImage: cg, options: [:]).perform([req])
+            let obs = (req.results ?? []).sorted {
+              let ay=$0.boundingBox.midY, by=$1.boundingBox.midY
+              if abs(ay-by) > 0.012 { return ay > by }
+              return $0.boundingBox.midX > $1.boundingBox.midX
+            }
+            let text = obs.compactMap { $0.topCandidates(1).first?.string }.joined(separator: "\n")
+            try text.write(toFile: String(format:"/tmp/book67-pilot/%03d.txt",physical), atomically:true, encoding:.utf8)
+          }
+          SWIFT
+          swift /tmp/book67-pilot.swift
+      - name: Translate with local Ollama
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$(dirname "$OUT")"
+          src=/tmp/book67-pilot-source.txt
+          : > "$src"
+          for p in $(seq "$START_PAGE" "$END_PAGE"); do
+            printf '\n===== SOURCE PAGE %03d =====\n' "$p" >> "$src"
+            cat "$(printf '/tmp/book67-pilot/%03d.txt' "$p")" >> "$src"
+            printf '\n' >> "$src"
+          done
+          prompt=/tmp/book67-pilot-prompt.txt
+          cat > "$prompt" <<'PROMPT'
+          Translate the following Arabic book pages into publication-quality English.
+          
+          Requirements:
+          - Translate ALL human-readable Arabic on the supplied pages, including headings, body, quotations, poetry, captions, and footnotes. Do not summarize or omit.
+          - Preserve the author's argument, polemical force, qualifiers, logical relations, quotations, Qur'anic citations, hadiths, dates, names, and bibliographic references.
+          - Use natural scholarly English, not machine-literal English.
+          - Use standard transliteration for Arabic names and book titles where practical.
+          - Render Prophet Muhammad honorific as ﷺ; Ahl al-Bayt / Imams as ﵊ where context warrants; Allah as Allah ﷻ only where an explicit reverential marker is present or natural in the existing edition style.
+          - Output English only except sacred glyphs and Qur'anic brackets. No readable Arabic script.
+          - Preserve source page boundaries exactly using headings: "===== PAGE NNN =====".
+          - Keep footnotes on the page where their marker/source appears and label them "NOTE N:" in order.
+          - If OCR is uncertain, preserve the uncertainty with "[source unclear]" rather than inventing text.
+          - Do not add commentary, fact-checking, or doctrinal correction.
+          
+          Source:
+          PROMPT
+          cat "$src" >> "$prompt"
+          ollama run "$MODEL" < "$prompt" > "$OUT"
+          test -s "$OUT"
+      - name: Commit pilot result
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$OUT"
+          git commit -m "workbench: local Book 67 translation pilot 260-264" || true
+          git pull --rebase origin main
+          git push origin HEAD:main
+      - name: Cleanup
+        if: always()
+        shell: bash
+        run: rm -rf /tmp/book67-pilot.pdf /tmp/book67-pilot /tmp/book67-pilot.swift /tmp/book67-pilot-source.txt /tmp/book67-pilot-prompt.txt
