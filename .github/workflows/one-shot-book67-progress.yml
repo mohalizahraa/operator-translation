@@ -13,18 +13,18 @@ jobs:
     runs-on: [self-hosted, macOS, ARM64]
     timeout-minutes: 5
     steps:
-      - name: Publish verified 420/584 checkpoint
+      - name: Publish verified 440/584 checkpoint
         shell: bash
         run: |
           set -euo pipefail
           body=$(cat <<'JSON'
           {
-            "translated_pages": 420,
-            "expected_previous_pages": 400,
+            "translated_pages": 440,
+            "expected_previous_pages": 420,
             "source_total_pages": 584,
             "source_pdf_sha256": "f42595fd7c50e10116b944351e7d59150f2cf90c7d8a93315bcea03fc6f41e0d",
-            "google_doc_revision": "ANLCKQne9sYicZxv6BHuN8x8IrTt0vFEds4_zUwnHdfioMiobQgegcBMexjDjFMbPs5JLmJ4Ut5UVd5nWbHrSQYWEK7a1WblUUL-Qk0dQqY",
-            "verification_note": "Verified continuous English translation coverage through physical source page 420 in the live Google Doc. Chapter Eight is complete and Chapter Nine has begun, with the author's discussion of the community, Umayyad and Abbasid countermeasures, historical writers and hadith transmitters, contemporary writers, and scholars/elites translated through the opening discussion of scholars as fortresses of Islam. Source-note text remains staged pending native-footnote migration and final formatting/publication QA; this checkpoint certifies continuous draft coverage/readback, not publication readiness."
+            "google_doc_revision": "ANLCKQkavuhnt-xcB-sO3AkYpxFwU4tlL-w0-bwB7-z2HdPk9tw48o5_QcPQHZdgjProlH-GSdDK41N98hZ0UKkP8BL0eLXP4J9yZ3EXHh8",
+            "verification_note": "Verified continuous English translation coverage through physical source page 440 in the live Google Doc. Chapter Nine now covers the danger and historical roots of Umayyadism, historical terror examples through al-Harrah, and their supporting source notes. Source-note text remains staged pending native-footnote migration and final formatting/publication QA; this checkpoint certifies continuous draft coverage/readback, not publication readiness."
           }
           JSON
           )
