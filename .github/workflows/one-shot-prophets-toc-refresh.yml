@@ -27,7 +27,7 @@ jobs:
       - name: Refresh native Google Docs TOC after whole-book pagination
         shell: bash
         run: |
-          # Trigger: terminal full-profile refresh after 2026-10-05 honorific/profile cleanup.
+          # Trigger: fixed-point refresh after rendered TOC mismatch at The Story of Joseph.
           cat > ./refresh-prophets-toc.mjs <<'NODE'
           import { chromium } from "playwright";
           const sleep=ms=>new Promise(r=>setTimeout(r,ms));
@@ -83,6 +83,7 @@ jobs:
               "Part One — Foundational Preliminaries",
               "Part Two — Stages of Infallibility and Ways of Establishing It",
               "First Study: Infallibility in Fulfilling Obligations and Avoiding Prohibitions",
+              "The Story of Joseph",
               "Second Study: Infallibility in Receiving and Conveying Revelation",
               "Third Study: Infallibility in Application",
               "Fourth Study: Infallibility in the Affairs of Ordinary Life",
