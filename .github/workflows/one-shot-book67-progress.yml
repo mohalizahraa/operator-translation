@@ -13,18 +13,18 @@ jobs:
     runs-on: [self-hosted, macOS, ARM64]
     timeout-minutes: 5
     steps:
-      - name: Publish verified 54/584 checkpoint
+      - name: Publish verified 91/584 checkpoint
         shell: bash
         run: |
           set -euo pipefail
           body=$(cat <<'JSON'
           {
-            "translated_pages": 54,
-            "expected_previous_pages": 32,
+            "translated_pages": 91,
+            "expected_previous_pages": 54,
             "source_total_pages": 584,
             "source_pdf_sha256": "f42595fd7c50e10116b944351e7d59150f2cf90c7d8a93315bcea03fc6f41e0d",
-            "google_doc_revision": "ANLCKQkxL_l2oz4COnqs8Z8LRLgfNd2RRb1VZ3R7219pQOg-nefDlIOQMkYjnwBn59TIM45bnUu671S8Lgky04M-2pOueZqvR5oZq8TCQZM",
-            "verification_note": "Verified source coverage through physical page 54 against the authoritative PDF hash. Pages 33-53 were translated into the live English Doc and physical page 54 was visually rendered and confirmed blank. This tranche added 31 populated native Google Docs footnotes at source-relative anchors; whole-doc native-footnote count is 48 with 0 empty notes. New body and notes have 0 unapproved Arabic-script hits. A fresh 41-page target PDF render verified representative long footnote continuations and the Chapter Two opener without an accidental interstitial page."
+            "google_doc_revision": "ANLCKQkD1xv8RmgstXCLKpEdNrVKziwnYvjaouslOHDHGMMObii5BEo1XLzXurMTBKADBYO47cKzlZXrGzJ4QlYs3FwgnxE98-B7oc5xFYM",
+            "verification_note": "Verified source coverage through physical page 91 against the authoritative PDF hash. Pages 55-74 complete Chapter Two; page 75 begins Chapter Three; physical page 76 is blank in the source OCR boundary; pages 77-91 translate the Chapter Three preface, the first preservation measure, and the opening of the Verse of Warning discussion. Whole-doc native-footnote count is 100 with 0 empty notes. New body and notes have 0 unapproved Arabic-script hits; semantic headings, Qur'anic green spans, source-quotation emphasis, and sacred-glyph styling were applied."
           }
           JSON
           )
