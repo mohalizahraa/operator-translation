@@ -1,0 +1,105 @@
+name: One-shot Fiqh al-Aqidah Progress
+
+on:
+  push:
+    paths:
+      - '.github/workflows/one-shot-fiqh-progress.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: [self-hosted, macOS, ARM64]
+    timeout-minutes: 10
+    env:
+      SOURCE_URL: "https://archive.alhaydari.com/ebook/ar/%D8%A7%D9%84%D9%83%D9%84%D8%A7%D9%85-%D9%88%D8%A7%D9%84%D8%B9%D9%82%D8%A7%D8%A6%D8%AF/%D9%81%D9%82%D9%87-%D8%A7%D9%84%D8%B9%D9%82%D9%8A%D8%AF%D8%A9.pdf"
+      TARGET_PAGES: "20"
+      SOURCE_TOTAL: "408"
+      DOC_REVISION: "ANLCKQmcH9S5H-ACSxwhqnQEmP6dkoq3x0DaMAIodsZPRZTslPrd-f9ONyzzMhFTrLnKLaGn0fV07TX_DO-Q7s0SXYPRO5p8iOip9X6ndQ"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Resolve live project and source identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsS --retry 3 --connect-timeout 20 \
+            https://haydari-translation-workbench.pages.dev/api/projects -o /tmp/projects.json
+          python3 - <<'PY' >/tmp/state.env
+          import json
+          data=json.load(open('/tmp/projects.json'))
+          p=next((x for x in data.get('projects',[]) if x.get('catalog_id')=='book-88'),None)
+          if not p:
+              raise SystemExit('FIQH_PROJECT_NOT_FOUND')
+          print(f"PROJECT_ID={int(p['id'])}")
+          print(f"CURRENT_PAGES={int(p.get('translated_pages') or 0)}")
+          print(f"SITE_TOTAL={int(p.get('pages') or 0)}")
+          PY
+          cat /tmp/state.env >> "$GITHUB_ENV"
+          curl -L --fail --retry 3 --connect-timeout 30 "$SOURCE_URL" -o /tmp/fiqh.pdf
+          head -c 5 /tmp/fiqh.pdf | grep -q '%PDF-'
+          printf 'SOURCE_SHA=%s\n' "$(shasum -a 256 /tmp/fiqh.pdf | awk '{print $1}')" >> "$GITHUB_ENV"
+      - name: Publish verified checkpoint
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "$SITE_TOTAL" -ne "$SOURCE_TOTAL" ]; then
+            echo "SOURCE_TOTAL_MISMATCH site=$SITE_TOTAL expected=$SOURCE_TOTAL" >&2
+            exit 2
+          fi
+          if [ "$CURRENT_PAGES" -gt "$TARGET_PAGES" ]; then
+            echo "SITE_PROGRESS_AHEAD current=$CURRENT_PAGES target=$TARGET_PAGES; refusing to overwrite." >&2
+            exit 3
+          fi
+          if [ "$CURRENT_PAGES" -lt "$TARGET_PAGES" ]; then
+            python3 - <<'PY' >/tmp/body.json
+          import json, os
+          body={
+            "translated_pages": int(os.environ["TARGET_PAGES"]),
+            "expected_previous_pages": int(os.environ["CURRENT_PAGES"]),
+            "source_total_pages": int(os.environ["SOURCE_TOTAL"]),
+            "source_pdf_sha256": os.environ["SOURCE_SHA"],
+            "google_doc_revision": os.environ["DOC_REVISION"],
+            "verification_note": "Verified continuous English coverage through physical source page 20. Physical page 21 begins 'Some Consequences of Preventing Recourse to Specialists in Theology'; only that heading is present in the live English Doc, so page 21 is conservatively excluded until its body is translated."
+          }
+          print(json.dumps(body,ensure_ascii=False))
+          PY
+            curl -fsS -X PATCH \
+              -H 'content-type: application/json' \
+              -H 'x-workbench-actor: Mohammed' \
+              --data-binary @/tmp/body.json \
+              "https://haydari-translation-workbench.pages.dev/api/projects/$PROJECT_ID/progress" \
+              -o /tmp/patch.json
+          fi
+      - name: Verify live Workbench readback
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsS --retry 3 --connect-timeout 20 \
+            https://haydari-translation-workbench.pages.dev/api/projects -o /tmp/projects-after.json
+          python3 - <<'PY'
+          import json, os
+          data=json.load(open('/tmp/projects-after.json'))
+          p=next((x for x in data.get('projects',[]) if x.get('catalog_id')=='book-88'),None)
+          if not p:
+              raise SystemExit('FIQH_PROJECT_NOT_FOUND_AFTER_SYNC')
+          got=int(p.get('translated_pages') or 0)
+          want=int(os.environ['TARGET_PAGES'])
+          if got != want:
+              raise SystemExit(f'FIQH_PROGRESS_VERIFY_FAILED got={got} want={want}')
+          print('FIQH_PROGRESS_SYNC_VERIFIED')
+          PY
+      - name: Publish verification commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit --allow-empty -m "workbench: verify Fiqh al-Aqidah progress sync"
+          git pull --rebase origin main
+          git push origin HEAD:main
+      - name: Cleanup
+        if: always()
+        run: rm -f /tmp/projects.json /tmp/projects-after.json /tmp/fiqh.pdf /tmp/body.json /tmp/patch.json /tmp/state.env
