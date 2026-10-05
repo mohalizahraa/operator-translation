@@ -13,18 +13,18 @@ jobs:
     runs-on: [self-hosted, macOS, ARM64]
     timeout-minutes: 5
     steps:
-      - name: Publish verified 91/584 checkpoint
+      - name: Publish verified 110/584 checkpoint
         shell: bash
         run: |
           set -euo pipefail
           body=$(cat <<'JSON'
           {
-            "translated_pages": 91,
-            "expected_previous_pages": 54,
+            "translated_pages": 110,
+            "expected_previous_pages": 91,
             "source_total_pages": 584,
             "source_pdf_sha256": "f42595fd7c50e10116b944351e7d59150f2cf90c7d8a93315bcea03fc6f41e0d",
-            "google_doc_revision": "ANLCKQkD1xv8RmgstXCLKpEdNrVKziwnYvjaouslOHDHGMMObii5BEo1XLzXurMTBKADBYO47cKzlZXrGzJ4QlYs3FwgnxE98-B7oc5xFYM",
-            "verification_note": "Verified source coverage through physical page 91 against the authoritative PDF hash. Pages 55-74 complete Chapter Two; page 75 begins Chapter Three; physical page 76 is blank in the source OCR boundary; pages 77-91 translate the Chapter Three preface, the first preservation measure, and the opening of the Verse of Warning discussion. Whole-doc native-footnote count is 100 with 0 empty notes. New body and notes have 0 unapproved Arabic-script hits; semantic headings, Qur'anic green spans, source-quotation emphasis, and sacred-glyph styling were applied."
+            "google_doc_revision": "ANLCKQlb6FibN2FRhMJc8XMmvCEcc3n2e34P7EpM-2ziAPpQlNJ-skDOBREA_aQrF2k7MHGE7gZPVg-nkOAGu1_vE79X--9xdBO6TnS9TCU",
+            "verification_note": "Verified continuous source coverage through physical page 110 against the authoritative 584-page PDF hash. The prior 91-page checkpoint was reconciled: omitted material spanning the page-91/92 boundary through page 94 was restored, the Ghadir section through page 96 was source-aligned, and pages 97-110 now cover the Calamity of Thursday, reactions to the first preservation measure, the three classes of objectors, Usamah-expedition resistance, and the Hawd/reversal traditions. Whole-doc native-footnote count is 132 with 0 empty notes and no temporary source-note anchors remain in the body."
           }
           JSON
           )
