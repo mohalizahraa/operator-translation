@@ -6,6 +6,7 @@ export async function onRequestGet(context) {
       (SELECT COALESCE(MAX(id), 0) FROM activity) AS activity_revision,
       (SELECT COALESCE(MAX(created_at), '') FROM activity) AS activity_changed_at,
       (SELECT COALESCE(MAX(updated_at), '') FROM projects) AS project_revision,
+      (SELECT COALESCE(MAX(pdf_checked_at), '') FROM projects) AS pdf_revision,
       (SELECT COALESCE(MAX(updated_at), '') FROM project_covers) AS cover_revision,
       (
         SELECT COALESCE(GROUP_CONCAT(key || '=' || value, '|'), '')
@@ -16,6 +17,7 @@ export async function onRequestGet(context) {
   const revision = [
     latest?.activity_revision ?? 0,
     latest?.project_revision || '',
+    latest?.pdf_revision || '',
     latest?.cover_revision || '',
     latest?.meta_revision || '',
   ].join('::');
@@ -23,6 +25,7 @@ export async function onRequestGet(context) {
   const changedAt = [
     latest?.activity_changed_at,
     latest?.project_revision,
+    latest?.pdf_revision,
     latest?.cover_revision,
   ].filter(Boolean).sort().at(-1) || null;
 
