@@ -109,6 +109,18 @@ assert(appSource.includes("root.querySelectorAll('.quick-status')"), 'Tap-friend
 assert(appSource.includes('assigneeBadgeMarkup(p)') && appSource.includes("value === 'Both' ? 'Shared'"), 'Scan-speed Shared assignee badge behavior is missing.');
 assert(indexSource.includes('data-dashboard-preset') === false, 'Dashboard drill-down controls must be rendered from live state, not hard-coded stale counts.');
 assert(appSource.includes('data-dashboard-preset=') && appSource.includes('function openProjectsPreset(preset)') && appSource.includes('function openPersonWork(person)'), 'Dashboard summaries are not navigational.');
+assert(appSource.includes("['translating','Translating', translating]") && appSource.includes("['needs_formatting','Needs formatting', needsFormatting]") && appSource.includes("['needs_review','Needs review', needsReview]"), 'Dashboard Right now must expose literal workflow stages instead of a vague Active aggregate.');
+assert(appSource.includes('const overdue=due.filter') && appSource.includes('const dueToday=due.filter') && appSource.includes('deadlineBits.push(`${overdue} overdue`)') && appSource.includes('deadlineBits.push(`${dueToday} today`)'), 'Dashboard deadline summary must distinguish overdue and due-today work.');
+assert(appSource.includes('function paceModel({projects=state.projects, paceEvents=state.paceEvents, actor=null}={})'), 'Scoped pace model contract is missing.');
+assert(appSource.includes('const weightedHalfLifeDays=14;') && appSource.includes('cap.setDate(cap.getDate()-89);'), 'Pace model must retain the 14-day half-life over at most 90 days.');
+assert(appSource.includes('observedDays>=7 && progressDays>=3'), 'Pace forecast evidence gate regressed.');
+assert(appSource.includes('const pages=dailyPages.get(key)||0;') && appSource.includes('weightTotal+=weight;'), 'Pace model must include zero-progress days in the weighted denominator.');
+assert(appSource.includes('if (!projectIds.has(Number(event.project_id))) continue;'), 'Pace model must scope events to the selected project set.');
+assert(appSource.includes('if (actor && event.actor !== actor) continue;'), 'Personal pace must exclude another collaborator\'s progress events on Shared/Both books.');
+assert(appSource.includes('const personalModel=paceModel({projects:assigned,actor:state.actor});'), 'Dashboard pace must be scoped to the selected collaborator.');
+assert(appSource.includes("toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'})"), 'At this rate must show an exact calendar finish date once the evidence gate opens.');
+assert(indexSource.includes('id="pace-panel-title"') && indexSource.includes('id="pace-summary"') && indexSource.includes('id="stat-forecast"'), 'NaNo-style pace/projection surfaces are missing.');
+assert(!appSource.includes('chart-projection'), 'Book-count completion history must not mix in a page-workload forecast.');
 assert(indexSource.includes('data-activity-actor="System"') && indexSource.includes('id="activity-type"') && appSource.includes('function activityActorGroup(activity)'), 'Activity filtering controls/logic are missing.');
 assert(indexSource.includes('id="due-date-warning"') && appSource.includes('function confirmSuspiciousDeadline(value,currentValue=') && appSource.includes('deadlineDaysAgo(value) > 90'), 'Suspicious-past-deadline warning/confirmation is missing.');
 assert(appSource.includes('/api/official-cover/'), 'Official covers are not routed through the same-origin proxy.');
@@ -117,7 +129,10 @@ assert(coverSourcesSource.includes('book-1') && coverSourcesSource.includes('boo
 assert(stylesSource.includes('--type-action:11px') && stylesSource.includes('.english-book-button{font-family:"Inter"'), 'Shared action geometry contract is missing.');
 assert(!stylesSource.includes('.english-book-button{font:inherit}'), 'English Book font inheritance regression remains.');
 assert(indexSource.includes('id="timeline-jump-today"'), 'Timeline Today control is missing.');
-assert(indexSource.includes('/app.js?v=20261004-live-marker-sync') && indexSource.includes('/styles.css?v=20261004-live-marker-sync'), 'Workbench asset cache-busting version is stale.');
+// Dashboard pace/truth closure: keep behavior and freshness assertions in the same acceptance owner.
+const appAssetVersion = indexSource.match(/\/app\.js\?v=([^"'&\\s]+)/)?.[1];
+const stylesAssetVersion = indexSource.match(/\/styles\.css\?v=([^"'&\\s]+)/)?.[1];
+assert(appAssetVersion && stylesAssetVersion, 'Workbench JS/CSS must both carry explicit cache-busting versions.');
 assert(headersSource.includes('/app.js') && headersSource.includes('/styles.css') && headersSource.includes('Cache-Control: no-cache'), 'Workbench JS/CSS freshness headers are missing.');
 assert(appSource.includes('timeline-due-marker'), 'Timeline due marker is missing.');
 assert(appSource.includes('async function setProjectDeadline(id, value)'), 'Shared deadline mutation helper is missing.');
@@ -127,7 +142,7 @@ assert(appSource.includes("api('/api/revision')") && appSource.includes('functio
 assert(appSource.includes("cache: options.cache || 'no-store'"), 'Workbench API reads do not explicitly bypass browser caches.');
 assert(revisionSource.includes('MAX(id)') && revisionSource.includes('FROM activity'), 'Live revision endpoint is not derived from shared activity state.');
 assert(appSource.includes('const LIVE_MARKER_SYNC_MS = 5000') && appSource.includes('syncVerifiedTranslationMarkers()'), 'Verified Google Doc marker sync is missing from live polling.');
-assert(appSource.includes("progress-sync',{method:'POST'}"), 'Live client does not publish verified marker checkpoints through the same-origin sync route.');
+assert(appSource.includes("/progress-sync\`,{method:'POST'}"), 'Live client does not publish verified marker checkpoints through the same-origin sync route.');
 assert(progressSyncSource.includes("export?format=txt") && progressSyncSource.includes('WBPROGRESS') && progressSyncSource.includes('public-export-sha256:'), 'Progress-sync route does not bind the public Google Doc marker to an exact export identity.');
 assert(progressSyncSource.includes("onRequestPatch as publishProgress"), 'Progress-sync route bypasses the canonical guarded progress checkpoint owner.');
 assert(appSource.includes('function bookTitleMarkup(project') && appSource.includes('function activityBookTitleMarkup(activity)'), 'Whole-site bilingual book-title projection helpers are missing.');
