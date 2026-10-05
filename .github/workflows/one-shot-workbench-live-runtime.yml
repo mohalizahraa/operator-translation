@@ -60,8 +60,8 @@ jobs:
                 snapshot.now.includes('Translating') &&
                 snapshot.now.includes('Needs formatting') &&
                 snapshot.now.includes('Needs review') &&
-                snapshot.pace.includes('Recent pace') &&
-                snapshot.pace.includes('At this rate')
+                snapshot.pace.toLowerCase().includes('recent pace') &&
+                snapshot.pace.toLowerCase().includes('at this rate')
               ) break;
               if (attempt < 8) await sleep(4000);
             }
@@ -75,8 +75,8 @@ jobs:
             for (const label of ['Translating','Needs formatting','Needs review']) {
               if (!snapshot.now.includes(label)) throw new Error('Missing dashboard workflow label: ' + label);
             }
-            for (const label of ['Recent pace','At this rate']) {
-              if (!snapshot.pace.includes(label)) throw new Error('Missing pace panel label: ' + label);
+            for (const label of ['recent pace','at this rate']) {
+              if (!snapshot.pace.toLowerCase().includes(label)) throw new Error('Missing pace panel label: ' + label);
             }
             if (consoleErrors.length) throw new Error('Console errors: ' + consoleErrors.join(' | '));
             if (pageErrors.length) throw new Error('Page errors: ' + pageErrors.join(' | '));
