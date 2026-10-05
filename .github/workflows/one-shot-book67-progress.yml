@@ -13,18 +13,18 @@ jobs:
     runs-on: [self-hosted, macOS, ARM64]
     timeout-minutes: 5
     steps:
-      - name: Publish verified 280/584 checkpoint
+      - name: Publish verified 360/584 checkpoint
         shell: bash
         run: |
           set -euo pipefail
           body=$(cat <<'JSON'
           {
-            "translated_pages": 280,
-            "expected_previous_pages": 259,
+            "translated_pages": 360,
+            "expected_previous_pages": 280,
             "source_total_pages": 584,
             "source_pdf_sha256": "f42595fd7c50e10116b944351e7d59150f2cf90c7d8a93315bcea03fc6f41e0d",
-            "google_doc_revision": "ANLCKQmd0wSpzuftxDgutRnCtK6kHUmDtTsQbGqvBBFGYUTg01BxRF1y2kYwW2gbno6tqhDJjBSenNg95VWqXFOD_FlIUocp4O_-neOuRtM",
-            "verification_note": "Verified continuous English translation coverage through physical source page 280 in the live Google Doc. Chapter Five now extends through Fatimah's future-facing warning about the Saqifah and into her three measures for invalidating the government of the reversal. Source-note text remains preserved in explicit staging markers pending native-footnote migration and final formatting/publication QA."
+            "google_doc_revision": "ANLCKQm7q74Pnkim1dYiDPpoXLfi6g56dRn_CA9DjgxwPEfPYFOVTMm1pnpRXuSV2ldSwGDnRTZvwZ9BN25Lzf6FyA6gAhL3-hFJFKrmHtE",
+            "verification_note": "Verified continuous English translation coverage through physical source page 360 in the live Google Doc. Chapter Seven has begun and the translation now covers the importance of the Prophetic measures against the Umayyad coup through al-Tabari's assessment of Umayyad irreligion. Source-note text is preserved in explicit staging markers pending native-footnote migration and final formatting/publication QA; this checkpoint certifies continuous draft coverage/readback, not publication readiness."
           }
           JSON
           )
