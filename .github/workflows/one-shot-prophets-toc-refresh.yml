@@ -27,7 +27,7 @@ jobs:
       - name: Refresh native Google Docs TOC after whole-book pagination
         shell: bash
         run: |
-          # Trigger: redundant Summary-break repair terminal pass.
+          # Trigger: terminal full-profile refresh after 2026-10-05 honorific/profile cleanup.
           cat > ./refresh-prophets-toc.mjs <<'NODE'
           import { chromium } from "playwright";
           const sleep=ms=>new Promise(r=>setTimeout(r,ms));
