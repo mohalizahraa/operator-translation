@@ -38,7 +38,7 @@ jobs:
             await sleep(8000);
             const editor = page.locator(".kix-appview-editor").first();
             if (await editor.isVisible({timeout:3000}).catch(()=>false)) {
-              await editor.click({position:{x:160,y:180}});
+              await editor.click({position:{x:520,y:220},force:true});
             } else {
               await page.mouse.click(800,450);
             }
