@@ -20,11 +20,11 @@ jobs:
           body=$(cat <<'JSON'
           {
             "translated_pages": 239,
-            "expected_previous_pages": 205,
+            "expected_previous_pages": 239,
             "source_total_pages": 584,
             "source_pdf_sha256": "f42595fd7c50e10116b944351e7d59150f2cf90c7d8a93315bcea03fc6f41e0d",
-            "google_doc_revision": "ANLCKQmAAvQjKLzOj9QzxDVMarGe4JugLU7x-ebuk64h3nKxdupkxyIeEpXQbVeCMaCKIJLTPCRojP3zMQNHeEEhp_dVvs9l2hUAVQgne74",
-            "verification_note": "Verified continuous English body coverage through physical source page 239 in the live Google Doc. The translated run now extends through the chapter on focusing on Imam Ali's personality, including the knowledge, practical, spiritual, guardianship, and qualification discussions. Source-note translations for later pages are preserved in explicit staging markers pending native Google Docs footnote migration. Native-footnote migration and final formatting/publication QA remain open and are not represented as complete."
+            "google_doc_revision": "ANLCKQkAqbTM00cCsrzS5eRJG2up6_0Mi1Dewk7mto7kbju5M_7EhQitcrg166f4gfVG1cDe8T6D6tQzK_N8wKMCOYCKUXKwk9_7uu61NTA",
+            "verification_note": "Verified continuous English body coverage through physical source page 239 in the live Google Doc. Pages 206 and 208 are blank source pages; the previously missing 207-220 body gap is now filled, reconnecting the already translated 221-239 material into one continuous run. Source-note translations are staged through page 239 pending native Google Docs footnote migration. Final formatting/publication QA remains open."
           }
           JSON
           )
