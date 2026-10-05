@@ -27,7 +27,7 @@ jobs:
       - name: Refresh native Google Docs TOC after whole-book pagination
         shell: bash
         run: |
-          # Trigger: retry fixed-point refresh with native-TOC entry targeting after the prior control-selection miss.
+          # Trigger: direct-DOM native-TOC targeting after repeated keyboard/coordinate selection misses.
           cat > ./refresh-prophets-toc.mjs <<'NODE'
           import { chromium } from "playwright";
           const sleep=ms=>new Promise(r=>setTimeout(r,ms));
@@ -95,9 +95,39 @@ jobs:
             }
 
             await findAndSettle("Contents",1800);
-            // From the Contents heading, the next "Introduction" occurrence is the first native-TOC entry.
-            // Selecting that entry is more stable than relying on a generic page click after a deep pagination sweep.
-            await findAndSettle("Introduction",1800);
+
+            const probes = await page.locator('[aria-label], [title], [data-tooltip]').evaluateAll(els =>
+              els.map(el => ({
+                tag: el.tagName,
+                aria: el.getAttribute('aria-label'),
+                title: el.getAttribute('title'),
+                tip: el.getAttribute('data-tooltip'),
+                text: (el.textContent || '').trim().slice(0,120)
+              })).filter(x => /(?:contents|introduction|refresh|update|table of contents)/i.test(
+                [x.aria,x.title,x.tip,x.text].filter(Boolean).join(' ')
+              )).slice(0,80)
+            ).catch(()=>[]);
+            console.log("TOC_DOM_PROBES="+JSON.stringify(probes));
+
+            const directTargets=[
+              page.getByRole('link',{name:/^Introduction/i}).first(),
+              page.locator('[aria-label^="Introduction" i]').first(),
+              page.locator('[aria-label*="Introduction" i]').first(),
+              page.getByText(/^Introduction(?:\\s+\\d+)?$/i).first(),
+              page.locator('.kix-lineview-content').filter({hasText:/Introduction/i}).first()
+            ];
+            for(const target of directTargets){
+              if(await target.isVisible({timeout:700}).catch(()=>false)){
+                console.log("TOC_DIRECT_TARGET_VISIBLE");
+                await target.click({force:true}).catch(()=>{});
+                await sleep(700);
+                if(await clickRefresh()){
+                  console.log("NATIVE_TOC_REFRESH_COMPLETED_DIRECT");
+                  await sleep(9000);
+                  process.exit(0);
+                }
+              }
+            }
 
             for(const key of ["ArrowRight","End","ArrowDown","ArrowDown"]){
               await page.keyboard.press(key).catch(()=>{});
