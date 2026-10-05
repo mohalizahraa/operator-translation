@@ -1,0 +1,42 @@
+name: One-shot Fiqh al-Aqidah Workbench State
+
+on:
+  push:
+    paths:
+      - '.github/workflows/one-shot-fiqh-workbench-state.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: [self-hosted, operator-translation, macOS, ARM64]
+    timeout-minutes: 5
+    steps:
+      - name: Read live Workbench state for Fiqh al-Aqidah
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsS --retry 3 --connect-timeout 20 \
+            https://haydari-translation-workbench.pages.dev/api/projects \
+            -o /tmp/projects.json
+          python3 - <<'PY'
+          import json
+          data=json.load(open('/tmp/projects.json'))
+          projects=data.get('projects',[])
+          match=None
+          for p in projects:
+              if p.get('catalog_id')=='book-88' or p.get('title_ar')=='فقه العقيدة، بحوث في أصول الإيمان وفروعه':
+                  match=p
+                  break
+          if not match:
+              raise SystemExit('FIQH_PROJECT_NOT_FOUND')
+          keys=[
+              'id','catalog_id','title_ar','title_en','assignee','status','pages',
+              'translated_pages','translation_progress_at','google_doc_url',
+              'source_pdf_url','pdf_status','updated_at'
+          ]
+          out={k:match.get(k) for k in keys}
+          print('FIQH_WORKBENCH_STATE='+json.dumps(out,ensure_ascii=False,separators=(',',':')))
+          PY
+          rm -f /tmp/projects.json
