@@ -129,6 +129,7 @@ assert(coverSourcesSource.includes('book-1') && coverSourcesSource.includes('boo
 assert(stylesSource.includes('--type-action:11px') && stylesSource.includes('.english-book-button{font-family:"Inter"'), 'Shared action geometry contract is missing.');
 assert(!stylesSource.includes('.english-book-button{font:inherit}'), 'English Book font inheritance regression remains.');
 assert(indexSource.includes('id="timeline-jump-today"'), 'Timeline Today control is missing.');
+// Dashboard pace/truth closure: keep behavior and freshness assertions in the same acceptance owner.
 const appAssetVersion = indexSource.match(/\/app\.js\?v=([^"'&\\s]+)/)?.[1];
 const stylesAssetVersion = indexSource.match(/\/styles\.css\?v=([^"'&\\s]+)/)?.[1];
 assert(appAssetVersion && stylesAssetVersion, 'Workbench JS/CSS must both carry explicit cache-busting versions.');
