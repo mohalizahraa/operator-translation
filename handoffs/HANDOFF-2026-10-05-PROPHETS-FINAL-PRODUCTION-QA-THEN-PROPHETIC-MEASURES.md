@@ -15,7 +15,7 @@ The founder/user's active instruction is:
 5. After translation is complete, run another **full formatting pass**, where "formatting pass" explicitly means the **entire current translator profile is applied**, not merely cosmetic cleanup.
 6. Do not call either book's formatting pass complete until the current translator profile's structural + render gates pass on the exact final artifact.
 
-Important ordering consequence: Project 2 already has 6/584 source pages translated. Preserve that work, but **do not advance it further until Prophets' remaining production-QA blocker is closed**, because the user's requested order was Prophets first, then the next assigned book.
+Ordering update: the Prophets production-QA blocker remains open, but on this turn Zahraa explicitly instructed: **“Continue translating the current book you’re translating.”** That direct instruction overrides the earlier sequencing hold for Project 2. Preserve the Prophets blocker as an open loop while continuing Project 2 truthfully.
 
 ## 2. Live authority / profile state
 
@@ -41,7 +41,7 @@ GitHub compute constraint remains founder-locked at **$0 paid usage**. Any Actio
 | Project | Workbench ID | Assignee | Live status | Source progress | Immediate truth |
 |---|---:|---|---|---:|---|
 | The Infallibility of the Prophets in the Noble Qurʾān | 1 | Zahraa | `review` (UI: Needs Review) | 209/209 | **Text complete, but NOT publication-QA closed because final PDF still has an unexplained blank trailing page 185. Workbench is ahead of actual production state.** |
-| The Prophetic Measures for Preserving the Divine Message | 2 | Zahraa | `in_progress` (UI: Translating) | 6/584 | Translation has started and is structurally clean so far; preserve it and resume at source page 7 **after Prophets closes**. |
+| The Prophetic Measures for Preserving the Divine Message | 2 | Zahraa | `in_progress` (UI: Translating) | 15/584 | Translation resumed by explicit user instruction. Pages 7–15 are now covered; resume by checking physical page 16, then continue into the first Chapter One section on page 17. |
 
 The Workbench statuses are workflow projections, not proof. In particular, Project 1 currently says `review`, but the formatting/publication gate is still open because of the blank final page.
 
@@ -224,8 +224,8 @@ Author: Dr. Ṭalāl al-Ḥasan
 Topic: Theology and Doctrine  
 Live Workbench status: `in_progress` / Translating  
 Verified authoritative source denominator: **584 physical PDF pages**  
-Current verified source progress: **6/584**  
-Progress timestamp in Workbench: `2026-10-05T11:42:18.002Z`
+Current verified source progress: **15/584**  
+Progress timestamp in Workbench: `2026-10-05T13:11:41.769Z`
 
 Canonical Workbench source route:
 `https://haydari-translation-workbench.pages.dev/api/pdf/2`
@@ -247,7 +247,7 @@ Doc ID:
 `1C8ZOE14w9mUF27hBowwnk42d_fG2cl32R2T5GAeepS8`
 
 Current revision at handoff:
-`ANLCKQkgisHI55EceTnnVd8fwowJ8z6wUI_pLnb9hGQNZQd99Z15KHYuYl_uXySoyOcO2o-xb3SjhRSmjckzUf3FFp_hyia0iOlb7R3a8wA`
+`ANLCKQkDs3YjS1Y9LcLA24jOZnANJIeED6q-FbASN8xAItxWQmQ0__AY7uue6xFCVMXRVeDekVUYgfQC5zs1WjgKJlJI3wrTWwmGhN6-C28`
 
 Sharing was re-read live:
 **Anyone with the link → Writer/Editor**.
@@ -260,11 +260,11 @@ Current extracted state:
 - last translated paragraph currently is:
   `13 Jumādā al-Ūlā 1437 AH`
 
-The live Workbench verified progress owner says **6/584**, so the safe continuation point is:
+The live Workbench verified progress owner now says **15/584**. Pages 7–9 contain the complete Preface, page 10 is intentionally blank, pages 11–14 contain the author Introduction, and page 15 is the Chapter One opener. The safe continuation point is:
 
-> **resume from authoritative source PDF physical page 7**, after first confirming the existing 1–6 alignment against the live target revision.
+> **inspect authoritative source physical page 16 first** (the prior OCR pass returned no text there), then continue with the first Chapter One body section beginning on physical page 17.
 
-Do not restart or overwrite the existing 6-page translation.
+Do not restart or overwrite the existing 15-page translation.
 
 ## 5.2 Translation continuation contract
 
@@ -273,8 +273,8 @@ After Prophets is genuinely closed:
 1. Fresh-load the translator profile again for that turn.
 2. Re-read Project 2 live Workbench state before mutation to avoid stale progress/revision assumptions.
 3. Open the canonical Workbench Arabic PDF route and the existing English Doc.
-4. Confirm pages 1–6 map cleanly to the existing target and that no concurrent writer advanced the document/progress.
-5. Continue source-relative translation from **page 7 / 584**.
+4. Confirm the current **15/584** checkpoint and current target revision before the next mutation.
+5. Resume source-relative work by verifying physical **page 16**, then continue from **page 17 / 584**.
 6. Preserve structure and apply the translator profile **during translation**, not only at the end:
    - native footnotes where source notes exist
    - semantic heading levels
@@ -306,6 +306,34 @@ One line currently says:
 Do not assume this phrase is wrong merely because Prophets had legacy prose-honorific cleanup. Re-evaluate it under the **current live translator profile and source semantics** during the full terminology/honorific pass; preserve source meaning rather than mechanically applying a Prophets-specific string replacement.
 
 ---
+
+## 5.4 2026-10-05 continuation checkpoint — 15/584
+
+This turn reloaded the live Operator router/profile, re-read Workbench + both Docs, and confirmed there was no concurrent advancement before mutation.
+
+Project 2 then advanced from **6/584 → 15/584**:
+
+- physical pages **7–9**: complete **Preface** translated;
+- physical page **10**: source is intentionally blank;
+- physical pages **11–14**: author **Introduction** translated;
+- physical page **15**: **Chapter One** opener and its six teaser items translated;
+- source PDF identity remained SHA-256 `f42595fd7c50e10116b944351e7d59150f2cf90c7d8a93315bcea03fc6f41e0d`;
+- source page 7's note was created as a **native Google Docs footnote**, populated and formatted, then verified in a fresh PDF render at the page bottom under the native separator;
+- newly inserted English text read back with **0 unapproved Arabic-script hits** after whitelisting only the edition's approved Qurʾanic brackets/sacred glyphs;
+- Qurʾanic English spans in pages 11–14 were styled with the approved green semantic layer;
+- `﵊` / `﵋` instances in the new chunk were isolated into the approved Scheherazade New glyph runs;
+- fresh target PDF rendering verified the Preface, author Introduction, and Chapter One opener without an accidental blank interstitial page;
+- guarded Workbench checkpoints **10/584** and then **15/584** both completed successfully on the self-hosted macOS/ARM64 runner;
+- live Workbench readback after the second guarded update confirmed **translated_pages = 15**.
+
+Current Google Doc revision after the 15-page checkpoint:
+
+`ANLCKQkDs3YjS1Y9LcLA24jOZnANJIeED6q-FbASN8xAItxWQmQ0__AY7uue6xFCVMXRVeDekVUYgfQC5zs1WjgKJlJI3wrTWwmGhN6-C28`
+
+Next source boundary:
+
+> Verify physical page **16** rather than inferring it is blank merely from OCR silence. Then continue with **“The Nature and Function of the Measure”** on physical page **17**. Pages 17–18 already have authoritative self-hosted OCR available, but they introduce native footnotes, so preserve note anchors/ownership and render-check them before advancing the guarded checkpoint.
+
 
 # 6. Workbench/runtime constraints
 
@@ -351,9 +379,9 @@ A fresh agent should do this:
    - rerun terminal TOC refresh + TOC styling;
    - exact-final PDF export + all-page QA;
    - only then accept Needs Review status.
-6. Then, and only then, resume Project 2:
-   - verify existing 6/584 checkpoint and current target;
-   - resume source page 7;
+6. Under Zahraa's explicit continuation instruction, Project 2 may proceed while the Prophets blank-final-page blocker remains tracked as an open loop:
+   - verify the existing 15/584 checkpoint and current target;
+   - inspect page 16, then resume from source page 17;
    - continue to 584/584 with guarded progress updates;
    - move to Needs Formatting;
    - run the full translator-profile formatting/publication pass;
@@ -365,7 +393,7 @@ A fresh agent should do this:
 
 - Do not call Prophets done while page 185 is blank.
 - Do not treat Workbench `review` as proof that formatting is actually verified.
-- Do not continue Project 2 before Prophets closes; preserve the existing 6 pages.
+- The earlier sequencing hold is superseded by Zahraa's explicit 2026-10-05 instruction to continue the current translation. Keep the Prophets production-QA blocker open, but do not use it to halt Project 2 unless Zahraa redirects again.
 - Do not create a duplicate Workbench project or duplicate English Doc for Project 2.
 - Do not replace the native Google Docs TOC with a manually typed TOC.
 - Do not leave TOC text blue/underlined; final presentation is Amiri + black, with glyph font preserved.
