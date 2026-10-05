@@ -33,40 +33,75 @@ jobs:
           const browser = await chromium.launch({headless:true});
           const context = await browser.newContext({viewport:{width:1440,height:1000},locale:"en-US"});
           const page = await context.newPage();
-          try {
-            await page.goto(process.env.DOC_URL,{waitUntil:"domcontentloaded",timeout:120000});
-            await sleep(8000);
-            const editor = page.locator(".kix-appview-editor").first();
-            if (await editor.isVisible({timeout:3000}).catch(()=>false)) {
-              await editor.click({position:{x:520,y:220},force:true});
-            } else {
-              await page.mouse.click(800,450);
-            }
-            await page.keyboard.press("Meta+f");
-            await sleep(300);
-            await page.keyboard.type("Introduction",{delay:25});
-            await sleep(700);
-            const close = page.getByLabel("Close",{exact:true}).first();
-            if (await close.isVisible({timeout:1200}).catch(()=>false)) await close.click();
-            else await page.keyboard.press("Escape");
-            await sleep(500);
-            await page.keyboard.press("ArrowRight");
-            await sleep(700);
+          async function clickRefreshControl() {
             const candidates=[
               page.getByLabel(/(?:Refresh|Update) table of contents/i).last(),
               page.getByLabel(/^(?:Refresh|Update)$/i).last(),
               page.locator('[aria-label*="Refresh" i][aria-label*="table" i]').last(),
               page.locator('[aria-label*="Update" i][aria-label*="table" i]').last(),
               page.locator('[data-tooltip*="Refresh" i][data-tooltip*="table" i]').last(),
-              page.locator('[data-tooltip*="Update" i][data-tooltip*="table" i]').last()
+              page.locator('[data-tooltip*="Update" i][data-tooltip*="table" i]').last(),
+              page.getByText(/(?:Refresh|Update) table of contents/i,{exact:false}).last()
             ];
-            let clicked=false;
             for (const loc of candidates) {
-              if (await loc.isVisible({timeout:1400}).catch(()=>false)) {
-                await loc.click(); clicked=true; break;
+              if (await loc.isVisible({timeout:900}).catch(()=>false)) {
+                await loc.click({force:true}); return true;
               }
             }
-            if (!clicked) throw new Error("Native TOC refresh control not found");
+            return false;
+          }
+          try {
+            await page.goto(process.env.DOC_URL,{waitUntil:"domcontentloaded",timeout:120000});
+            await sleep(8000);
+            const editor=page.locator(".kix-appview-editor").first();
+            if (await editor.isVisible({timeout:3000}).catch(()=>false)) await editor.click({position:{x:520,y:220},force:true});
+            else await page.mouse.click(800,450);
+            await page.keyboard.press("Meta+f");
+            await sleep(300);
+            await page.keyboard.type("Introduction",{delay:25});
+            await sleep(900);
+            const close=page.getByLabel("Close",{exact:true}).first();
+            if (await close.isVisible({timeout:1200}).catch(()=>false)) await close.click();
+            else await page.keyboard.press("Escape");
+            await sleep(500);
+
+            let targetBox=null;
+            const intros=page.getByText("Introduction",{exact:true});
+            const count=await intros.count().catch(()=>0);
+            console.log("INTRO_DOM_COUNT="+count);
+            for(let i=0;i<count;i++){
+              const loc=intros.nth(i);
+              if(await loc.isVisible({timeout:300}).catch(()=>false)){
+                const b=await loc.boundingBox().catch(()=>null);
+                console.log("INTRO_BOX_"+i+"="+JSON.stringify(b));
+                if(b && !targetBox) {targetBox=b; await loc.click({force:true}).catch(()=>{}); await sleep(700);}
+              }
+            }
+            if(!targetBox){
+              await page.mouse.click(720,500);
+              await sleep(700);
+            }
+
+            let clicked=await clickRefreshControl();
+            if(!clicked && targetBox){
+              await page.mouse.click(targetBox.x+Math.min(40,targetBox.width/2),targetBox.y+Math.min(10,targetBox.height/2),{button:"right"});
+              await sleep(600);
+              const menu=page.getByText(/(?:Refresh|Update) table of contents/i,{exact:false}).last();
+              if(await menu.isVisible({timeout:1200}).catch(()=>false)){ await menu.click(); clicked=true; }
+            }
+            if(!clicked){
+              await page.keyboard.press("Alt+/").catch(()=>{});
+              await sleep(500);
+              await page.keyboard.type("update table of contents",{delay:20}).catch(()=>{});
+              await sleep(600);
+              const cmd=page.getByText(/update table of contents/i,{exact:false}).last();
+              if(await cmd.isVisible({timeout:900}).catch(()=>false)){ await cmd.click(); clicked=true; }
+              else { await page.keyboard.press("Enter").catch(()=>{}); await sleep(1200); clicked=await clickRefreshControl(); }
+            }
+
+            const visibleLabels=await page.locator('[aria-label]:visible').evaluateAll(els=>els.map(e=>e.getAttribute('aria-label')).filter(x=>/table|content|refresh|update/i.test(x||'')).slice(0,80)).catch(()=>[]);
+            console.log("VISIBLE_LABELS="+JSON.stringify(visibleLabels));
+            if(!clicked) throw new Error("Native TOC refresh control not found after DOM click/context-menu/tool-finder fallbacks");
             await sleep(7000);
             console.log("NATIVE_TOC_REFRESH_COMPLETED");
           } finally {
