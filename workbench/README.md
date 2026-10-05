@@ -70,7 +70,7 @@ A filename ending in `.pdf` is not enough; availability is based on an actual re
 
 Recommended Git-integrated Pages settings:
 
-- Production branch: `workbench`
+- Production branch: `main`
 - Root directory: `workbench`
 - Framework preset: none
 - Build command: blank
