@@ -1,0 +1,126 @@
+name: One-shot Book 67 OCR Artifact
+
+on:
+  push:
+    paths:
+      - '.github/workflows/one-shot-book67-ocr-artifact.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  ocr-artifact:
+    runs-on: [self-hosted, macOS, ARM64]
+    timeout-minutes: 45
+    env:
+      SOURCE_URL: "https://archive.alhaydari.com/ebook/ar/%D8%A7%D9%84%D9%83%D9%84%D8%A7%D9%85-%D9%88%D8%A7%D9%84%D8%B9%D9%82%D8%A7%D8%A6%D8%AF/%D8%A7%D9%84%D8%AA%D8%AF%D8%A7%D8%A8%D9%8A%D8%B1-%D8%A7%D9%84%D9%86%D8%A8%D9%88%D9%8A%D8%A9-%D9%84%D8%AD%D9%81%D8%B8-%D8%A7%D9%84%D8%B1%D8%B3%D8%A7%D9%84%D8%A9-%D8%A7%D9%84%D8%A5%D9%84%D9%87%D9%8A%D8%A9.pdf"
+      START_PAGE: "95"
+      END_PAGE: "584"
+      POINTER_PATH: "workbench/handoffs/book67-ocr-artifact-run.json"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Publish run pointer
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$(dirname "$POINTER_PATH")"
+          cat >"$POINTER_PATH" <<JSON
+          {
+            "run_id": ${GITHUB_RUN_ID},
+            "run_attempt": ${GITHUB_RUN_ATTEMPT},
+            "trigger_sha": "${GITHUB_SHA}",
+            "start_page": ${START_PAGE},
+            "end_page": ${END_PAGE},
+            "artifact_name": "book67-ocr-pages-${START_PAGE}-${END_PAGE}",
+            "state": "started"
+          }
+          JSON
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$POINTER_PATH"
+          git commit -m "workbench: record Book 67 OCR artifact run ${GITHUB_RUN_ID}" || true
+          git pull --rebase origin main
+          git push origin HEAD:main
+
+      - name: Fetch authoritative PDF
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --connect-timeout 30 "$SOURCE_URL" -o /tmp/book67.pdf
+          head -c 5 /tmp/book67.pdf | grep -q '%PDF-'
+          shasum -a 256 /tmp/book67.pdf | awk '{print $1}' >/tmp/book67.sha256
+
+      - name: OCR authoritative pages with macOS Vision
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/book67-ocr
+          mkdir -p /tmp/book67-ocr/pages
+          cat >/tmp/ocr-book67-artifact.swift <<'SWIFT'
+          import Foundation
+          import PDFKit
+          import AppKit
+          import Vision
+
+          guard let doc = PDFDocument(url: URL(fileURLWithPath: "/tmp/book67.pdf")) else {
+            fputs("PDF_OPEN_FAILED\n", stderr)
+            exit(2)
+          }
+          let env = ProcessInfo.processInfo.environment
+          let start = max(1, Int(env["START_PAGE"] ?? "1") ?? 1)
+          let end = min(doc.pageCount, Int(env["END_PAGE"] ?? "\(doc.pageCount)") ?? doc.pageCount)
+          let outDir = URL(fileURLWithPath: "/tmp/book67-ocr/pages", isDirectory: true)
+
+          for physical in start...end {
+            guard let page = doc.page(at: physical - 1) else { continue }
+            let img = page.thumbnail(of: NSSize(width: 2400, height: 3400), for: .mediaBox)
+            guard let cg = img.cgImage(forProposedRect: nil, context: nil, hints: nil) else { continue }
+
+            let req = VNRecognizeTextRequest()
+            req.recognitionLevel = .accurate
+            req.usesLanguageCorrection = true
+            if (try? req.supportedRecognitionLanguages()).map({ $0.contains("ar-SA") }) == true {
+              req.recognitionLanguages = ["ar-SA"]
+            }
+            let handler = VNImageRequestHandler(cgImage: cg, options: [:])
+            try handler.perform([req])
+            let obs = (req.results ?? []).sorted {
+              let ay = $0.boundingBox.midY, by = $1.boundingBox.midY
+              if abs(ay - by) > 0.012 { return ay > by }
+              return $0.boundingBox.midX > $1.boundingBox.midX
+            }
+            let text = obs.compactMap { $0.topCandidates(1).first?.string }.joined(separator: "\n")
+            let url = outDir.appendingPathComponent(String(format: "%03d.txt", physical))
+            try text.write(to: url, atomically: true, encoding: .utf8)
+            if physical % 25 == 0 || physical == start || physical == end {
+              print("OCR_PAGE=\(physical)")
+            }
+          }
+          let manifest = """
+          {
+            "physical_page_count": \(doc.pageCount),
+            "start_page": \(start),
+            "end_page": \(end)
+          }
+          """
+          try manifest.write(toFile: "/tmp/book67-ocr/manifest.json", atomically: true, encoding: .utf8)
+          SWIFT
+          swift /tmp/ocr-book67-artifact.swift
+          cp /tmp/book67.sha256 /tmp/book67-ocr/source.sha256
+          test "$(find /tmp/book67-ocr/pages -type f | wc -l | tr -d ' ')" -ge 480
+
+      - name: Upload OCR artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: book67-ocr-pages-95-584
+          path: /tmp/book67-ocr
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 9
+
+      - name: Cleanup
+        if: always()
+        run: rm -rf /tmp/book67.pdf /tmp/book67.sha256 /tmp/book67-ocr /tmp/ocr-book67-artifact.swift
