@@ -27,7 +27,7 @@ jobs:
       - name: Refresh native Google Docs TOC after whole-book pagination
         shell: bash
         run: |
-          # Trigger: refresh after stabilizing the existing Story of Joseph page-90 boundary for TOC/render agreement.
+          # Trigger: select the native Table of contents container, then click its visible Update control.
           cat > ./refresh-prophets-toc.mjs <<'NODE'
           import { chromium } from "playwright";
           const sleep=ms=>new Promise(r=>setTimeout(r,ms));
@@ -36,12 +36,18 @@ jobs:
           const page=await context.newPage();
 
           async function clickRefresh(){
-            const exact=page.getByLabel("Update table of contents",{exact:true}).last();
-            if(await exact.count().catch(()=>0)){
+            const shell=page.getByLabel("Table of contents",{exact:true}).last();
+            if(await shell.count().catch(()=>0)){
               try{
-                await exact.evaluate(el=>el.click());
-                console.log("TOC_REFRESH_DOM_CLICK");
-                return true;
+                await shell.scrollIntoViewIfNeeded().catch(()=>{});
+                await shell.click({force:true});
+                await sleep(600);
+                const exact=page.getByLabel("Update table of contents",{exact:true}).last();
+                if(await exact.isVisible({timeout:1500}).catch(()=>false)){
+                  await exact.click({force:true});
+                  console.log("TOC_REFRESH_VISIBLE_CLICK");
+                  return true;
+                }
               }catch{}
             }
             const candidates=[
