@@ -1,0 +1,9 @@
+{
+  "run_id": 37368295659,
+  "run_attempt": 1,
+  "trigger_sha": "0f4aca1ce6538daaae4c9033a36fa1b213f66475",
+  "start_page": 95,
+  "end_page": 584,
+  "artifact_name": "book67-ocr-pages-95-584",
+  "state": "started"
+}
