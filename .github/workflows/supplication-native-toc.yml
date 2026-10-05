@@ -1,4 +1,4 @@
-name: Supplication Native TOC
+name: Translation Native TOC
 
 on:
   push:
@@ -16,8 +16,8 @@ jobs:
     runs-on: [self-hosted, operator-translation, macOS, ARM64]
     timeout-minutes: 15
     env:
-      DOC_URL: https://docs.google.com/document/d/15MMgcj6TPtdCotBecPUJW9xX59-Py_ODsHqRqh_dDLc/edit
-      TOC_ACTION: insert
+      DOC_URL: https://docs.google.com/document/d/1xBIpS5TXEQT42_JuoKlu5CgW95_B2wenYSk8LN_wcRg/edit
+      TOC_ACTION: refresh
       CONTENTS_LABEL: Contents
       TOC_VARIANT: dots-page-numbers
       PLAYWRIGHT_BROWSERS_PATH: /tmp/operator-playwright-browsers
@@ -32,7 +32,7 @@ jobs:
         run: |
           npm install --no-save playwright@1.55.0
           npx playwright install chromium
-      - name: Insert native Google Docs TOC through the editor UI
+      - name: Refresh native Google Docs TOC through the editor UI
         run: node scripts/google-docs-native-toc.mjs
       - name: Remove ephemeral browser payload
         if: always()
