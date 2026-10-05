@@ -13,18 +13,18 @@ jobs:
     runs-on: [self-hosted, macOS, ARM64]
     timeout-minutes: 5
     steps:
-      - name: Publish verified 259/584 checkpoint
+      - name: Publish verified 280/584 checkpoint
         shell: bash
         run: |
           set -euo pipefail
           body=$(cat <<'JSON'
           {
-            "translated_pages": 259,
-            "expected_previous_pages": 239,
+            "translated_pages": 280,
+            "expected_previous_pages": 259,
             "source_total_pages": 584,
             "source_pdf_sha256": "f42595fd7c50e10116b944351e7d59150f2cf90c7d8a93315bcea03fc6f41e0d",
-            "google_doc_revision": "ANLCKQkWSyvC1KNbaPXSaYxqIrFtiK-rX0CIsOgRWPgky2eeeePtpn04tjXIZPVV9fX2HVFGQsosZ-yQrsv_4Fzrc2O1aVG-btcs8bffSOE",
-            "verification_note": "Verified continuous English translation coverage through physical source page 259 in the live Google Doc. Chapter Five has begun and the translation now includes Lady Fatimah al-Zahra's titles and attributes through al-Batul, with source-note text preserved in explicit staging markers. Native-footnote migration and final formatting/publication QA remain open and are not represented as complete."
+            "google_doc_revision": "ANLCKQmd0wSpzuftxDgutRnCtK6kHUmDtTsQbGqvBBFGYUTg01BxRF1y2kYwW2gbno6tqhDJjBSenNg95VWqXFOD_FlIUocp4O_-neOuRtM",
+            "verification_note": "Verified continuous English translation coverage through physical source page 280 in the live Google Doc. Chapter Five now extends through Fatimah's future-facing warning about the Saqifah and into her three measures for invalidating the government of the reversal. Source-note text remains preserved in explicit staging markers pending native-footnote migration and final formatting/publication QA."
           }
           JSON
           )
