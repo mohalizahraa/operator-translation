@@ -13,18 +13,18 @@ jobs:
     runs-on: [self-hosted, macOS, ARM64]
     timeout-minutes: 5
     steps:
-      - name: Publish verified 120/584 checkpoint
+      - name: Publish verified 130/584 checkpoint
         shell: bash
         run: |
           set -euo pipefail
           body=$(cat <<'JSON'
           {
-            "translated_pages": 120,
-            "expected_previous_pages": 110,
+            "translated_pages": 130,
+            "expected_previous_pages": 120,
             "source_total_pages": 584,
             "source_pdf_sha256": "f42595fd7c50e10116b944351e7d59150f2cf90c7d8a93315bcea03fc6f41e0d",
-            "google_doc_revision": "ANLCKQnG3ZmnVJL3O3IL-jFzwW2K8JY03UgejSYuDMn4_4YaW4VicI6SzUiwUStK6etJBT-TIEnncXvSGSBn43JYsn3EuGha627QkSKHQRw",
-            "verification_note": "Verified continuous source coverage through physical page 120 against the authoritative 584-page PDF hash. Pages 111-115 translate the Prophet's forewarning of opposition and betrayal, the Abu Dharr warning, post-exclusion warfare against Imam Ali, and the Umayyad cursing legacy. Pages 116-120 begin Imam Ali's own defense of his right to the Caliphate and cover the Saqifah response plus the opening of the Umar-successorship episode. Whole-doc native-footnote count is 149 with 0 empty notes and no temporary source-note anchors remain in the body."
+            "google_doc_revision": "ANLCKQmdRC-edtgjsn2j7CxETpQM84HjAgXCifAi1Xmu3bUHh0vbWnBAUjF-Yzr2TbggNx5D1BVn8lWqobCMQV4s0ha0fJtiTpuUvcOKCg4",
+            "verification_note": "Verified continuous source coverage through physical page 130 against the authoritative 584-page PDF hash. Pages 121-125 cover the Umar-era military consultation, the formal shura, Uthman's accession, and the opening of Ali's elected Caliphate. Pages 126-130 cover Ali's diagnosis of the prior governments and the 'inner garment, companions, treasurers, and doors' sermon, including all source-note continuations. Whole-doc native-footnote count is 167 with 0 empty notes and no temporary source-note anchors remain in the body."
           }
           JSON
           )
