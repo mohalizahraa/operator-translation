@@ -23,10 +23,12 @@ const state = { projects: [], activity: [], paceEvents: [], liveSignature: '', l
 const LIVE_REVISION_MS = 2000;
 const LIVE_REVISION_RETRY_MS = 1000;
 const LIVE_MARKER_SYNC_MS = 5000;
+const LIVE_MARKER_BATCH_SIZE = 3;
 let liveSyncTimer = null;
 let liveSyncInFlight = false;
 let liveRevisionInFlight = false;
 let markerSyncInFlight = false;
+let markerSyncCursor = 0;
 let lastMarkerSyncAt = 0;
 
 const $ = (id) => document.getElementById(id);
@@ -1439,8 +1441,7 @@ function sharedDataSignature(projects, activity, paceEvents) {
 
 async function fetchLiveRevision() {
   const data=await api('/api/revision');
-  const revision=Number(data.revision || 0);
-  return Number.isFinite(revision) ? revision : 0;
+  return String(data.revision ?? '');
 }
 
 async function fetchSharedData() {
@@ -1461,7 +1462,7 @@ function applySharedData(next,{force=false}={}) {
   state.projects=next.projects;
   state.activity=next.activity;
   state.paceEvents=next.paceEvents;
-  state.liveRevision=Number(next.revision ?? state.liveRevision ?? 0);
+  state.liveRevision=String(next.revision ?? state.liveRevision ?? '');
   state.liveSignature=signature;
   if (changed) render();
   return changed;
@@ -1494,14 +1495,21 @@ async function syncVerifiedTranslationMarkers() {
 
   const candidates=state.projects
     .filter(p=>p.status==='in_progress' && p.google_doc_url)
-    .sort((a,b)=>String(b.translation_progress_at || '').localeCompare(String(a.translation_progress_at || '')))
-    .slice(0,3);
+    .sort((a,b)=>String(b.translation_progress_at || '').localeCompare(String(a.translation_progress_at || '')));
 
-  if (!candidates.length) return true;
+  if (!candidates.length) {
+    markerSyncCursor=0;
+    return true;
+  }
+  const start=markerSyncCursor % candidates.length;
+  const batchSize=Math.min(LIVE_MARKER_BATCH_SIZE,candidates.length);
+  const batch=Array.from({length:batchSize},(_,offset)=>candidates[(start+offset)%candidates.length]);
+  markerSyncCursor=(start+batchSize)%candidates.length;
+
   markerSyncInFlight=true;
   let ok=true;
   try {
-    for (const project of candidates) {
+    for (const project of batch) {
       try {
         await api(`/api/projects/${project.id}/progress-sync`,{method:'POST'});
       } catch {

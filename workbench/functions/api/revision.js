@@ -1,12 +1,30 @@
 import { json } from '../_lib.js';
 
 export async function onRequestGet(context) {
-  const latest = await context.env.DB.prepare(
-    'SELECT COALESCE(MAX(id), 0) AS revision, MAX(created_at) AS changed_at FROM activity'
-  ).first();
+  const latest = await context.env.DB.prepare(`
+    SELECT
+      (SELECT COALESCE(MAX(id), 0) FROM activity) AS activity_revision,
+      (SELECT COALESCE(MAX(created_at), '') FROM activity) AS activity_changed_at,
+      (SELECT COALESCE(MAX(updated_at), '') FROM projects) AS project_revision,
+      (SELECT COALESCE(MAX(updated_at), '') FROM project_covers) AS cover_revision,
+      (
+        SELECT COALESCE(GROUP_CONCAT(key || '=' || value, '|'), '')
+        FROM (SELECT key, value FROM workbench_meta ORDER BY key)
+      ) AS meta_revision
+  `).first();
 
-  return json({
-    revision: Number(latest?.revision || 0),
-    changed_at: latest?.changed_at || null,
-  });
+  const revision = [
+    latest?.activity_revision ?? 0,
+    latest?.project_revision || '',
+    latest?.cover_revision || '',
+    latest?.meta_revision || '',
+  ].join('::');
+
+  const changedAt = [
+    latest?.activity_changed_at,
+    latest?.project_revision,
+    latest?.cover_revision,
+  ].filter(Boolean).sort().at(-1) || null;
+
+  return json({ revision, changed_at: changedAt });
 }
