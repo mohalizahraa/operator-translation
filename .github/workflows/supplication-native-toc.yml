@@ -16,7 +16,7 @@ jobs:
     runs-on: [self-hosted, operator-translation, macOS, ARM64]
     timeout-minutes: 15
     env:
-      DOC_URL: https://docs.google.com/document/d/1xBIpS5TXEQT42_JuoKlu5CgW95_B2wenYSk8LN_wcRg/edit
+      DOC_URL: https://docs.google.com/document/d/15MMgcj6TPtdCotBecPUJW9xX59-Py_ODsHqRqh_dDLc/edit
       TOC_ACTION: refresh
       CONTENTS_LABEL: Contents
       TOC_VARIANT: dots-page-numbers
