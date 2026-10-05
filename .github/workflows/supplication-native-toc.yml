@@ -1,0 +1,41 @@
+name: Supplication Native TOC
+
+on:
+  push:
+    branches:
+      - 'ops/supplication-native-toc-2026-10-04'
+    paths:
+      - '.github/workflows/supplication-native-toc.yml'
+      - 'scripts/google-docs-native-toc.mjs'
+
+permissions:
+  contents: read
+
+jobs:
+  native-toc:
+    runs-on: [self-hosted, macOS, ARM64]
+    timeout-minutes: 15
+    env:
+      DOC_URL: https://docs.google.com/document/d/15MMgcj6TPtdCotBecPUJW9xX59-Py_ODsHqRqh_dDLc/edit
+      TOC_ACTION: insert
+      CONTENTS_LABEL: Contents
+      TOC_VARIANT: dots-page-numbers
+      PLAYWRIGHT_BROWSERS_PATH: /tmp/operator-playwright-browsers
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify native-TOC driver syntax
+        run: node --check scripts/google-docs-native-toc.mjs
+      - name: Install ephemeral browser driver
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install chromium
+      - name: Insert native Google Docs TOC through the editor UI
+        run: node scripts/google-docs-native-toc.mjs
+      - name: Remove ephemeral browser payload
+        if: always()
+        run: |
+          rm -rf /tmp/operator-playwright-browsers
+          rm -rf node_modules/playwright node_modules/playwright-core node_modules/.bin/playwright
