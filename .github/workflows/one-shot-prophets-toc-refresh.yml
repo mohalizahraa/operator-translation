@@ -33,7 +33,7 @@ jobs:
           const browser=await chromium.launch({headless:true});
           const context=await browser.newContext({viewport:{width:1440,height:1000},locale:"en-US"});
           const page=await context.newPage();
-          async function refreshVisible(){
+          async function clickRefresh(){
             const candidates=[
               page.getByLabel(/(?:Refresh|Update) table of contents/i).last(),
               page.getByLabel(/^(?:Refresh|Update)$/i).last(),
@@ -44,7 +44,7 @@ jobs:
               page.getByText(/(?:Refresh|Update) table of contents/i,{exact:false}).last()
             ];
             for(const loc of candidates){
-              if(await loc.isVisible({timeout:800}).catch(()=>false)){
+              if(await loc.isVisible({timeout:900}).catch(()=>false)){
                 await loc.click({force:true}); return true;
               }
             }
@@ -53,26 +53,46 @@ jobs:
           try{
             await page.goto(process.env.DOC_URL,{waitUntil:"domcontentloaded",timeout:120000});
             await sleep(9000);
-            const pages=page.locator(".kix-page-paginated");
-            const count=await pages.count();
-            console.log("DOC_PAGE_DOM_COUNT="+count);
-            if(count<6) throw new Error("Fewer than six Google Docs page elements were available");
-            const tocPage=pages.nth(5);
-            await tocPage.scrollIntoViewIfNeeded();
-            await sleep(1200);
-            const b=await tocPage.boundingBox();
-            console.log("TOC_PAGE_BOX="+JSON.stringify(b));
-            if(!b) throw new Error("Could not resolve TOC page bounds");
-            const points=[
-              [0.35,0.24],[0.50,0.28],[0.35,0.35],[0.55,0.42],[0.45,0.55]
+            const editor=page.locator(".kix-appview-editor").first();
+            if(await editor.isVisible({timeout:3000}).catch(()=>false)) await editor.click({position:{x:520,y:220},force:true});
+            else await page.mouse.click(800,450);
+
+            await page.keyboard.press("Meta+f");
+            await sleep(300);
+            await page.keyboard.type("Contents",{delay:25});
+            await sleep(900);
+            const close=page.getByLabel("Close",{exact:true}).first();
+            if(await close.isVisible({timeout:1200}).catch(()=>false)) await close.click();
+            else await page.keyboard.press("Escape");
+            await sleep(600);
+
+            const contents=page.getByText("Contents",{exact:true});
+            const count=await contents.count().catch(()=>0);
+            console.log("CONTENTS_DOM_COUNT="+count);
+            let box=null;
+            for(let i=0;i<count;i++){
+              const loc=contents.nth(i);
+              if(await loc.isVisible({timeout:300}).catch(()=>false)){
+                const b=await loc.boundingBox().catch(()=>null);
+                console.log("CONTENTS_BOX_"+i+"="+JSON.stringify(b));
+                if(b && !box){box=b;break;}
+              }
+            }
+            if(!box) throw new Error("Could not locate visible Contents heading in document body");
+
+            const clickPoints=[
+              [box.x+box.width/2, box.y+box.height+70],
+              [box.x+box.width/2, box.y+box.height+120],
+              [box.x+box.width/2, box.y+box.height+180],
+              [box.x+120, box.y+box.height+70]
             ];
             let clicked=false;
-            for(const [xr,yr] of points){
-              await page.mouse.click(b.x+b.width*xr,b.y+b.height*yr);
+            for(const [x,y] of clickPoints){
+              await page.mouse.click(x,y);
               await sleep(600);
-              if(await refreshVisible()){clicked=true;break;}
+              if(await clickRefresh()){clicked=true;break;}
             }
-            if(!clicked) throw new Error("Native TOC refresh control not found after direct TOC-page targeting");
+            if(!clicked) throw new Error("Native TOC refresh control not found from Contents-body anchor");
             await sleep(7000);
             console.log("NATIVE_TOC_REFRESH_COMPLETED");
           }finally{await browser.close();}
