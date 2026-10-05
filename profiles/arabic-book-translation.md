@@ -6,6 +6,18 @@ This profile is additive, not a separate operating system: apply the rest of Ope
 
 This profile specializes translation procedure. It does not weaken source authority, execution, documentation, or verification rules owned by the parent protocol.
 
+## 0. Interpret translation and formatting shorthand as full-profile work
+
+For any Arabic→English book or manuscript governed by this profile, user wording such as `translate this book`, `format it`, `do a formatting pass`, `finish formatting`, or `do another formatting pass` automatically inherits this profile. The user does not need to restate its individual rules.
+
+A **formatting pass** is not a cosmetic spot-fix. It means apply and verify the **entire currently applicable translation-profile formatting and production contract across the whole edition**, including the active edition-formatting profile/overlay and every applicable requirement for semantic document roles, notes, the native TOC, major openings, page boundaries, typography, indentation/spacing, sacred-glyph rendering, image/text presentation surfaces, pagination properties, and final rendered checks. Reuse already-valid evidence and already-correct work rather than redoing it for activity's sake; a formatting pass does not by itself require retranslation or reopening source-fidelity review that is still valid. But any known unmet requirement in this profile that affects the edition's claimed formatting or publication state must be repaired or remain an explicit blocker.
+
+When translation and formatting are requested together, completion is conjunctive:
+
+> **translation/text gates pass + the full applicable formatting/production profile is applied + invalidated downstream evidence is rerun + the terminal native-TOC fixed-point/render verification passes.**
+
+Do not call a formatting pass `done`, `complete`, or equivalent after only fixing the examples the user named, after a sampled/structural check, or while a known applicable profile requirement remains unmet. Whole-book denominators and outlier-driven class scans still apply. If an applicable profile requirement cannot be satisfied with the available tooling or authority, state the exact blocker and do not report the formatting pass complete.
+
 ## 1. Treat the target as an English edition, not a summary
 
 When the user requests an English translation of an Arabic book/document, preserve the source's meaning and structure while producing natural English suitable for the intended readership.
