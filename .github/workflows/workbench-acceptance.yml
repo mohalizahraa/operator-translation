@@ -1,0 +1,26 @@
+name: Workbench Acceptance
+
+on:
+  push:
+    paths:
+      - 'workbench/public/**'
+      - 'workbench/functions/**'
+      - 'workbench/scripts/**'
+      - 'workbench/package.json'
+      - 'workbench/schema.sql'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: [self-hosted, operator-translation, macOS, ARM64]
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run Workbench acceptance suite
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd workbench
+          npm run check:acceptance
