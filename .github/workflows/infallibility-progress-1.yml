@@ -1,0 +1,62 @@
+name: Publish Infallibility Progress 1
+
+on:
+  push:
+    branches:
+      - 'ops/supplication-native-toc-2026-10-04'
+    paths:
+      - '.github/workflows/infallibility-progress-1.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  publish-progress:
+    runs-on: [self-hosted, operator-translation, macOS, ARM64]
+    timeout-minutes: 5
+    steps:
+      - name: Publish verified 1/209 checkpoint
+        shell: bash
+        env:
+          BASE: https://haydari-translation-workbench.pages.dev
+          DOC_REVISION: ANLCKQlRGN46mCaNmWdEpNnvkOWG1T5LVIRcdHvvumn6AWNr_vjfzwxpxQk2jTf4AP8MAtO0s5Lh7heI9iaSHmtoPvmjb2YHoP1flDpsNKI
+          SOURCE_SHA256: 2fa5b96f343b180317dd64df063349f4d1f3155643390740168bb853e8bb8ac3
+        run: |
+          set -euo pipefail
+          before="$(curl --fail --silent --show-error "$BASE/api/projects/1")"
+          python3 - "$before" <<'PY'
+          import json,sys
+          data=json.loads(sys.argv[1])["project"]
+          assert int(data["pages"]) == 209, data
+          assert int(data.get("translated_pages") or 0) == 0, data
+          assert data["google_doc_url"].find("1KJBqjZ41Zasg_LqrKNr4wJXZCkpOcJ77PXQal2KU1qM") >= 0, data
+          print("BEFORE_OK", data["status"], data.get("translated_pages"))
+          PY
+
+          payload="$(python3 - <<'PY'
+          import json,os
+          print(json.dumps({
+            "translated_pages": 1,
+            "expected_previous_pages": 0,
+            "source_total_pages": 209,
+            "source_pdf_sha256": os.environ["SOURCE_SHA256"],
+            "google_doc_revision": os.environ["DOC_REVISION"],
+            "verification_note": "Source physical page 1 title/frontispiece translated into the linked English Doc; connector readback and rendered PDF page verified."
+          }))
+          PY
+          )"
+
+          curl --fail-with-body --silent --show-error \
+            -X PATCH "$BASE/api/projects/1/progress" \
+            -H 'Content-Type: application/json' \
+            -H 'x-workbench-actor: Zahraa' \
+            --data-binary "$payload" > "$RUNNER_TEMP/progress-response.json"
+
+          after="$(curl --fail --silent --show-error "$BASE/api/projects/1")"
+          python3 - "$after" <<'PY'
+          import json,sys
+          data=json.loads(sys.argv[1])["project"]
+          assert int(data["translated_pages"]) == 1, data
+          assert data["status"] == "in_progress", data
+          print("AFTER_OK", data["status"], data["translated_pages"], "/", data["pages"])
+          PY
