@@ -1,0 +1,26 @@
+name: Translation Runner Smoke
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  runner-smoke:
+    runs-on: [self-hosted, operator-translation, macOS, ARM64]
+    timeout-minutes: 5
+    steps:
+      - name: Verify dedicated runner identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$RUNNER_NAME" = "operator-translation-mac-arm64"
+          test "$RUNNER_OS" = "macOS"
+          test "$RUNNER_ARCH" = "ARM64"
+          test "$(uname -m)" = "arm64"
+          printf 'runner_name=%s\n' "$RUNNER_NAME"
+          printf 'runner_os=%s\n' "$RUNNER_OS"
+          printf 'runner_arch=%s\n' "$RUNNER_ARCH"
+          printf 'machine_arch=%s\n' "$(uname -m)"
+          printf 'hostname=%s\n' "$(hostname)"
