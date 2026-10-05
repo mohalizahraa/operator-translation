@@ -13,18 +13,18 @@ jobs:
     runs-on: [self-hosted, macOS, ARM64]
     timeout-minutes: 5
     steps:
-      - name: Publish verified 16/584 checkpoint
+      - name: Publish verified 32/584 checkpoint
         shell: bash
         run: |
           set -euo pipefail
           body=$(cat <<'JSON'
           {
-            "translated_pages": 16,
-            "expected_previous_pages": 15,
+            "translated_pages": 32,
+            "expected_previous_pages": 16,
             "source_total_pages": 584,
             "source_pdf_sha256": "f42595fd7c50e10116b944351e7d59150f2cf90c7d8a93315bcea03fc6f41e0d",
-            "google_doc_revision": "ANLCKQkDs3YjS1Y9LcLA24jOZnANJIeED6q-FbASN8xAItxWQmQ0__AY7uue6xFCVMXRVeDekVUYgfQC5zs1WjgKJlJI3wrTWwmGhN6-C28",
-            "verification_note": "Physical source page 16 was visually rendered from the authoritative 584-page PDF on the self-hosted macOS/ARM64 runner and confirmed intentionally blank. No target mutation was required, so the same verified Google Doc revision remains current."
+            "google_doc_revision": "AHj4eMTUK9sPiBzO9OawvfcgJU3olwoeAwWRjvNbk3e0VAbDmwX_8oUtnS78rU9T3lLp15_9Syjm_7Ds_VJ3jwjn3H6dss-Lk6P_8VChK0k",
+            "verification_note": "Verified source coverage through physical page 32 against the authoritative PDF hash. Pages 17-32 were translated into the live English Doc; 16 source notes were migrated as populated native Google Docs footnotes at source-relative anchors. New body readback has 0 unapproved Arabic-script hits, Qur'anic spans and sacred glyph styling were preserved, and a fresh 24-page PDF render confirmed native page-bottom footnote continuation and readable section layout."
           }
           JSON
           )
