@@ -27,7 +27,7 @@ jobs:
       - name: Refresh native Google Docs TOC after whole-book pagination
         shell: bash
         run: |
-          # Trigger: fixed-point refresh after rendered TOC mismatch at The Story of Joseph.
+          # Trigger: retry fixed-point refresh with native-TOC entry targeting after the prior control-selection miss.
           cat > ./refresh-prophets-toc.mjs <<'NODE'
           import { chromium } from "playwright";
           const sleep=ms=>new Promise(r=>setTimeout(r,ms));
@@ -94,7 +94,10 @@ jobs:
               await findAndSettle(anchor,2200);
             }
 
-            await findAndSettle("Contents",3000);
+            await findAndSettle("Contents",1800);
+            // From the Contents heading, the next "Introduction" occurrence is the first native-TOC entry.
+            // Selecting that entry is more stable than relying on a generic page click after a deep pagination sweep.
+            await findAndSettle("Introduction",1800);
 
             for(const key of ["ArrowRight","End","ArrowDown","ArrowDown"]){
               await page.keyboard.press(key).catch(()=>{});
