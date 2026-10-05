@@ -1,0 +1,21 @@
+name: One-shot Workbench Progress Sync
+
+on:
+  push:
+    paths:
+      - '.github/workflows/one-shot-workbench-progress-sync.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: [self-hosted, operator-translation, macOS, ARM64]
+    timeout-minutes: 5
+    steps:
+      - name: Publish verified Prophets progress marker
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --request POST \
+            https://haydari-translation-workbench.pages.dev/api/projects/1/progress-sync
