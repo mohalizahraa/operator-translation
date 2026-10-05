@@ -6,6 +6,17 @@ This profile is additive, not a separate operating system: apply the rest of Ope
 
 This profile specializes translation procedure. It does not weaken source authority, execution, documentation, or verification rules owned by the parent protocol.
 
+## Haydari Translation Workbench integration
+
+For Sayyid Kamal al-Haydari translation/publication work, the canonical shared Workbench is:
+
+> **https://haydari-translation-workbench.pages.dev**
+
+Treat that Workbench as the live operational surface for project assignment, linked English Book targets, canonical Arabic-PDF access, source-page translation progress, workflow status, and publication-tracking state. When those fields are material to the active task, retrieve current Workbench state rather than relying on remembered chat/repository status, and keep the Workbench synchronized with verified progress and lifecycle changes produced by the work.
+
+The Workbench's own project contract remains authoritative for its field semantics, status transitions, access invariants, progress/checkpoint rules, and deployment behavior. Do not duplicate those mechanics into this profile; use the current Workbench/project authority and preserve the URL above as the stable discovery point.
+
+
 ## 0. Interpret translation and formatting shorthand as full-profile work
 
 For any Arabic→English book or manuscript governed by this profile, user wording such as `translate this book`, `format it`, `do a formatting pass`, `finish formatting`, or `do another formatting pass` automatically inherits this profile. The user does not need to restate its individual rules.
