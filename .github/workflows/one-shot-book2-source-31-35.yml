@@ -1,4 +1,4 @@
-name: One-shot Book 2 Source 66-70
+name: One-shot Book 2 Text 65
 
 on:
   push:
@@ -14,11 +14,11 @@ jobs:
     timeout-minutes: 15
     env:
       SOURCE_URL: "https://haydari-translation-workbench.pages.dev/api/pdf/5"
-      START_PAGE: "66"
-      END_PAGE: "70"
+      START_PAGE: "65"
+      END_PAGE: "65"
     steps:
       - uses: actions/checkout@v4
-      - name: Render source pages 66-70
+      - name: Extract source page 65 text
         shell: bash
         run: |
           set -euo pipefail
@@ -27,26 +27,13 @@ jobs:
           cat >/tmp/render.swift <<'SWIFT'
           import Foundation
           import PDFKit
-          import AppKit
           guard let doc = PDFDocument(url: URL(fileURLWithPath: "/tmp/book2.pdf")) else { exit(2) }
           print("SOURCE_PAGE_COUNT=\(doc.pageCount)")
-          let start = Int(ProcessInfo.processInfo.environment["START_PAGE"]!)!
-          let end = Int(ProcessInfo.processInfo.environment["END_PAGE"]!)!
-          for p in start...end {
-            guard let page = doc.page(at: p - 1) else { continue }
-            let img = page.thumbnail(of: NSSize(width: 1400, height: 1980), for: .mediaBox)
-            guard let tiff=img.tiffRepresentation,
-                  let rep=NSBitmapImageRep(data:tiff),
-                  let jpg=rep.representation(using:.jpeg,properties:[.compressionFactor:0.90]) else { continue }
-            let b64=jpg.base64EncodedString()
-            print(String(format:"PAGE_%03d_BEGIN",p))
-            var i=b64.startIndex
-            while i<b64.endIndex {
-              let j=b64.index(i,offsetBy:30000,limitedBy:b64.endIndex) ?? b64.endIndex
-              print(String(b64[i..<j])); i=j
-            }
-            print(String(format:"PAGE_%03d_END",p))
-          }
+          let p = 65
+          guard let page = doc.page(at: p - 1) else { exit(3) }
+          print("PAGE_065_TEXT_BEGIN")
+          print(page.string ?? "")
+          print("PAGE_065_TEXT_END")
           SWIFT
           swift /tmp/render.swift
       - name: Cleanup
