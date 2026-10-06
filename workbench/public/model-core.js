@@ -30,7 +30,7 @@
     return a>=0 && b>=0 && Math.abs(a-b)===1;
   }
 
-  function reconcilePageDeltas(events) {
+  function reconcilePageDeltas(events, acceptedActors=null) {
     const creditsByProject=new Map();
     const ordered=[...(events || [])].sort((a,b)=>{
       const byTime=String(a.created_at || '').localeCompare(String(b.created_at || ''));
@@ -47,7 +47,7 @@
       if (!creditsByProject.has(projectId)) creditsByProject.set(projectId,[]);
       const credits=creditsByProject.get(projectId);
       if (delta>0) {
-        credits.push({date_key:event.date_key,pages:delta});
+        credits.push({date_key:event.date_key,pages:delta,actor:event.actor || 'Unknown'});
         continue;
       }
       let remaining=-delta;
@@ -62,6 +62,7 @@
     for (const credits of creditsByProject.values()) {
       for (const credit of credits) {
         if (!(credit.pages>0)) continue;
+        if (Array.isArray(acceptedActors) && !acceptedActors.includes(credit.actor)) continue;
         dailyPages[credit.date_key]=(dailyPages[credit.date_key] || 0)+credit.pages;
       }
     }
