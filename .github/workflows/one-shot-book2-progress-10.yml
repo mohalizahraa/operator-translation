@@ -1,0 +1,35 @@
+name: One-shot Book 2 Progress 10
+
+on:
+  push:
+    paths:
+      - '.github/workflows/one-shot-book2-progress-10.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: [self-hosted, macOS, ARM64]
+    timeout-minutes: 5
+    steps:
+      - name: Publish verified 10/375 translation checkpoint
+        shell: bash
+        run: |
+          set -euo pipefail
+          body=$(cat <<'JSON'
+          {
+            "translated_pages": 10,
+            "expected_previous_pages": 0,
+            "source_total_pages": 375,
+            "source_pdf_sha256": "48d338363f4443d291c4e53365efef6eb36deb87ddfe788bb1e8559cd1c58cbf",
+            "google_doc_revision": "ANLCKQnwXHTDfvlTHXKKABYuiJCWptufYQNGakZbcJuMbc-leO3LI-IynDQHYLyM7sZqOTRkVWJCbHC5bD7U02cY3OpMAKMTqK-9_Whrt8s",
+            "verification_note": "Verified English coverage for physical source pages 1-10 in the linked Google Doc: title/front matter, Basmalah, compiler preface, Chapter One opener, and both source footnotes implemented as native Google Docs footnotes. Source physical pages 4 and 10 are intentionally blank. Translation remains in progress; formatting/publication QA is not complete."
+          }
+          JSON
+          )
+          curl -fsS -X PATCH \
+            -H 'content-type: application/json' \
+            -H 'x-workbench-actor: Zahraa' \
+            --data "$body" \
+            https://haydari-translation-workbench.pages.dev/api/projects/5/progress
