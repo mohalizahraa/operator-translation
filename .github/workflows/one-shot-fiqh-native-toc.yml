@@ -1,0 +1,148 @@
+name: One-shot Fiqh al-Aqidah Native TOC
+
+on:
+  push:
+    paths:
+      - '.github/workflows/one-shot-fiqh-native-toc.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  insert-toc:
+    runs-on: [self-hosted, macOS, ARM64]
+    timeout-minutes: 20
+    env:
+      DOC_URL: https://docs.google.com/document/d/1jMkWQfto0obfAQltSZ6Mi-YJex0-ywuzh9K-UeuhZJE/edit
+      PLAYWRIGHT_BROWSERS_PATH: /tmp/operator-playwright-browsers
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install ephemeral browser driver
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install chromium
+      - name: Insert native Google Docs TOC
+        shell: bash
+        run: |
+          cat > ./insert-fiqh-toc.mjs <<'NODE'
+          import { chromium } from "playwright";
+          const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+          const browser=await chromium.launch({headless:true});
+          const context=await browser.newContext({viewport:{width:1440,height:1000},locale:"en-US"});
+          const page=await context.newPage();
+
+          async function clickIfVisible(loc,timeout=1200){
+            try{ if(await loc.isVisible({timeout})){ await loc.click({force:true}); return true; } }catch{}
+            return false;
+          }
+          async function dismiss(){
+            for(const label of ["Got it","No thanks","Dismiss","Close"]){
+              await clickIfVisible(page.getByRole("button",{name:label,exact:true}),600);
+            }
+          }
+          async function focusEditor(){
+            await dismiss();
+            for(const loc of [
+              page.locator(".kix-appview-editor").first(),
+              page.locator(".kix-page-paginated").first(),
+              page.locator('[role="textbox"]').first()
+            ]){
+              if(await loc.isVisible({timeout:1800}).catch(()=>false)){
+                await loc.click({position:{x:520,y:220},force:true}).catch(()=>{});
+                return;
+              }
+            }
+            await page.mouse.click(800,450);
+          }
+          async function findInDoc(q){
+            await focusEditor();
+            await page.keyboard.press("Meta+f");
+            await sleep(350);
+            await page.keyboard.type(q,{delay:20});
+            await sleep(1000);
+            const close=page.getByLabel("Close",{exact:true}).first();
+            if(await close.isVisible({timeout:1000}).catch(()=>false)) await close.click({force:true});
+            else await page.keyboard.press("Escape");
+            await sleep(700);
+          }
+          async function openInsert(){
+            await dismiss();
+            const m=page.locator("#docs-insert-menu");
+            if(await m.isVisible({timeout:2500}).catch(()=>false)){ await m.click({force:true}); return; }
+            const t=page.getByText("Insert",{exact:true}).first();
+            if(!(await t.isVisible({timeout:2500}).catch(()=>false))) throw new Error("Insert menu unavailable");
+            await t.click({force:true});
+          }
+          async function insertToc(){
+            await findInDoc("Contents");
+            await page.keyboard.press("ArrowRight");
+            await page.keyboard.press("End");
+            await page.keyboard.press("Enter");
+            await sleep(700);
+
+            await openInsert();
+            await sleep(500);
+            const pe=page.getByText("Page elements",{exact:true}).last();
+            if(await pe.isVisible({timeout:1400}).catch(()=>false)){ await pe.hover(); await sleep(500); }
+
+            let toc=page.getByText("Table of contents",{exact:true}).last();
+            if(!(await toc.isVisible({timeout:1700}).catch(()=>false))) toc=page.getByText(/Table of contents/i).last();
+            if(!(await toc.isVisible({timeout:2200}).catch(()=>false))) throw new Error("TOC menu unavailable");
+            await toc.hover();
+            await sleep(800);
+
+            const direct=[
+              page.getByLabel(/table of contents.*page numbers/i).last(),
+              page.getByLabel(/page numbers/i).last(),
+              page.getByLabel(/dotted/i).last(),
+              page.getByText(/with page numbers/i).last(),
+              page.getByText(/page numbers/i).last(),
+              page.getByText(/dotted/i).last()
+            ];
+            for(const loc of direct){
+              if(await loc.isVisible({timeout:700}).catch(()=>false)){
+                await loc.click({force:true});
+                console.log("FIQH_NATIVE_TOC_INSERTED");
+                await sleep(10000);
+                return;
+              }
+            }
+
+            const nodes=page.locator('[role="menuitem"]:visible,[role="button"]:visible,[tabindex="0"]:visible');
+            const n=await nodes.count();
+            const candidates=[];
+            for(let i=0;i<n;i++){
+              const node=nodes.nth(i);
+              const aria=(await node.getAttribute("aria-label"))||"";
+              const title=(await node.getAttribute("title"))||"";
+              const txt=((await node.textContent())||"").trim();
+              const all=(aria+" "+title+" "+txt).trim();
+              if(/table of contents|page number|dotted|dots/i.test(all)) candidates.push({i,all});
+            }
+            console.log("TOC_STYLE_CANDIDATES="+JSON.stringify(candidates));
+            if(!candidates.length) throw new Error("TOC style preset unavailable");
+            const chosen=candidates.find(x=>/page number|dotted|dots/i.test(x.all))||candidates[candidates.length-1];
+            await nodes.nth(chosen.i).click({force:true});
+            console.log("FIQH_NATIVE_TOC_INSERTED_FALLBACK="+chosen.all);
+            await sleep(10000);
+          }
+
+          try{
+            await page.goto(process.env.DOC_URL,{waitUntil:"domcontentloaded",timeout:120000});
+            await sleep(12000);
+            if(/accounts\.google\.com/.test(page.url())) throw new Error("Document requires sign-in");
+            await insertToc();
+          } finally {
+            await browser.close();
+          }
+          NODE
+          node ./insert-fiqh-toc.mjs
+      - name: Remove ephemeral browser payload
+        if: always()
+        run: |
+          rm -f ./insert-fiqh-toc.mjs
+          rm -rf /tmp/operator-playwright-browsers
+          rm -rf node_modules/playwright node_modules/playwright-core node_modules/.bin/playwright
