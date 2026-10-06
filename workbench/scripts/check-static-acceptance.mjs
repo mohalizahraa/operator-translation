@@ -194,6 +194,8 @@ console.log(`Workbench static acceptance passed: 176 books, 10 topics, 176 cover
 assert(!projectsIndexSource.includes('syncActiveTranslationMarkers'), 'GET /api/projects must not mutate translation progress.');
 assert(!progressSyncSource.includes('SET notes ='), 'Progress sync must not overwrite project notes.');
 assert(projectPatchSource.includes('validStatusTransition') && projectPatchSource.includes('Math.abs(a-b) === 1'), 'Workflow stage jumps are not blocked.');
+assert(projectPatchSource.includes('before.status !== \'published\''), 'Publication can still be combined with entering Publish Ready.');
+assert(projectsIndexSource.includes("!['not_started','in_progress'].includes(status)"), 'New projects can still be created past Translating.');
 assert(appSource.includes('projectMatchesSearch') && appSource.includes('renderTimeline();'), 'Shared book search is not consistently projected into Timeline.');
 assert(stylesSource.includes('--parchment:#EEECE6') && stylesSource.includes('--paper:#F7F5EF') && stylesSource.includes('--sage:#596861'), 'Low-light-safe cooler palette tokens are missing.');
 assert(stylesSource.includes('@media (prefers-reduced-motion:reduce)') && stylesSource.includes('@media (prefers-contrast:more)'), 'Accessibility preference handling is incomplete.');
