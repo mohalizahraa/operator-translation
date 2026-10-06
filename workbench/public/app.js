@@ -734,7 +734,7 @@ function parseActivityJson(raw) {
   try { return JSON.parse(raw); } catch { return null; }
 }
 function renderTranslationLive() {
-  const assigned=corpusProjects()
+  const assigned=state.projects
     .filter(p=>p.assignee===state.actor || p.assignee==='Both')
     .sort((a,b)=>{
       const ap=Number(a.translated_pages || 0), bp=Number(b.translated_pages || 0);
@@ -757,7 +757,7 @@ function renderTranslationLive() {
       <div class="live-translation-copy">${bookTitleMarkup(p,{compact:true})}<strong>${progressText}</strong></div>
       ${verified ? `<div class="live-translation-track"><span style="width:${percent}%"></span></div>` : ''}
     </button>`;
-  }).join('') : '<div class="live-empty">No catalogue books are assigned here yet.</div>';
+  }).join('') : '<div class="live-empty">No books are assigned here yet.</div>';
   const feedMarkup=latest.length ? latest.map(a=>{
     const after=parseActivityJson(a.after_json) || {};
     const project=state.projects.find(p=>Number(p.id)===Number(a.project_id));
@@ -815,10 +815,11 @@ function renderDashboard() {
   $('people-summary').querySelectorAll('[data-dashboard-person]').forEach(button=>button.addEventListener('click',()=>openPersonWork(button.dataset.dashboardPerson)));
 
   const assigned = sortProjects(
-    corpus.filter(p => p.assignee === state.actor || p.assignee === 'Both'),
+    state.projects.filter(p => p.assignee === state.actor || p.assignee === 'Both'),
     'title'
   );
-  const personalModel=paceModel({projects:assigned,actor:state.actor,universe:corpus});
+  const assignedCorpus=corpusProjects(assigned);
+  const personalModel=paceModel({projects:assignedCorpus,actor:state.actor,universe:corpus});
   const paceValue=personalModel.pagesPerDay>0 ? (personalModel.pagesPerDay>=10 ? personalModel.pagesPerDay.toFixed(0) : personalModel.pagesPerDay.toFixed(1)) : '—';
   const finishValue=personalModel.remainingWork===0
     ? 'Done'
@@ -834,7 +835,7 @@ function renderDashboard() {
     <div class="pace-metric"><span>Recent pace</span><strong>${paceValue}</strong><small>source pages / day</small></div>
     <div class="pace-metric"><span>At this rate</span><strong>${escapeHtml(finishValue)}</strong><small>${escapeHtml(finishNote)}</small></div>
     <div class="pace-metric"><span>Remaining</span><strong>${Math.round(personalModel.remainingWork).toLocaleString()}</strong><small>page-equivalents</small></div>
-    <div class="pace-metric"><span>Workload translated</span><strong>${personalModel.workloadPercent}%</strong><small>assigned catalogue books</small></div>
+    <div class="pace-metric"><span>Workload translated</span><strong>${personalModel.workloadPercent}%</strong><small>assigned catalogue books only</small></div>
     <div class="pace-evidence">${escapeHtml(evidenceText)}</div>`;
   $('my-projects-title').textContent = `${state.actor}'s assigned projects`;
   $('my-projects-count').textContent = `${assigned.length} book${assigned.length===1?'':'s'}`;
