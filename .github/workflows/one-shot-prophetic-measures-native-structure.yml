@@ -46,7 +46,7 @@ jobs:
           async function focusEditor(){
             await dismiss();
             for(const loc of [page.locator(".kix-appview-editor"),page.locator(".kix-page-paginated"),page.locator('[role="textbox"]')]){
-              if(await loc.first().isVisible({timeout:1800}).catch(()=>false)){await loc.first().click({position:{x:160,y:180}});return;}
+              if(await loc.first().isVisible({timeout:1800}).catch(()=>false)){await loc.first().click({position:{x:520,y:220},force:true});return;}
             }
             await page.mouse.click(800,450);
           }
