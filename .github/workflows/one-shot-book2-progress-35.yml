@@ -1,4 +1,4 @@
-name: One-shot Book 2 Progress 75
+name: One-shot Book 2 Progress 91
 
 on:
   push:
@@ -13,23 +13,37 @@ jobs:
     runs-on: [self-hosted, macOS, ARM64]
     timeout-minutes: 5
     steps:
-      - name: Publish verified 75/375 translation checkpoint
+      - name: Publish verified 91/375 translation checkpoint
         shell: bash
         run: |
           set -euo pipefail
-          body=$(cat <<'JSON'
+          progress=$(cat <<'JSON'
           {
-            "translated_pages": 75,
-            "expected_previous_pages": 70,
+            "translated_pages": 91,
+            "expected_previous_pages": 86,
             "source_total_pages": 375,
             "source_pdf_sha256": "48d338363f4443d291c4e53365efef6eb36deb87ddfe788bb1e8559cd1c58cbf",
-            "google_doc_revision": "ANLCKQnOdK0yparXNLFHHgpkLNclig5iAaC2eZk6g3zcdiw68sQWGOjpnCfvP-hznhc4vyfqXaMtJGpY8W3-nLRmT74E_ks9MvWN_DaNh64",
-            "verification_note": "Verified English manuscript coverage through physical source page 75 in the linked Google Doc. Pages 71-75 continue the evidence from scholars after Ibn Taymiyyah and open the response to the claim that the Salaf and people of Madinah did not visit the Prophet\u0027s grave. All 16 source notes from pages 71-75 are native Google Docs footnotes; the manuscript now contains 142 native footnotes total. No readable Arabic-script manuscript prose remains in the newly translated batch. Translation remains in progress; continue sequentially from physical source page 76."
+            "google_doc_revision": "ANLCKQllBH4KyaojjIbOkXPmOKz7GBxWXHAEBKIQdgzcoQ1WHHRftRdc5jxZLlWAhm9s2XLgT_ihOS4G2bHVIuDbSPlEM0pMmZSZ4kU8B2Q",
+            "verification_note": "Verified English manuscript coverage through physical source page 91 in the linked Google Doc. Pages 87-91 open Chapter Four with its preamble, establish the Prophetic Sunnah on visiting graves, present three visitation reports, and begin the reports permitting visitation after the earlier prohibition. All 15 source notes in this batch are native Google Docs footnotes; the manuscript now contains 170 native footnotes total. No readable Arabic-script manuscript prose remains in the newly translated batch. Translation remains in progress; continue sequentially from physical source page 92."
           }
           JSON
           )
           curl -fsS -X PATCH \
             -H 'content-type: application/json' \
             -H 'x-workbench-actor: Zahraa' \
-            --data "$body" \
+            --data "$progress" \
             https://haydari-translation-workbench.pages.dev/api/projects/5/progress
+          printf '\n'
+          project=$(cat <<'JSON'
+          {
+            "status": "in_progress",
+            "notes": "Translation active. Verified physical source-page checkpoint: 91/375. Pages 87-91 open Chapter Four, cover the preamble, the Prophetic Sunnah on grave visitation, three visitation reports, and the beginning of the reports permitting visitation after the earlier prohibition. All 15 source notes in this batch are native Google Docs footnotes; 170 native footnotes total. Continue sequentially from physical source page 92."
+          }
+          JSON
+          )
+          curl -fsS -X PATCH \
+            -H 'content-type: application/json' \
+            -H 'x-workbench-actor: Zahraa' \
+            --data "$project" \
+            https://haydari-translation-workbench.pages.dev/api/projects/5
+          printf '\n'
