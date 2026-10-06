@@ -1,0 +1,47 @@
+name: One-shot Book 2 Progress 15
+
+on:
+  push:
+    paths:
+      - '.github/workflows/one-shot-book2-progress-15.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: [self-hosted, macOS, ARM64]
+    timeout-minutes: 5
+    steps:
+      - name: Publish verified 15/375 translation checkpoint
+        shell: bash
+        run: |
+          set -euo pipefail
+          body=$(cat <<'JSON'
+          {
+            "translated_pages": 15,
+            "expected_previous_pages": 10,
+            "source_total_pages": 375,
+            "source_pdf_sha256": "48d338363f4443d291c4e53365efef6eb36deb87ddfe788bb1e8559cd1c58cbf",
+            "google_doc_revision": "ANLCKQkmIQJv5LNgRaJJBrPOPCbXdWa133hV9RliluSzXNYk4o3jT8uFUKuxSLDKFHFmB5dfDHWqfUmxBvK5m-_hJIgsxPFqIy-EFghsfj8",
+            "verification_note": "Verified English coverage through physical source page 15 in the linked Google Doc. Pages 1-15 include all source front matter, preface, Chapter One opening material, Qur'anic passages, narrations, and seven source notes implemented as native Google Docs footnotes. Translation remains in progress; formatting/publication QA is not complete."
+          }
+          JSON
+          )
+          curl -fsS -X PATCH \
+            -H 'content-type: application/json' \
+            -H 'x-workbench-actor: Zahraa' \
+            --data "$body" \
+            https://haydari-translation-workbench.pages.dev/api/projects/5/progress
+
+          notes=$(cat <<'JSON'
+          {
+            "notes": "Translation active. Verified source-page checkpoint: 15/375 as of 2026-10-06. Pages 1-15 are written in the linked English Google Doc with source notes implemented as native footnotes. Continue sequentially from physical source page 16; publish another verified checkpoint as the next batch lands."
+          }
+          JSON
+          )
+          curl -fsS -X PATCH \
+            -H 'content-type: application/json' \
+            -H 'x-workbench-actor: Zahraa' \
+            --data "$notes" \
+            https://haydari-translation-workbench.pages.dev/api/projects/5
