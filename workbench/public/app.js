@@ -1566,9 +1566,14 @@ async function saveEnglishBook(event) {
 
 function sharedDataSignature(projects, activity, paceEvents) {
   const projectState=projects.map(p=>[
-    p.id,p.updated_at,p.status,p.assignee,p.translated_pages,p.translation_progress_at,
-    p.start_date,p.due_date,p.google_doc_url,p.cover_url,p.has_uploaded_cover,
-    p.published_at,p.pdf_status
+    p.id,p.catalog_id,p.updated_at,
+    p.title_ar,p.title_en,p.translit,p.author,p.author_ar,p.category,p.topic_en,p.topic_ar,
+    p.package_url,p.pages,p.volumes,p.catalog_date,
+    p.assignee,p.status,p.start_date,p.due_date,p.notes,
+    p.translated_pages,p.translation_progress_at,p.completed_at,p.completed_by,
+    p.published,p.published_at,p.published_by,
+    p.source_url,p.source_pdf_url,p.pdf_status,p.pdf_checked_at,p.pdf_check_note,p.page_count_verified,p.page_count_basis,
+    p.google_doc_url,p.cover_url,p.has_uploaded_cover
   ]);
   return JSON.stringify([
     projectState,
