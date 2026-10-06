@@ -14,9 +14,9 @@ jobs:
     timeout-minutes: 10
     env:
       SOURCE_URL: "https://archive.alhaydari.com/ebook/ar/%D8%A7%D9%84%D9%83%D9%84%D8%A7%D9%85-%D9%88%D8%A7%D9%84%D8%B9%D9%82%D8%A7%D8%A6%D8%AF/%D9%81%D9%82%D9%87-%D8%A7%D9%84%D8%B9%D9%82%D9%8A%D8%AF%D8%A9.pdf"
-      TARGET_PAGES: "236"
+      TARGET_PAGES: "264"
       SOURCE_TOTAL: "408"
-      DOC_REVISION: "ANLCKQmDPnHty07lG0zzFditdZPVq9Ivb9hPei9C6ZqNzJrxnsknqAK4-0yCt-stFqZvVNPnNu0ULcLoXlMl2cBZEWMRo7yYQtN3-e1kmQ"
+      DOC_REVISION: "ANLCKQlkLgpQ-20XJf3HMJB9SjH__Oi05Xy4iy2MK1LXx0i4amg9TXZD3sMgDCJcKS4cXRExzphYmjTZq6QUu1MNh1F6fpf4ZpTg-0rdPw"
     steps:
       - uses: actions/checkout@v4
         with:
@@ -62,7 +62,7 @@ jobs:
             "source_total_pages": int(os.environ["SOURCE_TOTAL"]),
             "source_pdf_sha256": os.environ["SOURCE_SHA"],
             "google_doc_revision": os.environ["DOC_REVISION"],
-            "verification_note": "Verified continuous Arabic-source-to-English review through physical source page 236 of the authoritative 408-page PDF. Axis Two Chapter Three is complete. Pages 179-236 cover the historicity of theological scholarship, causes of delayed theological production, reassurance and its epistemic grades and routes, the authority and classification of solitary reports, eight principal rectifying/supporting factors for weak reports, the distinction between qasir, muqassir, and the religiously disadvantaged, precaution against culpable negligence, and the effect of time and place on those classifications. Main prose and attached native notes were checked against the Arabic source. Chapter Three formatting is normalized to the current REAL SCALE v2 rules, including black H3/H4 headings."
+            "verification_note": "Verified continuous Arabic-source-to-English review through physical source page 264 of the authoritative 408-page PDF. Axis Two Chapter Four is complete. Pages 237-264 cover the identity and limits of tawalli and tabarri, their relation to cursing, the afterlife destiny of other Muslims and the People of the Book, the limits of freedom of belief, the reconciliation of freedom with tawalli and tabarri, and the relation of disbelief and shirk to those duties. The inherited English was corrected where it had softened or omitted explicit source claims in the freedom-of-belief section. Main prose and attached native notes were checked against the Arabic source."
           }
           print(json.dumps(body,ensure_ascii=False))
           PY
@@ -97,7 +97,7 @@ jobs:
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit --allow-empty -m "workbench: verify Fiqh al-Aqidah progress 236/408"
+          git commit --allow-empty -m "workbench: verify Fiqh al-Aqidah progress 264/408"
           git pull --rebase origin main
           git push origin HEAD:main
       - name: Cleanup
