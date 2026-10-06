@@ -359,19 +359,22 @@ export function normalizeProject(row) {
   const pdfStatus = row.pdf_status || (!row.source_pdf_url ? 'missing' : 'unchecked');
   const hasPdfUrl = Boolean(row.source_pdf_url);
   const pageEvidence = row.catalog_id ? PDF_AUDIT[row.catalog_id] : null;
-  const catalogBook = row.catalog_id ? BOOK_CATALOG.find(book => book.catalog_id === row.catalog_id) : null;
-  const verifiedPhysicalPages = catalogBook && !['book-4','book-23','book-32','book-43'].includes(row.catalog_id)
-    ? Number(catalogBook.pages)
-    : (Number.isInteger(Number(pageEvidence?.physical_pages)) && Number(pageEvidence.physical_pages) > 0
-      ? Number(pageEvidence.physical_pages)
-      : null);
+  const auditedPhysicalPages = Number.isInteger(Number(pageEvidence?.physical_pages)) && Number(pageEvidence.physical_pages) > 0
+    ? Number(pageEvidence.physical_pages)
+    : null;
+  const currentPdfUrl=normalizeHttpUrl(row.source_pdf_url);
+  const auditedPdfUrl=normalizeHttpUrl(pageEvidence?.url);
+  const pageCountVerified = pdfStatus === 'available'
+    && Boolean(currentPdfUrl && auditedPdfUrl && currentPdfUrl === auditedPdfUrl)
+    && auditedPhysicalPages !== null
+    && Number(row.pages) === auditedPhysicalPages;
   const { priority: _legacyPriority, blocked: _legacyBlocked, blocker_reason: _legacyBlockerReason, ...project } = row;
   return {
     ...project,
     assignee: row.assignee === 'Brother' ? 'Mohammed' : row.assignee,
     has_uploaded_cover: Boolean(row.has_uploaded_cover),
-    page_count_verified: verifiedPhysicalPages !== null && Number(row.pages) === verifiedPhysicalPages,
-    page_count_basis: verifiedPhysicalPages !== null ? 'physical_pdf' : 'catalog_metadata',
+    page_count_verified: pageCountVerified,
+    page_count_basis: pageCountVerified ? 'physical_pdf' : 'catalog_metadata',
     pdf_status: pdfStatus,
     pdf_available: pdfStatus === 'available' && hasPdfUrl,
     pdf_missing: pdfStatus === 'missing' || (!hasPdfUrl && pdfStatus !== 'unchecked'),
