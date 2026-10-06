@@ -16,7 +16,8 @@ export async function onRequestPost(context) {
   if (!body?.title_ar?.trim()) return json({ error: 'Arabic title is required.' }, 400);
   const assignee = validAssignees.has(body.assignee) ? body.assignee : 'Unassigned';
   let status = validStatuses.has(body.status) ? body.status : 'not_started';
-  if (body.published && status !== 'published') return json({ error: 'A new project can only be marked Published after it is Publish Ready.' }, 409);
+  if (!['not_started','in_progress'].includes(status)) return json({ error: 'New projects must begin as Not Started or Translating.' }, 409);
+  if (body.published) return json({ error: 'A new project cannot begin Published.' }, 409);
   const googleDocUrl = normalizeGoogleDocUrl(body.google_doc_url);
   if (googleDocUrl === false) return json({ error: 'English Book must be a Google Docs document link.' }, 400);
   if (googleDocUrl) {
