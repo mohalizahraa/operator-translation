@@ -9,11 +9,17 @@ function close(actual,expected,epsilon=1e-9){
 }
 
 const source=fs.readFileSync(new URL('../public/model-core.js',import.meta.url),'utf8');
+const {validIsoDate}=await import('../functions/_lib.js');
 const context={};
 vm.createContext(context);
 vm.runInContext(source,context);
 const core=context.WorkbenchCore;
 assert(core,'WorkbenchCore failed to load.');
+assert(validIsoDate('2028-02-29'),'Valid leap day must pass.');
+assert(!validIsoDate('2026-02-29'),'Impossible non-leap day must fail.');
+assert(!validIsoDate('2026-13-01'),'Impossible month must fail.');
+assert(!validIsoDate('2026-04-31'),'Impossible day-of-month must fail.');
+assert(validIsoDate(''),'Blank optional date must pass.');
 
 const projects=[
   {pages:120,page_count_verified:true},
