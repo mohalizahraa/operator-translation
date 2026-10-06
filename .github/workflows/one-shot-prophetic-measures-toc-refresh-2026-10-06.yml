@@ -2,6 +2,7 @@ name: One-shot Prophetic Measures TOC Refresh 2026-10-06
 # final carrier-boundary rerun
 # final rerun after front-matter fresh-page repair
 # terminal rerun after Introduction fresh-page boundary fix
+# fixed-point second TOC refresh after TOC repagination
 
 on:
   push:
