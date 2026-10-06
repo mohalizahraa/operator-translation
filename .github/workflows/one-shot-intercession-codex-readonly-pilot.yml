@@ -1,0 +1,47 @@
+name: One-shot Intercession Codex Readonly Pilot
+
+on:
+  push:
+    paths:
+      - '.github/workflows/one-shot-intercession-codex-readonly-pilot.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  translate:
+    runs-on: [self-hosted, operator-translation, macOS, ARM64]
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Translate pages 171-172
+        shell: bash
+        run: |
+          set -euo pipefail
+          CODEX="/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex"
+          SRC="workbench/handoffs/intercession-pages-92-375-ocr.txt"
+          OUT="workbench/handoffs/intercession-codex-pilot-171-172.md"
+          test -x "$CODEX"
+          python3 - "$SRC" > /tmp/intercession-source.txt <<'PY'
+          import sys
+          s=open(sys.argv[1],encoding='utf-8').read()
+          a=s.index("=== PHYSICAL PAGE 171 ===")
+          b=s.index("=== PHYSICAL PAGE 173 ===")
+          print(s[a:b])
+          PY
+          {
+            printf '%s\n' 'Translate the following Arabic source pages completely and faithfully into publication-quality English.'
+            printf '%s\n' 'Preserve page boundaries as ===== PHYSICAL PAGE NNN =====. Translate headings, prose, quotations, Quranic verses, hadith, and footnotes. Do not summarize or omit. Output only the translation.'
+            cat /tmp/intercession-source.txt
+          } | "$CODEX" exec - > "$OUT"
+          test -s "$OUT"
+          grep -q "PHYSICAL PAGE 171" "$OUT"
+          grep -q "PHYSICAL PAGE 172" "$OUT"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$OUT"
+          git commit -m "workbench: Codex pilot Intercession pages 171-172"
+          git pull --rebase origin main
+          git push origin HEAD:main
