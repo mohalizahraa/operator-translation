@@ -27,13 +27,14 @@ assert(core.estimatedPages({pages:999,page_count_verified:false,volumes:3},240,f
 assert(core.estimatedPages({pages:999,page_count_verified:false,volumes:3},240,true)===240,'Indexed volume must not multiply its own fallback.');
 
 const daily=core.reconcilePageDeltas([
-  {id:1,project_id:7,created_at:'2026-10-01T10:00:00Z',date_key:'2026-10-01',before_pages:0,after_pages:100},
-  {id:2,project_id:7,created_at:'2026-10-02T10:00:00Z',date_key:'2026-10-02',before_pages:100,after_pages:80},
-  {id:3,project_id:7,created_at:'2026-10-03T10:00:00Z',date_key:'2026-10-03',before_pages:80,after_pages:130},
-]);
+  {id:1,project_id:7,actor:'Zahraa',created_at:'2026-10-01T10:00:00Z',date_key:'2026-10-01',before_pages:0,after_pages:100},
+  {id:2,project_id:7,actor:'System',created_at:'2026-10-02T10:00:00Z',date_key:'2026-10-02',before_pages:100,after_pages:80},
+  {id:3,project_id:7,actor:'Zahraa',created_at:'2026-10-03T10:00:00Z',date_key:'2026-10-03',before_pages:80,after_pages:130},
+],['Zahraa']);
 assert(daily['2026-10-01']===80,'Correction must unwind previously credited pages instead of leaving pace inflated.');
 assert(!daily['2026-10-02'],'Correction day must not count negative work as productive pages.');
 assert(daily['2026-10-03']===50,'Later verified progress must remain credited.');
+assert(Object.values(daily).reduce((sum,value)=>sum+value,0)===130,'A correction by another actor must still unwind the selected actor\'s overstated project credit.');
 
 const order=['not_started','in_progress','review','completed','published'];
 assert(core.statusTransitionAllowed(order,'in_progress','review'),'Adjacent forward workflow move should pass.');
