@@ -1,0 +1,130 @@
+name: One-shot Intercession Codex 171-375
+
+on:
+  push:
+    paths:
+      - '.github/workflows/one-shot-intercession-codex-171-375.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  translate:
+    runs-on: [self-hosted, operator-translation, macOS, ARM64]
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Translate physical pages 171-375 in bounded batches
+        shell: bash
+        run: |
+          set -euo pipefail
+          CODEX="/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex"
+          SRC="workbench/handoffs/intercession-pages-92-375-ocr.txt"
+          PROFILE="profiles/arabic-book-translation.md"
+          OUTDIR="workbench/handoffs/intercession-codex-171-375"
+          mkdir -p "$OUTDIR"
+          test -x "$CODEX"
+          test -s "$SRC"
+          test -s "$PROFILE"
+
+          run_batch() {
+            start="$1"; end="$2"
+            srcfile="/tmp/intercession-${start}-${end}.txt"
+            prompt="/tmp/intercession-${start}-${end}-prompt.txt"
+            out="$OUTDIR/${start}-${end}.md"
+
+            python3 - "$SRC" "$start" "$end" > "$srcfile" <<'PY'
+          import sys
+          path,start,end=sys.argv[1],int(sys.argv[2]),int(sys.argv[3])
+          s=open(path,encoding='utf-8').read()
+          a=s.index(f"=== PHYSICAL PAGE {start} ===")
+          marker=f"=== PHYSICAL PAGE {end+1} ==="
+          b=s.index(marker) if marker in s else len(s)
+          print(s[a:b].rstrip())
+          PY
+
+            cat > "$prompt" <<'PROMPT'
+          Continue the English translation of "Seeking Intercession through the Possessor of the Means".
+          Translate ALL supplied OCR completely and faithfully into publication-quality English.
+
+          Mandatory output contract:
+          - Preserve every source page boundary exactly as: ===== PHYSICAL PAGE NNN =====
+          - Translate every substantive source item: headings, prose, Qur'anic verses, hadith, quotations, poetry if any, captions, and every footnote. Never summarize or omit.
+          - Preserve the author's argument, qualifiers, polemical force, logical relations, names, dates, source identities, volume/page citations, and numbering.
+          - Use the manuscript's established scholarly English and stable terms, especially tawassul, testimony/witnessing, barzakh, Allah Most High, Messenger of Allah ﷺ, Ahl al-Bayt, and istiغātha as "seeking aid" or the contextually established term.
+          - Render Qur'anic quotations in polished English inside ﴾ ﴿ and retain surah/ayah references.
+          - At each source footnote callout, insert a unique visible marker in this exact form: ⟦F{physical-page}-{ordinal-on-that-page}⟧.
+          - At the end of that physical page, after the body, include each translated footnote on its own paragraph in this exact form: FOOTNOTE ⟦F{physical-page}-{ordinal}⟧: <complete translated note text>
+          - The marker and footnote label must use the same page and ordinal. Preserve source note order.
+          - Do not fabricate unreadable material. Use [source unclear] only where the OCR genuinely prevents recovery.
+          - English only except standard transliterations and sacred glyphs.
+          - Apply the canonical translation profile supplied below. Where this prompt and the profile differ, the profile controls.
+          - Output ONLY the finished translated pages. No process commentary.
+          PROMPT
+            printf '\n===== CANONICAL PROFILE =====\n' >> "$prompt"
+            cat "$PROFILE" >> "$prompt"
+            printf '\n===== SOURCE OCR =====\n' >> "$prompt"
+            cat "$srcfile" >> "$prompt"
+
+            "$CODEX" exec - < "$prompt" > "$out"
+            test -s "$out"
+            grep -q "PHYSICAL PAGE $start" "$out"
+            grep -q "PHYSICAL PAGE $end" "$out"
+          }
+
+          # Three bounded groups; each group uses parallel remote Codex sessions.
+          run_batch 171 195 & p1=$!
+          run_batch 196 220 & p2=$!
+          run_batch 221 245 & p3=$!
+          wait "$p1" "$p2" "$p3"
+
+          run_batch 246 270 & p1=$!
+          run_batch 271 295 & p2=$!
+          run_batch 296 320 & p3=$!
+          wait "$p1" "$p2" "$p3"
+
+          run_batch 321 345 & p1=$!
+          run_batch 346 370 & p2=$!
+          run_batch 371 375 & p3=$!
+          wait "$p1" "$p2" "$p3"
+
+          python3 - "$OUTDIR" > "$OUTDIR/coverage.json" <<'PY'
+          import json, pathlib, re, sys
+          d=pathlib.Path(sys.argv[1])
+          files=sorted(d.glob("*.md"), key=lambda p:int(p.stem.split("-")[0]))
+          pages=[]
+          foot_markers=[]
+          foot_defs=[]
+          for f in files:
+              s=f.read_text(encoding="utf-8")
+              pages += [int(x) for x in re.findall(r'PHYSICAL PAGE\s+(\d+)',s)]
+              foot_markers += re.findall(r'⟦F(\d+-\d+)⟧',s)
+              foot_defs += re.findall(r'FOOTNOTE\s+⟦F(\d+-\d+)⟧:',s)
+          unique_pages=sorted(set(pages))
+          expected=list(range(171,376))
+          data={
+            "files":[p.name for p in files],
+            "unique_pages":unique_pages,
+            "expected_pages":expected,
+            "page_coverage_ok":unique_pages==expected,
+            "marker_count":len(foot_markers),
+            "definition_count":len(foot_defs),
+            "missing_definitions":sorted(set(foot_markers)-set(foot_defs)),
+            "orphan_definitions":sorted(set(foot_defs)-set(foot_markers))
+          }
+          print(json.dumps(data,ensure_ascii=False,indent=2))
+          if not data["page_coverage_ok"]: raise SystemExit(11)
+          if data["missing_definitions"] or data["orphan_definitions"]: raise SystemExit(12)
+          PY
+
+          cat "$OUTDIR/coverage.json"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$OUTDIR"
+          git commit -m "workbench: translate Intercession pages 171-375 with Codex"
+          git pull --rebase origin main
+          git push origin HEAD:main
