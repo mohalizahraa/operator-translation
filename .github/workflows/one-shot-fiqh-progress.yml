@@ -14,9 +14,9 @@ jobs:
     timeout-minutes: 10
     env:
       SOURCE_URL: "https://archive.alhaydari.com/ebook/ar/%D8%A7%D9%84%D9%83%D9%84%D8%A7%D9%85-%D9%88%D8%A7%D9%84%D8%B9%D9%82%D8%A7%D8%A6%D8%AF/%D9%81%D9%82%D9%87-%D8%A7%D9%84%D8%B9%D9%82%D9%8A%D8%AF%D8%A9.pdf"
-      TARGET_PAGES: "360"
+      TARGET_PAGES: "408"
       SOURCE_TOTAL: "408"
-      DOC_REVISION: "AHj4eMT5SWHNuC1s1Y5DcvyqPvQeKVjX7rtbyTSfPra-e71Zx7xXTbPIxqC-AJAlEIrUrjBFJg6LDF8YVNHYMUTQXF2JY96ub_3HYIpDUg"
+      DOC_REVISION: "ANLCKQmFmiJs36l4NFqM69YDdAa4xs-RPaGcpzT55NwiqS8ScWCZ0LcQDX19bUuhC77b5fppIkEScoPRCi_Yz0jBgNUYqJ-9sfDsXxbL4A"
     steps:
       - uses: actions/checkout@v4
         with:
@@ -62,7 +62,7 @@ jobs:
             "source_total_pages": int(os.environ["SOURCE_TOTAL"]),
             "source_pdf_sha256": os.environ["SOURCE_SHA"],
             "google_doc_revision": os.environ["DOC_REVISION"],
-            "verification_note": "Verified continuous Arabic-source-to-English review through physical source page 360 of the authoritative 408-page PDF. Pages 341-346 complete the Imam's mulki/malakuti existence section; page 347 opens Chapter Two; page 348 is blank; pages 349-360 cover the reality and ranks of infallibility and its reality, origin, and preparatory ground. The review restored source details concerning the Prophet's continuing post-material role, the author's explicit critique of reducing him to 'bones that neither harm nor benefit,' the concrete Divine-Names examples, and omitted precision in the presentational-knowledge discussion. Native notes and hierarchy were checked through the page-360 opening of the implication/explicit/inference section."
+            "verification_note": "Verified continuous Arabic-source-to-English review through physical source page 408 of the authoritative 408-page PDF. Pages 361-396 complete the infallibility and fitrah conclusion, sources, and closing body material; source quotations and native-footnote separations were restored where earlier English had compressed them. The review also ran a manuscript-wide heading and honorific audit, removed two blank heading-style paragraphs, corrected heading terminology around implicit indication, normalized sacred glyph rendering, repaired explicit-name and context-confirmed pronoun honorifics, and reconciled the 141-entry English Sources section. Physical source pages 397-408 are the Arabic table of contents and were reviewed as structural evidence against the live native English TOC and verified heading hierarchy. Translation/source review is complete at 408/408; terminal native-TOC fixed-point/render publication QA remains a separate downstream gate."
           }
           print(json.dumps(body,ensure_ascii=False))
           PY
@@ -97,7 +97,7 @@ jobs:
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit --allow-empty -m "workbench: verify Fiqh al-Aqidah progress 360/408"
+          git commit --allow-empty -m "workbench: verify Fiqh al-Aqidah progress 408/408"
           git pull --rebase origin main
           git push origin HEAD:main
       - name: Cleanup
