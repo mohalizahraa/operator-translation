@@ -30,6 +30,17 @@
     return a>=0 && b>=0 && Math.abs(a-b)===1;
   }
 
+  function workflowTransitionAllowed(statusOrder, project, to) {
+    const from=project?.status;
+    if (!statusTransitionAllowed(statusOrder,from,to)) return false;
+    if (from==='in_progress' && to==='review' && project?.page_count_verified) {
+      const total=Number(project.pages || 0);
+      const done=Number(project.translated_pages || 0);
+      if (total>0 && done<total) return false;
+    }
+    return true;
+  }
+
   function reconcilePageDeltas(events, acceptedActors=null) {
     const creditsByProject=new Map();
     const ordered=[...(events || [])].sort((a,b)=>{
@@ -89,6 +100,7 @@
     verifiedFallbackPages,
     estimatedPages,
     statusTransitionAllowed,
+    workflowTransitionAllowed,
     reconcilePageDeltas,
     completionHistory,
   };
