@@ -1,4 +1,4 @@
-name: One-shot Book 2 Site Note 50
+name: One-shot Book 2 Site Note 70
 
 on:
   push:
@@ -13,14 +13,14 @@ jobs:
     runs-on: [self-hosted, macOS, ARM64]
     timeout-minutes: 5
     steps:
-      - name: Update live Workbench note for 50/375
+      - name: Update live Workbench note for 70/375
         shell: bash
         run: |
           set -euo pipefail
           body=$(cat <<'JSON'
           {
             "status": "in_progress",
-            "notes": "Translation active. Verified source-page checkpoint: 50/375 as of 2026-10-06. Pages 1-50 are written in the linked English Google Doc. Pages 46-49 continue the barzakhī-life evidence and philosophical discussion of death, then open the second issue on the Prophet\u0027s connection with the world after death. Page 50 presents the first, severance view associated with Ibn Taymiyyah and Ibn Bāz; its final sentence continues onto page 51. The manuscript now contains 76 native Google Docs footnotes, with all 10 source footnotes from pages 46-50 implemented natively. Continue sequentially from physical source page 51 and publish the next verified checkpoint as it lands."
+            "notes": "Translation active. Verified physical source-page checkpoint: 70/375. Pages 61-70 complete Ibn Taymiyyah\u0027s stated position on visitation, summarize the resulting points, begin the response to his claims, present Sunni and Ahl al-Bayt visitation narrations, and begin the evidence from Muslim scholars before and after Ibn Taymiyyah. The linked English Google Doc now contains 126 native footnotes, including all 33 source notes from pages 61-70. Continue sequentially from physical source page 71."
           }
           JSON
           )
