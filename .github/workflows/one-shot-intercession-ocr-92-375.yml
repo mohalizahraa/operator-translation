@@ -1,0 +1,115 @@
+name: One-shot Intercession OCR 92-375
+
+on:
+  push:
+    paths:
+      - '.github/workflows/one-shot-intercession-ocr-92-375.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  ocr:
+    runs-on: [self-hosted, macOS, ARM64]
+    timeout-minutes: 90
+    env:
+      SOURCE_URL: "https://archive.alhaydari.com/ebook/ar/%D9%83%D8%AA%D8%A8-%D8%A7%D9%84%D8%A3%D8%AE%D9%84%D8%A7%D9%82/%D8%A7%D9%84%D8%AA%D9%88%D8%B3%D9%84-%D8%A8%D8%B5%D8%A7%D8%AD%D8%A8-%D8%A7%D9%84%D9%88%D8%B3%DB%8C%D9%84%D8%A9.pdf"
+      OUT: "workbench/handoffs/intercession-pages-92-375-ocr.txt"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: OCR physical source pages 92 through 375
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --connect-timeout 30 "$SOURCE_URL" -o /tmp/intercession.pdf
+          cat >/tmp/ocr-intercession.swift <<'SWIFT'
+          import Foundation
+          import PDFKit
+          import AppKit
+          import Vision
+
+          guard let doc = PDFDocument(url: URL(fileURLWithPath: "/tmp/intercession.pdf")) else { exit(2) }
+          guard doc.pageCount == 375 else { exit(3) }
+
+          let out = ProcessInfo.processInfo.environment["OUT"]!
+          let fm = FileManager.default
+          fm.createFile(atPath: out, contents: nil)
+          guard let handle = FileHandle(forWritingAtPath: out) else { exit(4) }
+          defer { try? handle.close() }
+
+          func emit(_ s: String) {
+            if let d = s.data(using: .utf8) { try? handle.write(contentsOf: d) }
+          }
+
+          emit("SOURCE_PAGE_COUNT=\(doc.pageCount)\n")
+          for physical in 92...375 {
+            autoreleasepool {
+              guard let page = doc.page(at: physical - 1) else { return }
+              let img = page.thumbnail(of: NSSize(width: 2600, height: 3600), for: .mediaBox)
+              guard let cg = img.cgImage(forProposedRect: nil, context: nil, hints: nil) else { return }
+
+              let req = VNRecognizeTextRequest()
+              req.recognitionLevel = .accurate
+              req.usesLanguageCorrection = true
+              if (try? req.supportedRecognitionLanguages()).map({ $0.contains("ar-SA") }) == true {
+                req.recognitionLanguages = ["ar-SA"]
+              }
+              do {
+                try VNImageRequestHandler(cgImage: cg, options: [:]).perform([req])
+              } catch {
+                emit("\n=== PHYSICAL PAGE \(physical) ===\n[OCR_ERROR: \(error)]\n")
+                return
+              }
+
+              let obs = (req.results ?? []).sorted {
+                let ay = $0.boundingBox.midY, by = $1.boundingBox.midY
+                if abs(ay - by) > 0.012 { return ay > by }
+                return $0.boundingBox.midX > $1.boundingBox.midX
+              }
+              let text = obs.compactMap { $0.topCandidates(1).first?.string }.joined(separator: "\n")
+              emit("\n=== PHYSICAL PAGE \(physical) ===\n\(text)\n")
+            }
+          }
+          SWIFT
+
+          mkdir -p "$(dirname "$OUT")"
+          swift /tmp/ocr-intercession.swift
+          sha=$(shasum -a 256 /tmp/intercession.pdf | awk '{print $1}')
+          python3 - "$OUT" "$sha" <<'PY'
+          import sys
+          p, sha = sys.argv[1], sys.argv[2]
+          s = open(p, encoding='utf-8').read()
+          s = f"SOURCE_SHA256={sha}\n" + s
+          open(p, 'w', encoding='utf-8').write(s)
+          PY
+
+          # Publish from an isolated clean worktree so unrelated runner dirt
+          # cannot invalidate the OCR result.
+          git fetch origin main
+          publish_dir="/tmp/intercession-ocr-publish-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          rm -rf "$publish_dir"
+          git worktree add --detach "$publish_dir" origin/main
+          mkdir -p "$publish_dir/$(dirname "$OUT")"
+          cp "$GITHUB_WORKSPACE/$OUT" "$publish_dir/$OUT"
+          (
+            cd "$publish_dir"
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add "$OUT"
+            git commit -m "workbench: OCR Intercession pages 92-375"
+            for attempt in 1 2 3; do
+              git fetch origin main
+              git rebase origin/main
+              if git push origin HEAD:main; then
+                exit 0
+              fi
+              sleep 2
+            done
+            exit 1
+          )
+          git worktree remove --force "$publish_dir"
+      - name: Cleanup
+        if: always()
+        run: rm -f /tmp/intercession.pdf /tmp/ocr-intercession.swift
