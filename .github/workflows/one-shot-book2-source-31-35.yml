@@ -1,4 +1,4 @@
-name: One-shot Book 2 Alternate Render 65
+name: One-shot Book 2 Alternate Render 80
 
 on:
   push:
@@ -16,7 +16,7 @@ jobs:
       SOURCE_URL: "https://haydari-translation-workbench.pages.dev/api/pdf/5"
     steps:
       - uses: actions/checkout@v4
-      - name: Alternate-render source page 65
+      - name: Alternate-render source page 80
         shell: bash
         run: |
           set -euo pipefail
@@ -27,7 +27,7 @@ jobs:
           import PDFKit
           import AppKit
           guard let doc = PDFDocument(url: URL(fileURLWithPath: "/tmp/book2.pdf")),
-                let page = doc.page(at: 64) else { exit(2) }
+                let page = doc.page(at: 79) else { exit(2) }
           let box = page.bounds(for: .mediaBox)
           let scale: CGFloat = 3.5
           let width = Int(box.width * scale)
@@ -48,13 +48,13 @@ jobs:
           NSGraphicsContext.restoreGraphicsState()
           guard let jpg = rep.representation(using:.jpeg,properties:[.compressionFactor:0.95]) else { exit(5) }
           let b64=jpg.base64EncodedString()
-          print("PAGE_065_ALT_BEGIN")
+          print("PAGE_080_ALT_BEGIN")
           var i=b64.startIndex
           while i<b64.endIndex {
             let j=b64.index(i,offsetBy:30000,limitedBy:b64.endIndex) ?? b64.endIndex
             print(String(b64[i..<j])); i=j
           }
-          print("PAGE_065_ALT_END")
+          print("PAGE_080_ALT_END")
           SWIFT
           swift /tmp/render.swift
       - name: Cleanup
