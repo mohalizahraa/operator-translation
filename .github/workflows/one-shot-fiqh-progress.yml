@@ -16,7 +16,7 @@ jobs:
       SOURCE_URL: "https://archive.alhaydari.com/ebook/ar/%D8%A7%D9%84%D9%83%D9%84%D8%A7%D9%85-%D9%88%D8%A7%D9%84%D8%B9%D9%82%D8%A7%D8%A6%D8%AF/%D9%81%D9%82%D9%87-%D8%A7%D9%84%D8%B9%D9%82%D9%8A%D8%AF%D8%A9.pdf"
       TARGET_PAGES: "408"
       SOURCE_TOTAL: "408"
-      DOC_REVISION: "ANLCKQmFmiJs36l4NFqM69YDdAa4xs-RPaGcpzT55NwiqS8ScWCZ0LcQDX19bUuhC77b5fppIkEScoPRCi_Yz0jBgNUYqJ-9sfDsXxbL4A"
+      DOC_REVISION: "ANLCKQnU8BGc5t3dQoFqJPCw0PGVZ7aropYPBqy0alvozNJysuMGAO1j3CNMvbtdwR2DESs1qgngPeGCwdNK93glN6EBbAkagKL0ONyuYQ"
     steps:
       - uses: actions/checkout@v4
         with:
