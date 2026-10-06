@@ -1,0 +1,48 @@
+name: One-shot Book 2 Source 20
+
+on:
+  push:
+    paths:
+      - '.github/workflows/one-shot-book2-source-20.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  render-source:
+    runs-on: [self-hosted, macOS, ARM64]
+    timeout-minutes: 10
+    env:
+      SOURCE_URL: "https://haydari-translation-workbench.pages.dev/api/pdf/5"
+    steps:
+      - name: Fetch and render canonical Workbench PDF page 20
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --connect-timeout 30 "$SOURCE_URL" -o /tmp/book2.pdf
+          printf 'SOURCE_SHA256=%s\n' "$(shasum -a 256 /tmp/book2.pdf | awk '{print $1}')"
+          cat >/tmp/render.swift <<'SWIFT'
+          import Foundation
+          import PDFKit
+          import AppKit
+          guard let doc = PDFDocument(url: URL(fileURLWithPath: "/tmp/book2.pdf")),
+                let page = doc.page(at: 19) else { exit(2) }
+          print("SOURCE_PAGE_COUNT=\(doc.pageCount)")
+          let thumb = page.thumbnail(of: NSSize(width: 760, height: 1075), for: .mediaBox)
+          guard let tiff = thumb.tiffRepresentation,
+                let rep = NSBitmapImageRep(data: tiff),
+                let jpg = rep.representation(using: .jpeg, properties: [.compressionFactor: 0.78]) else { exit(3) }
+          let b64 = jpg.base64EncodedString()
+          print("PAGE_020_BEGIN")
+          var i = b64.startIndex
+          while i < b64.endIndex {
+            let j = b64.index(i, offsetBy: 30000, limitedBy: b64.endIndex) ?? b64.endIndex
+            print(String(b64[i..<j]))
+            i = j
+          }
+          print("PAGE_020_END")
+          SWIFT
+          swift /tmp/render.swift
+      - name: Cleanup
+        if: always()
+        run: rm -f /tmp/book2.pdf /tmp/render.swift
