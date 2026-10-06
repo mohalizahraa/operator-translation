@@ -14,9 +14,9 @@ jobs:
     timeout-minutes: 10
     env:
       SOURCE_URL: "https://archive.alhaydari.com/ebook/ar/%D8%A7%D9%84%D9%83%D9%84%D8%A7%D9%85-%D9%88%D8%A7%D9%84%D8%B9%D9%82%D8%A7%D8%A6%D8%AF/%D9%81%D9%82%D9%87-%D8%A7%D9%84%D8%B9%D9%82%D9%8A%D8%AF%D8%A9.pdf"
-      TARGET_PAGES: "396"
+      TARGET_PAGES: "360"
       SOURCE_TOTAL: "408"
-      DOC_REVISION: "AHj4eMTWzHKHzghmyJ_gX3WGg0U6S7FKFhkm_gC1GOg7pP6Yf4gjvnV9b58cI0IfepynxAfMNsO4blr7A2rL2QZIeIZydmRUYXh7IMLZtg"
+      DOC_REVISION: "AHj4eMT5SWHNuC1s1Y5DcvyqPvQeKVjX7rtbyTSfPra-e71Zx7xXTbPIxqC-AJAlEIrUrjBFJg6LDF8YVNHYMUTQXF2JY96ub_3HYIpDUg"
     steps:
       - uses: actions/checkout@v4
         with:
@@ -62,7 +62,7 @@ jobs:
             "source_total_pages": int(os.environ["SOURCE_TOTAL"]),
             "source_pdf_sha256": os.environ["SOURCE_SHA"],
             "google_doc_revision": os.environ["DOC_REVISION"],
-            "verification_note": "Verified continuous Arabic-source-to-English processing through physical source page 396 of the authoritative 408-page PDF. Pages 383-396 comprise the source bibliography. All 141 source entries were translated/transliterated into Latin-script English bibliographic form with their author/editor, publisher, edition, date, place, manuscript, and other publication metadata preserved. The Sources section was appended as mandatory end matter with 141/141 numbered entries, no missing or duplicate numbers, compact Amiri typography, hanging indents, and zero Arabic-script leakage. Physical pages 397-408 are the source TOC and remain to be discharged through the required target-native English Google Docs TOC after structural reconciliation."
+            "verification_note": "Verified continuous Arabic-source-to-English review through physical source page 360 of the authoritative 408-page PDF. Pages 341-346 complete the Imam's mulki/malakuti existence section; page 347 opens Chapter Two; page 348 is blank; pages 349-360 cover the reality and ranks of infallibility and its reality, origin, and preparatory ground. The review restored source details concerning the Prophet's continuing post-material role, the author's explicit critique of reducing him to 'bones that neither harm nor benefit,' the concrete Divine-Names examples, and omitted precision in the presentational-knowledge discussion. Native notes and hierarchy were checked through the page-360 opening of the implication/explicit/inference section."
           }
           print(json.dumps(body,ensure_ascii=False))
           PY
@@ -97,7 +97,7 @@ jobs:
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit --allow-empty -m "workbench: verify Fiqh al-Aqidah progress 396/408"
+          git commit --allow-empty -m "workbench: verify Fiqh al-Aqidah progress 360/408"
           git pull --rebase origin main
           git push origin HEAD:main
       - name: Cleanup
