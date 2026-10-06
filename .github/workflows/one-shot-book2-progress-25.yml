@@ -1,0 +1,42 @@
+name: One-shot Book 2 Progress 25
+
+on:
+  push:
+    paths:
+      - '.github/workflows/one-shot-book2-progress-25.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: [self-hosted, macOS, ARM64]
+    timeout-minutes: 5
+    steps:
+      - name: Publish verified 25/375 translation checkpoint
+        shell: bash
+        run: |
+          set -euo pipefail
+          body=$(cat <<'JSON'
+          {
+            "translated_pages": 25,
+            "expected_previous_pages": 20,
+            "source_total_pages": 375,
+            "source_pdf_sha256": "48d338363f4443d291c4e53365efef6eb36deb87ddfe788bb1e8559cd1c58cbf",
+            "google_doc_revision": "ANLCKQn-PGjnS3bPmHMTQYrhZNkJ8v8ISjrQJtmhtAJxEMdlHzhAONBP4PtX8qN8looIwhuE-PF3gCVY7uEpSQxdJ_WcWG0QdPhUcFds9Lw",
+            "verification_note": "Verified English coverage for physical source pages 21-25 in the linked Google Doc, continuing the already verified 1-20 checkpoint. All 13 source footnotes on pages 21-25 are implemented as native Google Docs footnotes, and the new body range contains no readable Arabic. Translation remains in progress; formatting/publication QA is not complete."
+          }
+          JSON
+          )
+          curl -fsS -X PATCH             -H 'content-type: application/json'             -H 'x-workbench-actor: Zahraa'             --data "$body"             https://haydari-translation-workbench.pages.dev/api/projects/5/progress
+      - name: Update live Workbench note
+        shell: bash
+        run: |
+          set -euo pipefail
+          body=$(cat <<'JSON'
+          {
+            "notes": "Translation active. Verified source-page checkpoint: 25/375 as of 2026-10-06. Pages 1-25 are written in the linked English Google Doc. Pages 21-25 add the rational-evidence discussion, methodology clarification, al-Tusi report criteria, and all 13 source footnotes as native Google Docs footnotes. Continue sequentially from physical source page 26; publish another verified checkpoint as the next batch lands."
+          }
+          JSON
+          )
+          curl -fsS -X PATCH             -H 'content-type: application/json'             -H 'x-workbench-actor: Zahraa'             --data "$body"             https://haydari-translation-workbench.pages.dev/api/projects/5
