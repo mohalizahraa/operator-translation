@@ -120,7 +120,7 @@ assert(appSource.includes('const weightedHalfLifeDays=14;') && appSource.include
 assert(appSource.includes('observedDays>=7 && progressDays>=3'), 'Pace forecast evidence gate regressed.');
 assert(appSource.includes('const pages=dailyPages.get(key)||0;') && appSource.includes('weightTotal+=weight;'), 'Pace model must include zero-progress days in the weighted denominator.');
 assert(appSource.includes('if (!projectIds.has(Number(event.project_id))) continue;'), 'Pace model must scope events to the selected project set.');
-assert(appSource.includes('if (!actorMatches(event.actor,actor)) continue;'), 'Personal pace must exclude another collaborator\'s progress events on Shared/Both books.');
+assert(appSource.includes("const acceptedActors=actor ? (actor==='Mohammed' ? ['Mohammed','Brother'] : [actor]) : null;") && appSource.includes('WorkbenchCore.reconcilePageDeltas(normalizedEvents,acceptedActors)'), 'Personal pace must apply collaborator attribution after correction reconciliation.');
 assert(appSource.includes('const personalModel=paceModel({projects:assigned,actor:state.actor,universe:corpus});'), 'Dashboard pace must be scoped to the selected collaborator.');
 assert(appSource.includes("toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'})"), 'At this rate must show an exact calendar finish date once the evidence gate opens.');
 assert(indexSource.includes('id="pace-panel-title"') && indexSource.includes('id="pace-summary"') && indexSource.includes('id="stat-forecast"'), 'NaNo-style pace/projection surfaces are missing.');
