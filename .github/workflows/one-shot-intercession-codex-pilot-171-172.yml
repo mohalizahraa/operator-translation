@@ -1,0 +1,68 @@
+name: One-shot Intercession Codex Pilot 171-172
+
+on:
+  push:
+    paths:
+      - '.github/workflows/one-shot-intercession-codex-pilot-171-172.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  translate:
+    runs-on: [self-hosted, operator-translation, macOS, ARM64]
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Translate physical pages 171-172 with bundled Codex CLI
+        shell: bash
+        run: |
+          set -euo pipefail
+          CODEX="/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex"
+          test -x "$CODEX"
+          src="workbench/handoffs/intercession-pages-92-375-ocr.txt"
+          profile="profiles/arabic-book-translation.md"
+          out="workbench/handoffs/intercession-codex-pilot-171-172.md"
+          prompt="/tmp/intercession-codex-pilot-prompt.txt"
+
+          python3 - "$src" > /tmp/intercession-171-172.txt <<'PY'
+          import re,sys
+          s=open(sys.argv[1],encoding='utf-8').read()
+          a=s.index("=== PHYSICAL PAGE 171 ===")
+          b=s.index("=== PHYSICAL PAGE 173 ===")
+          print(s[a:b].rstrip())
+          PY
+
+          cat > "$prompt" <<'PROMPT'
+          You are continuing the English translation of the book "Seeking Intercession through the Possessor of the Means".
+          Translate the supplied OCR of physical source pages 171-172 completely and faithfully into publication-quality English.
+
+          Mandatory rules:
+          - Translate every substantive Arabic line: headings, prose, quotations, Qur'anic verses, hadith, and footnotes. Do not summarize, abridge, merge away arguments, or invent.
+          - Preserve physical page boundaries exactly as "===== PHYSICAL PAGE NNN =====".
+          - English only except conventional Arabic transliterations and sacred glyphs already required by the project.
+          - Maintain the book's existing scholarly register and terminology: tawassul, shahadah/testimony, barzakh, Allah Most High, the Messenger of Allah ﷺ.
+          - Render Qur'anic quotations in polished English inside ﴾ ﴿ and include surah/ayah references when the source gives them or they are unambiguous.
+          - Preserve footnotes in source order as NOTE 1, NOTE 2, etc. Do not fabricate bibliographic data where OCR is unclear; mark only genuinely unreadable material as [source unclear].
+          - Apply the attached canonical Arabic-book translation profile. The profile governs style and fidelity.
+          - Output ONLY the finished translated pages, with no commentary about your process.
+          PROMPT
+          printf '\n===== CANONICAL PROFILE =====\n' >> "$prompt"
+          cat "$profile" >> "$prompt"
+          printf '\n===== SOURCE OCR =====\n' >> "$prompt"
+          cat /tmp/intercession-171-172.txt >> "$prompt"
+
+          "$CODEX" exec             --sandbox workspace-write             --ask-for-approval never             --output-last-message "$out"             - < "$prompt"
+
+          test -s "$out"
+          grep -q "PHYSICAL PAGE 171" "$out"
+          grep -q "PHYSICAL PAGE 172" "$out"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "4189822+github-actions[bot]@users.noreply.github.com"
+          git add "$out"
+          git commit -m "workbench: Codex translate Intercession pages 171-172"
+          git pull --rebase origin main
+          git push origin HEAD:main
