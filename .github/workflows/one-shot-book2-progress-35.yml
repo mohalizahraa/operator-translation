@@ -1,0 +1,35 @@
+name: One-shot Book 2 Progress 35
+
+on:
+  push:
+    paths:
+      - '.github/workflows/one-shot-book2-progress-35.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: [self-hosted, macOS, ARM64]
+    timeout-minutes: 5
+    steps:
+      - name: Publish verified 35/375 translation checkpoint
+        shell: bash
+        run: |
+          set -euo pipefail
+          body=$(cat <<'JSON'
+          {
+            "translated_pages": 35,
+            "expected_previous_pages": 30,
+            "source_total_pages": 375,
+            "source_pdf_sha256": "48d338363f4443d291c4e53365efef6eb36deb87ddfe788bb1e8559cd1c58cbf",
+            "google_doc_revision": "ANLCKQmkRqH_wq6x7MNXCVAo-MroaDGpFjU6RG4544MjiMTNFoz0OQhT-Ay1oRVzSoRAUopV9gWTbGug51iyD5p-iUsn5-G_e2pDsbDdKLo",
+            "verification_note": "Verified English coverage through physical source page 35 in the linked Google Doc. Pages 31-35 complete the narrator-acceptance discussion, the critique of exclusionary methodology, the hadith and Qur'anic principle on following the Prophet, the results/findings section, and the transition to the book's focus on tawassul. All 8 source footnotes from pages 31-35 are native Google Docs footnotes; the manuscript now has 56 native footnotes total. Zero readable Arabic runs were found in the current English document text surfaces checked. Translation remains in progress; continue sequentially from physical page 36."
+          }
+          JSON
+          )
+          curl -fsS -X PATCH \
+            -H 'content-type: application/json' \
+            -H 'x-workbench-actor: Zahraa' \
+            --data "$body" \
+            https://haydari-translation-workbench.pages.dev/api/projects/5/progress
