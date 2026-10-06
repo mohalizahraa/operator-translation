@@ -1,4 +1,4 @@
-name: One-shot Book 2 Progress 40
+name: One-shot Book 2 Progress 45
 
 on:
   push:
@@ -13,18 +13,18 @@ jobs:
     runs-on: [self-hosted, macOS, ARM64]
     timeout-minutes: 5
     steps:
-      - name: Publish verified 40/375 translation checkpoint
+      - name: Publish verified 45/375 translation checkpoint
         shell: bash
         run: |
           set -euo pipefail
           body=$(cat <<'JSON'
           {
-            "translated_pages": 40,
-            "expected_previous_pages": 35,
+            "translated_pages": 45,
+            "expected_previous_pages": 40,
             "source_total_pages": 375,
             "source_pdf_sha256": "48d338363f4443d291c4e53365efef6eb36deb87ddfe788bb1e8559cd1c58cbf",
-            "google_doc_revision": "ANLCKQn9dvc-55xsiiJq3i16cRkvcqDNcqWwdeoANJ_qEGKqgPfJ0U7jnqnFP670rG3gPDNSc74DE1kX9iPo9UkYmaSd_HGAYzj5zOhBSuI",
-            "verification_note": "Verified English coverage through physical source page 40 in the linked Google Doc. Physical pages 36 and 38 are intentionally blank; page 37 is the Chapter Two opener, and pages 39-40 begin the barzakhī-life discussion. Both source footnotes in pages 39-40 are implemented as native Google Docs footnotes, including the full continued note on transmigration; the manuscript now has 58 native footnotes total. Zero readable Arabic runs were found in the current English document text surfaces checked. Translation remains in progress; continue sequentially from physical page 41."
+            "google_doc_revision": "ANLCKQl_1PXPhc2ALU9sOWIY5GQMasunD2nNiFUezzPIkMhwBpC2XpMyTxVpqlhraeJ136Z8GzNSgNRjcYiHeJjYcVWxnvcSk-BD_HR96Uo",
+            "verification_note": "Verified English coverage through physical source page 45 in the linked Google Doc. Pages 41-42 complete the extended source footnote on transmigration and its rational refutation. Pages 42-45 introduce Qurʾanic and hadith evidence for the Prophet\u0027s barzakhī life, including al-Ṭabrisī, al-Ṭabarī, al-Rāzī, al-Haythamī, Ibn Ḥajar, al-Albānī, al-Kattānī, al-Suyūṭī, Ibn al-Qayyim, and al-Qurṭubī. All 8 source footnotes from this batch are native Google Docs footnotes; the manuscript now has 66 native footnotes total. Zero readable Arabic runs were found in the checked English document text surfaces. Translation remains in progress; continue sequentially from physical page 46."
           }
           JSON
           )
