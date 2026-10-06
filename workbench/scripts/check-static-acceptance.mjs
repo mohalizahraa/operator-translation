@@ -199,3 +199,7 @@ assert(projectsIndexSource.includes("!['not_started','in_progress'].includes(sta
 assert(appSource.includes('projectMatchesSearch') && appSource.includes('renderTimeline();'), 'Shared book search is not consistently projected into Timeline.');
 assert(stylesSource.includes('--parchment:#EEECE6') && stylesSource.includes('--paper:#F7F5EF') && stylesSource.includes('--sage:#596861'), 'Low-light-safe cooler palette tokens are missing.');
 assert(stylesSource.includes('@media (prefers-reduced-motion:reduce)') && stylesSource.includes('@media (prefers-contrast:more)'), 'Accessibility preference handling is incomplete.');
+assert(stylesSource.includes('@media (hover:none) and (pointer:coarse)') && stylesSource.includes('.timeline-bar{height:44px;min-height:44px;top:7px}'), 'Coarse-pointer touch-target floor is incomplete.');
+assert(stylesSource.includes('--status-not-started:#D6D5CF') && stylesSource.includes('--status-ready:#805359'), 'Low-light status palette tokens are incomplete.');
+assert(!['#F4EDDC','#F7F0E1','#C7A56E','#D8D1BD','#C6A56A','#D2B980','#B88132','#CAA05D','#829987','#9DAF9F','#8F4844','#A45B55'].some(color=>stylesSource.includes(color)), 'Legacy warm visual literals remain after low-light palette consolidation.');
+assert(appSource.includes("p.google_doc_url && p.page_count_verified"), 'Verified marker sync still includes books without a verified physical-page denominator.');
