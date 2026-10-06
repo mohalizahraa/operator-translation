@@ -1,0 +1,43 @@
+name: Intercession Marker Sync
+
+on:
+  push:
+    paths:
+      - '.github/workflows/intercession-marker-sync.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: [self-hosted, macOS, ARM64]
+    timeout-minutes: 5
+    steps:
+      - name: Sync latest verified Google Doc marker to Workbench
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='https://haydari-translation-workbench.pages.dev/api/projects/5/progress-sync'
+          curl -fsS "$base" -o /tmp/before.json
+          marker=$(python3 - <<'PY'
+          import json
+          d=json.load(open('/tmp/before.json'))
+          assert d.get('marker_found') is True, d
+          print(d['marker_pages'])
+          PY
+          )
+          curl -fsS -X POST -H 'x-workbench-actor: System' "$base" -o /tmp/synced.json
+          cat /tmp/synced.json
+          printf '\n'
+          curl -fsS https://haydari-translation-workbench.pages.dev/api/projects -o /tmp/projects.json
+          python3 - "$marker" <<'PY'
+          import json,sys
+          marker=int(sys.argv[1])
+          data=json.load(open('/tmp/projects.json'))
+          p=next(x for x in data['projects'] if int(x['id'])==5)
+          assert int(p['translated_pages'])==marker, (p['translated_pages'], marker)
+          assert p['status']=='in_progress', p['status']
+          print(f'INTERCESSION_MARKER_SYNC_VERIFIED_{marker}')
+          PY
+
+# trigger: 162
