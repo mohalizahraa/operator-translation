@@ -694,6 +694,11 @@ function paceModel({projects=corpusProjects(), paceEvents=state.paceEvents, acto
 function translationProgressMarkup(p, compact=false, showZero=false) {
   const done=Math.max(0,Number(p.translated_pages || 0));
   const total=Math.max(0,Number(p.pages || 0));
+  if (isTranslated(p) && p.page_count_verified && total>0 && done<total) {
+    return `<div class="book-translation-progress ${compact?'compact':''} legacy-complete" aria-label="Translation complete; historical page checkpoint unavailable">
+      <div class="book-progress-copy"><span>Translation complete</span><strong>Legacy checkpoint unavailable</strong></div>
+    </div>`;
+  }
   if (!p.page_count_verified) {
     if (!showZero && !done) return '';
     return `<div class="book-translation-progress ${compact?'compact':''} unverified" aria-label="${done} source pages translated; total page count unverified">
@@ -751,11 +756,14 @@ function renderTranslationLive() {
   const assignedMarkup=assigned.length ? assigned.map(p=>{
     const done=Number(p.translated_pages || 0), total=Number(p.pages || 0);
     const verified=Boolean(p.page_count_verified && total>0);
-    const percent=verified ? Math.min(100,Math.round(done/total*100)) : 0;
-    const progressText=verified ? `${done}/${total} pages` : `${done} pages · total unverified`;
-    return `<button type="button" class="live-translation-row ${done===0?'zero':''} ${verified?'':'unverified'}" data-live-project="${p.id}">
+    const legacyComplete=Boolean(isTranslated(p) && verified && done<total);
+    const percent=verified && !legacyComplete ? Math.min(100,Math.round(done/total*100)) : 0;
+    const progressText=legacyComplete
+      ? 'Translation complete · legacy checkpoint unavailable'
+      : (verified ? `${done}/${total} pages` : `${done} pages · total unverified`);
+    return `<button type="button" class="live-translation-row ${done===0?'zero':''} ${verified?'':'unverified'} ${legacyComplete?'legacy-complete':''}" data-live-project="${p.id}">
       <div class="live-translation-copy">${bookTitleMarkup(p,{compact:true})}<strong>${progressText}</strong></div>
-      ${verified ? `<div class="live-translation-track"><span style="width:${percent}%"></span></div>` : ''}
+      ${verified && !legacyComplete ? `<div class="live-translation-track"><span style="width:${percent}%"></span></div>` : ''}
     </button>`;
   }).join('') : '<div class="live-empty">No books are assigned here yet.</div>';
   const feedMarkup=latest.length ? latest.map(a=>{
@@ -1334,11 +1342,15 @@ function openProject(id) {
   $('start-date').value = p?.start_date || '';
   $('due-date').value = p?.due_date || '';
   updateDeadlineWarning($('due-date').value,p?.due_date || '');
-  $('translated-pages').value = p?.translated_pages || 0;
-  $('translated-pages').max = p?.page_count_verified ? (p?.pages || '') : '';
-  $('translated-pages-total').textContent = p?.page_count_verified && p?.pages
-    ? `/ ${p.pages} verified source pages`
-    : 'verified total unavailable';
+  const translatedPages=Number(p?.translated_pages || 0);
+  const sourcePages=Number(p?.pages || 0);
+  const legacyComplete=Boolean(p && isTranslated(p) && p.page_count_verified && sourcePages>0 && translatedPages<sourcePages);
+  $('translated-pages').value = legacyComplete ? '' : translatedPages;
+  $('translated-pages').placeholder = legacyComplete ? 'Complete' : '';
+  $('translated-pages').max = p?.page_count_verified && !legacyComplete ? (p?.pages || '') : '';
+  $('translated-pages-total').textContent = legacyComplete
+    ? 'historical completion · page checkpoint unavailable'
+    : (p?.page_count_verified && p?.pages ? `/ ${p.pages} verified source pages` : 'verified total unavailable');
   $('google-doc-url').value = p?.google_doc_url || '';
   $('cover-url').value = p?.cover_url || '';
   $('cover-file').value = '';
