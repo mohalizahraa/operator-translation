@@ -11,6 +11,7 @@ const generic = read('functions/api/projects/[id].js');
 const progress = read('functions/api/projects/[id]/progress.js');
 const app = read('public/app.js');
 const catalog = read('functions/_catalog.js');
+const progressSync = read('functions/api/projects/[id]/progress-sync.js');
 
 assert(
   generic.includes("Translation progress is verification-owned. Use the dedicated progress checkpoint endpoint."),
@@ -40,3 +41,16 @@ const book123 = catalog.match(/"catalog_id": "book-123"[\s\S]*?"date": "2013-02-
 assert(book123.includes('"pages": 132'), 'Repentance physical PDF denominator must remain 132.');
 
 console.log('Translation progress invariants: PASS');
+
+assert(
+  generic.includes('function validStatusTransition(from, to)') && generic.includes('Math.abs(a-b) === 1'),
+  'Generic project PATCH must enforce adjacent workflow transitions.'
+);
+assert(
+  generic.includes('Only a Publish Ready book can be marked Published.'),
+  'Published must remain independent from workflow and require Publish Ready.'
+);
+assert(
+  !progressSync.includes('SET notes ='),
+  'Verified progress synchronization must never overwrite freeform project notes.'
+);
