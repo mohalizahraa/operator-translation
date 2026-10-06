@@ -39,6 +39,11 @@ export async function onRequestPatch(context) {
   if (body.status !== undefined && !validStatusTransition(before.status, body.status)) {
     return json({ error: 'Workflow stages must move one step at a time: Not Started → Translating → Needs Formatting → Needs Review → Publish Ready.' }, 409);
   }
+  const normalizedBefore=normalizeProject(before);
+  if (before.status === 'in_progress' && body.status === 'review' && normalizedBefore.page_count_verified
+      && Number(before.translated_pages || 0) < Number(before.pages || 0)) {
+    return json({ error: 'Verified source-page translation must reach the physical PDF total before Needs Formatting.' }, 409);
+  }
   if (body.published === true && before.status !== 'published') {
     return json({ error: 'Save the book as Publish Ready first; publication is a separate step.' }, 409);
   }
