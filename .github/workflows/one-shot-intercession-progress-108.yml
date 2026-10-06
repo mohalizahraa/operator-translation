@@ -1,0 +1,54 @@
+name: One-shot Intercession Progress 108
+
+on:
+  push:
+    paths:
+      - '.github/workflows/one-shot-intercession-progress-108.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: [self-hosted, macOS, ARM64]
+    timeout-minutes: 5
+    steps:
+      - name: Publish verified 108/375 translation checkpoint
+        shell: bash
+        run: |
+          set -euo pipefail
+          progress=$(cat <<'JSON'
+          {
+            "translated_pages": 108,
+            "expected_previous_pages": 104,
+            "source_total_pages": 375,
+            "source_pdf_sha256": "48d338363f4443d291c4e53365efef6eb36deb87ddfe788bb1e8559cd1c58cbf",
+            "google_doc_revision": "ANLCKQmshyhLswAl3rbX0GA3gxv6hgVNRkZkvCG_0yy3x9CnAIx9dU_wa_eOHHv4tN6khDRoTvelxSUwaLjrrICYJ7EyuGw9CKsnwD2gRhw",
+            "verification_note": "Verified continuous Arabic-source-to-English translation through physical source page 108 of 375. Pages 105-108 complete the first objective of grave visitation, explain the visitor's benefit through remembering death, preserve Imam Ali's cemetery discourse and glossary notes, and trace grave-standing from the Age of Ignorance through Islam and the post-Prophetic period. All 12 source notes in this tranche are native Google Docs footnotes; the manuscript now contains 229 native footnotes total. No residual source-note placeholders remain. Continue sequentially from physical source page 109."
+          }
+          JSON
+          )
+          curl -fsS -X PATCH -H 'content-type: application/json' -H 'x-workbench-actor: Zahraa'             --data "$progress" https://haydari-translation-workbench.pages.dev/api/projects/5/progress
+          printf '\n'
+          project=$(cat <<'JSON'
+          {
+            "status": "in_progress",
+            "notes": "Translation active. Verified physical source-page checkpoint: 108/375. Pages 105-108 are source-verified in the live English Doc; 12 new native footnotes were added, 229 native footnotes total. Continue sequentially from physical source page 109, Chapter Five."
+          }
+          JSON
+          )
+          curl -fsS -X PATCH -H 'content-type: application/json' -H 'x-workbench-actor: Zahraa'             --data "$project" https://haydari-translation-workbench.pages.dev/api/projects/5
+          printf '\n'
+      - name: Verify live Workbench readback
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsS https://haydari-translation-workbench.pages.dev/api/projects -o /tmp/projects.json
+          python3 - <<'PY'
+          import json
+          data=json.load(open('/tmp/projects.json'))
+          p=next(x for x in data['projects'] if int(x['id'])==5)
+          assert int(p['translated_pages'])==108, p['translated_pages']
+          assert p['status']=='in_progress', p['status']
+          print('INTERCESSION_PROGRESS_108_VERIFIED')
+          PY
