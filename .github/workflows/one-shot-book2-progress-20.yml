@@ -1,0 +1,47 @@
+name: One-shot Book 2 Progress 20
+
+on:
+  push:
+    paths:
+      - '.github/workflows/one-shot-book2-progress-20.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: [self-hosted, macOS, ARM64]
+    timeout-minutes: 5
+    steps:
+      - name: Publish verified 20/375 translation checkpoint
+        shell: bash
+        run: |
+          set -euo pipefail
+          body=$(cat <<'JSON'
+          {
+            "translated_pages": 20,
+            "expected_previous_pages": 15,
+            "source_total_pages": 375,
+            "source_pdf_sha256": "48d338363f4443d291c4e53365efef6eb36deb87ddfe788bb1e8559cd1c58cbf",
+            "google_doc_revision": "ANLCKQm2eHZQtgSPU89WhZskLLMi5U7OKABPVBg82mPGcbnOo6Qqlb2hvxpy_OZWsFGXmRwWoT-2Zd4o6y9G3eL71xwtX2ZBDgUOE7CLr0U",
+            "verification_note": "Verified English coverage through physical source page 20 in the linked Google Doc. Pages 1-20 are translated sequentially; all source notes encountered through this checkpoint are represented as native Google Docs footnotes. The live manuscript currently contains 15 native footnotes. Translation remains in progress; full formatting/publication QA is not complete."
+          }
+          JSON
+          )
+          curl -fsS -X PATCH \
+            -H 'content-type: application/json' \
+            -H 'x-workbench-actor: Zahraa' \
+            --data "$body" \
+            https://haydari-translation-workbench.pages.dev/api/projects/5/progress
+
+          notes=$(cat <<'JSON'
+          {
+            "notes": "Translation active. Verified source-page checkpoint: 20/375 as of 2026-10-06. Pages 1-20 are written in the linked English Google Doc with source notes implemented as native footnotes. Continue sequentially from physical source page 21; publish another verified checkpoint as the next batch lands."
+          }
+          JSON
+          )
+          curl -fsS -X PATCH \
+            -H 'content-type: application/json' \
+            -H 'x-workbench-actor: Zahraa' \
+            --data "$notes" \
+            https://haydari-translation-workbench.pages.dev/api/projects/5
