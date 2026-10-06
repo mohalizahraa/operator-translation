@@ -44,8 +44,8 @@ export async function onRequestPatch(context) {
       && Number(before.translated_pages || 0) < Number(before.pages || 0)) {
     return json({ error: 'Verified source-page translation must reach the physical PDF total before Needs Formatting.' }, 409);
   }
-  if (body.published === true && before.status !== 'published') {
-    return json({ error: 'Save the book as Publish Ready first; publication is a separate step.' }, 409);
+  if (body.published === true && (before.status !== 'published' || (body.status !== undefined && body.status !== 'published'))) {
+    return json({ error: 'Save the book as Publish Ready first; publication is a separate step and cannot remain set while rewinding workflow.' }, 409);
   }
   if (body.assignee !== undefined && !validAssignees.has(body.assignee)) return json({ error: 'Invalid assignee.' }, 400);
 
