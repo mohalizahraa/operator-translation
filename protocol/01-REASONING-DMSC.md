@@ -4,6 +4,8 @@ Status: canonical THINK protocol.
 
 DMSC = **Discern · Merge · Synthesize · Consolidate**.
 
+**DMSC always means DMSC to the floor of the currently authorized scope.** One Discern → Merge → Synthesize → Consolidate cycle is a **DMSC pass**; it is not a completed DMSC unless the recursive floor/saturation rule in §7 has closed. Saying **“to the floor”** is therefore explicit emphasis, not a stronger mode.
+
 DMSC is THINK's **semantic reconciliation/compression kernel**, not the whole thinking process. THINK surrounds it with problem framing, strategy selection, search, inference, testing, decision reasoning, metareasoning, and recursive stopping; ACT and ASSURANCE compose when execution or external verification is material. Do not mistake the memorable four-verb kernel for a requirement to force every reasoning operation into those four names.
 
 Its objective is not brevity. It is the strongest useful model with the least accidental complexity while preserving every distinction required for correct downstream behavior.
@@ -303,7 +305,7 @@ For persistent documentation/corpus reconciliation, chronology, source authority
 
 ## 7. Recurse to the floor; stop at saturation
 
-> **DMSC until you hit the floor.**
+> **DMSC means: recurse until you hit the floor.**
 
 The floor is the smallest coherent set of truths, distinctions, owners, dependencies, and rules that still reproduces the required meaning and behavior.
 
