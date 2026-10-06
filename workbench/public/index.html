@@ -6,7 +6,7 @@
   <meta name="robots" content="noindex,nofollow,noarchive" />
   <title>Haydari Translation Workbench</title>
   <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=EB+Garamond:ital,wght@0,400;0,600;1,400;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css?v=20261004-live-marker-sync" />
+  <link rel="stylesheet" href="/styles.css?v=20261006-full-audit-repair" />
 </head>
 <body>
   <div class="wrap">
@@ -16,7 +16,7 @@
     </header>
 
     <nav class="view-tabs" aria-label="Workspace views">
-      <button class="nav-item active" data-view="dashboard">Dashboard</button>
+      <button class="nav-item active" data-view="dashboard" aria-current="page">Dashboard</button>
       <button class="nav-item" data-view="projects">Projects</button>
       <button class="nav-item" data-view="board">Board</button>
       <button class="nav-item" data-view="timeline">Timeline</button>
@@ -33,7 +33,7 @@
         </div>
         <select id="actor" class="visually-hidden" aria-hidden="true" tabindex="-1"><option>Zahraa</option><option>Mohammed</option></select>
       </div>
-      <input class="search" id="search" type="search" placeholder="Search Arabic, English, transliteration, or author…" aria-label="Search projects" />
+      <input class="search" id="search" type="search" placeholder="Search books…" aria-label="Search books by Arabic or English title, transliteration, author, or topic" hidden />
       <button id="new-project" class="primary">+ Project</button>
     </div>
 
@@ -96,10 +96,10 @@
         <div class="filter-group open">
           <button id="filter-toggle" class="filter-header" type="button" aria-expanded="true"><span id="filter-toggle-label">Hide filters</span><span class="filter-toggle-icon" aria-hidden="true">⌄</span></button>
           <div id="filter-content" class="filter-content active filters">
-            <select id="filter-topic"><option value="">All topics</option></select>
-            <select id="filter-assignee"><option value="">All people</option><option value="__mine__">My assignments</option><option>Zahraa</option><option>Mohammed</option><option>Both</option><option>Unassigned</option></select>
-            <select id="filter-status"><option value="">All statuses</option><option value="__active__">Started, not Publish Ready</option><option value="not_started">Not Started</option><option value="in_progress">Translating</option><option value="review">Needs Formatting</option><option value="completed">Needs Review</option><option value="published">Publish Ready</option></select>
-            <select id="filter-schedule"><option value="">Any schedule</option><option value="with_deadline">Has deadline</option><option value="overdue">Overdue</option><option value="due_month">Due this month</option><option value="no_deadline">No deadline</option></select>
+            <select id="filter-topic" aria-label="Filter by topic"><option value="">All topics</option></select>
+            <select id="filter-assignee" aria-label="Filter by assignee"><option value="">All people</option><option value="__mine__">My assignments</option><option>Zahraa</option><option>Mohammed</option><option>Both</option><option>Unassigned</option></select>
+            <select id="filter-status" aria-label="Filter by workflow status"><option value="">All statuses</option><option value="__active__">Started, not Publish Ready</option><option value="not_started">Not Started</option><option value="in_progress">Translating</option><option value="review">Needs Formatting</option><option value="completed">Needs Review</option><option value="published">Publish Ready</option></select>
+            <select id="filter-schedule" aria-label="Filter by schedule"><option value="">Any schedule</option><option value="with_deadline">Has deadline</option><option value="overdue">Overdue</option><option value="due_month">Due this month</option><option value="no_deadline">No deadline</option></select>
             <select id="sort-projects" aria-label="Sort projects">
               <option value="updated">Sort: Recently updated</option>
               <option value="deadline">Sort: Deadline (soonest)</option>
@@ -122,8 +122,8 @@
         <div id="batch-toolbar" class="batch-toolbar hidden">
           <label class="check batch-select-all"><input id="select-visible" type="checkbox" /> Select visible</label>
           <strong id="batch-count">0 selected</strong>
-          <select id="batch-assignee"><option value="">Assign…</option><option>Zahraa</option><option>Mohammed</option><option>Both</option><option>Unassigned</option></select>
-          <select id="batch-status"><option value="">Set status…</option><option value="not_started">Not Started</option><option value="in_progress">Translating</option><option value="review">Needs Formatting</option><option value="completed">Needs Review</option><option value="published">Publish Ready</option></select>
+          <select id="batch-assignee" aria-label="Batch assignee"><option value="">Assign…</option><option>Zahraa</option><option>Mohammed</option><option>Both</option><option>Unassigned</option></select>
+          <select id="batch-status" aria-label="Batch workflow status"><option value="">Set status…</option><option value="not_started">Not Started</option><option value="in_progress">Translating</option><option value="review">Needs Formatting</option><option value="completed">Needs Review</option><option value="published">Publish Ready</option></select>
           <input id="batch-deadline" type="date" aria-label="Batch deadline" />
           <button id="apply-batch" type="button" class="secondary">Apply</button>
           <button id="clear-batch-deadlines" type="button" class="text-button">Remove deadlines</button>
@@ -238,7 +238,7 @@
         <div id="cover-preview" class="full cover-preview"></div>
         <label class="full">Arabic PDF — direct file<input id="source-pdf-url" type="url" placeholder="Direct .pdf URL" /></label>
         <div id="pdf-state" class="full pdf-state"></div>
-        <label class="full check"><input id="published" type="checkbox" /> Published</label>
+        <label class="full check"><input id="published" type="checkbox" disabled /> Published <span class="field-help">Available only at Publish Ready.</span></label>
         <label class="full">Notes<textarea id="notes" rows="4"></textarea></label>
         <div id="completion-meta" class="full completion-meta"></div>
       </div>
@@ -266,11 +266,12 @@
 
   <svg style="display:none">
     <symbol id="rosette" viewBox="0 0 40 40">
-      <g fill="none" stroke="#B8925A" stroke-width="1.4"><path d="M20 4 L23 15 L34 12 L26 20 L34 28 L23 25 L20 36 L17 25 L6 28 L14 20 L6 12 L17 15 Z"/><circle cx="20" cy="20" r="3" fill="#B8925A"/></g>
+      <g fill="none" stroke="#9A835F" stroke-width="1.4"><path d="M20 4 L23 15 L34 12 L26 20 L34 28 L23 25 L20 36 L17 25 L6 28 L14 20 L6 12 L17 15 Z"/><circle cx="20" cy="20" r="3" fill="#9A835F"/></g>
     </symbol>
   </svg>
 
   <div id="toast" role="status" aria-live="polite"></div>
-  <script type="module" src="/app.js?v=20261005-pace-truth-closure"></script>
+  <script src="/model-core.js?v=20261006-full-audit-repair"></script>
+  <script type="module" src="/app.js?v=20261006-full-audit-repair"></script>
 </body>
 </html>
