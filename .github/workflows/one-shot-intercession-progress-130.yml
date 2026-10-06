@@ -1,0 +1,54 @@
+name: One-shot Intercession Progress 130
+
+on:
+  push:
+    paths:
+      - '.github/workflows/one-shot-intercession-progress-130.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: [self-hosted, macOS, ARM64]
+    timeout-minutes: 5
+    steps:
+      - name: Publish verified 130/375 translation checkpoint
+        shell: bash
+        run: |
+          set -euo pipefail
+          progress=$(cat <<'JSON'
+          {
+            "translated_pages": 130,
+            "expected_previous_pages": 108,
+            "source_total_pages": 375,
+            "source_pdf_sha256": "48d338363f4443d291c4e53365efef6eb36deb87ddfe788bb1e8559cd1c58cbf",
+            "google_doc_revision": "ANLCKQnGA2baFpv_6lqXyEfVNVBeA8ISdzO58hQLn8yY-5GOakcF9NNJ2b-7moyx4RqHTTnVfZmpj4InxXTQEHtBi7_Oq6xztAviKnHNLQg",
+            "verification_note": "Verified continuous Arabic-source-to-English translation through physical source page 130 of 375. Pages 109-129 complete Chapter Five: the concept and linguistic meaning of tawassul, its distinction from istighathah, its Qur'anic basis, the two positions on legitimacy, the tawqifi principle, the Sunnah's legislative role, the author's critique of excluding the Sunnah, and the chapter conclusion. Physical pages 110 and 130 are blank and were explicitly checked. Twenty-five native footnotes were added for pages 109-119 and twenty-seven for pages 120-129; the manuscript now contains 281 native footnotes total. No residual source-note placeholders remain. Continue sequentially from physical source page 131."
+          }
+          JSON
+          )
+          curl -fsS -X PATCH -H 'content-type: application/json' -H 'x-workbench-actor: Zahraa'             --data "$progress" https://haydari-translation-workbench.pages.dev/api/projects/5/progress
+          printf '\n'
+          project=$(cat <<'JSON'
+          {
+            "status": "in_progress",
+            "notes": "Translation active. Verified physical source-page checkpoint: 130/375. Chapter Five is complete in the live English Doc. Physical pages 110 and 130 are blank and were checked. The manuscript has 281 native footnotes. Continue sequentially from physical source page 131."
+          }
+          JSON
+          )
+          curl -fsS -X PATCH -H 'content-type: application/json' -H 'x-workbench-actor: Zahraa'             --data "$project" https://haydari-translation-workbench.pages.dev/api/projects/5
+          printf '\n'
+      - name: Verify live Workbench readback
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsS https://haydari-translation-workbench.pages.dev/api/projects -o /tmp/projects.json
+          python3 - <<'PY'
+          import json
+          data=json.load(open('/tmp/projects.json'))
+          p=next(x for x in data['projects'] if int(x['id'])==5)
+          assert int(p['translated_pages'])==130, p['translated_pages']
+          assert p['status']=='in_progress', p['status']
+          print('INTERCESSION_PROGRESS_130_VERIFIED')
+          PY
