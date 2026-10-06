@@ -1,0 +1,54 @@
+name: One-shot Intercession Progress 148
+
+on:
+  push:
+    paths:
+      - '.github/workflows/one-shot-intercession-progress-148.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: [self-hosted, macOS, ARM64]
+    timeout-minutes: 5
+    steps:
+      - name: Publish verified 148/375 translation checkpoint
+        shell: bash
+        run: |
+          set -euo pipefail
+          progress=$(cat <<'JSON'
+          {
+            "translated_pages": 148,
+            "expected_previous_pages": 130,
+            "source_total_pages": 375,
+            "source_pdf_sha256": "48d338363f4443d291c4e53365efef6eb36deb87ddfe788bb1e8559cd1c58cbf",
+            "google_doc_revision": "ANLCKQncakfW8pYjLi4WtbQSZ0RE60wJmgq9GIQL1d1p6mmU-xYVn6e8sngqjUs3A0i3i5WQhhviouWaXEW21nSQWvO3pinfrvRUV88-pJs",
+            "verification_note": "Verified continuous Arabic-source-to-English translation through physical source page 148 of 375. Pages 131-148 open Chapter Six and cover means whose legitimacy is agreed upon: tawassul through Allah's Most Beautiful Names, the meaning and metaphysics of the divine names, tawassul through righteous deeds with Qur'anic and hadith evidence, and the opening consensus on tawassul through a living righteous servant. Physical page 132 is blank and was checked. Twenty-eight native footnotes were added; the manuscript now contains 309 native footnotes total. No residual source-note placeholders remain. Continue sequentially from physical source page 149."
+          }
+          JSON
+          )
+          curl -fsS -X PATCH -H 'content-type: application/json' -H 'x-workbench-actor: Zahraa'             --data "$progress" https://haydari-translation-workbench.pages.dev/api/projects/5/progress
+          printf '\n'
+          project=$(cat <<'JSON'
+          {
+            "status": "in_progress",
+            "notes": "Translation active. Verified physical source-page checkpoint: 148/375. Chapter Six is translated through the opening consensus on tawassul through a living righteous servant. The manuscript has 309 native footnotes. Continue sequentially from physical source page 149."
+          }
+          JSON
+          )
+          curl -fsS -X PATCH -H 'content-type: application/json' -H 'x-workbench-actor: Zahraa'             --data "$project" https://haydari-translation-workbench.pages.dev/api/projects/5
+          printf '\n'
+      - name: Verify live Workbench readback
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsS https://haydari-translation-workbench.pages.dev/api/projects -o /tmp/projects.json
+          python3 - <<'PY'
+          import json
+          data=json.load(open('/tmp/projects.json'))
+          p=next(x for x in data['projects'] if int(x['id'])==5)
+          assert int(p['translated_pages'])==148, p['translated_pages']
+          assert p['status']=='in_progress', p['status']
+          print('INTERCESSION_PROGRESS_148_VERIFIED')
+          PY
