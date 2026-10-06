@@ -333,7 +333,7 @@ export function validIsoDate(raw) {
 
 export function actorFromRequest(request) {
   const actor = (request.headers.get('x-workbench-actor') || '').trim();
-  return ['Zahraa', 'Mohammed', 'Brother'].includes(actor) ? actor : 'Unknown';
+  return ['Zahraa', 'Mohammed', 'Brother', 'System'].includes(actor) ? actor : 'Unknown';
 }
 
 export async function recordActivity(db, projectId, actor, action, before, after) {
