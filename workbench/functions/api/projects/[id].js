@@ -4,7 +4,13 @@ const fields = new Set([
   'title_ar','title_en','assignee','status','source_url','source_pdf_url','google_doc_url','cover_url',
   'start_date','due_date','notes'
 ]);
-const validStatuses = new Set(['not_started','in_progress','review','completed','published']);
+const statusOrder = ['not_started','in_progress','review','completed','published'];
+const validStatuses = new Set(statusOrder);
+function validStatusTransition(from, to) {
+  if (from === to) return true;
+  const a=statusOrder.indexOf(from), b=statusOrder.indexOf(to);
+  return a >= 0 && b >= 0 && Math.abs(a-b) === 1;
+}
 const validAssignees = new Set(['Zahraa','Mohammed','Brother','Both','Unassigned']);
 
 function idFrom(context) {
@@ -29,8 +35,14 @@ export async function onRequestPatch(context) {
   const body = await context.request.json().catch(() => null);
   if (!body || typeof body !== 'object') return json({ error: 'Invalid JSON body.' }, 400);
 
-  if (body.published === true) body.status = 'published';
   if (body.status !== undefined && !validStatuses.has(body.status)) return json({ error: 'Invalid status.' }, 400);
+  if (body.status !== undefined && !validStatusTransition(before.status, body.status)) {
+    return json({ error: 'Workflow stages must move one step at a time: Not Started → Translating → Needs Formatting → Needs Review → Publish Ready.' }, 409);
+  }
+  const requestedStatus = body.status ?? before.status;
+  if (body.published === true && requestedStatus !== 'published') {
+    return json({ error: 'Only a Publish Ready book can be marked Published.' }, 409);
+  }
   if (body.assignee !== undefined && !validAssignees.has(body.assignee)) return json({ error: 'Invalid assignee.' }, 400);
 
   if (body.google_doc_url !== undefined) {
@@ -48,6 +60,11 @@ export async function onRequestPatch(context) {
     const normalized = normalizeHttpUrl(body.cover_url);
     if (normalized === false) return json({ error: 'Cover image must use an http(s) URL.' }, 400);
     body.cover_url = normalized || '';
+  }
+  if (body.source_pdf_url !== undefined) {
+    const normalized = normalizeHttpUrl(body.source_pdf_url);
+    if (normalized === false) return json({ error: 'Arabic source PDF must use an http(s) URL.' }, 400);
+    body.source_pdf_url = normalized || '';
   }
   if ((body.start_date !== undefined && !validIsoDate(body.start_date)) || (body.due_date !== undefined && !validIsoDate(body.due_date))) {
     return json({ error: 'Dates must use YYYY-MM-DD.' }, 400);
