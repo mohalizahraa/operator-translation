@@ -86,19 +86,14 @@ function viewScopeMatches(project) {
   return project.assignee === 'Zahraa' || project.assignee === 'Mohammed' || project.assignee === 'Both';
 }
 
-function setView(view) {
-  state.view = view;
-  document.querySelectorAll('.view').forEach(x=>x.classList.remove('active-view'));
-  $(`${view}-view`).classList.add('active-view');
-  document.querySelectorAll('.nav-item').forEach(button=>{
-    const active=button.dataset.view===view;
-    button.classList.toggle('active',active);
-    if (active) button.setAttribute('aria-current','page');
-    else button.removeAttribute('aria-current');
-  });
-  els.title.textContent = ({dashboard:'Dashboard',projects:'Projects',board:'Board',timeline:'Timeline',stats:'Stats',activity:'Activity'})[view];
-  els.search.hidden=!['projects','board','timeline'].includes(view);
+function setViewScope(scope) {
+  if (!VIEW_SCOPES.includes(scope)) return;
+  state.viewScope=scope;
+  localStorage.setItem('haydariViewScope',scope);
+  localStorage.removeItem('haydariBoardScope');
+  syncViewScopeSwitch();
 }
+
 function toast(message) {
   els.toast.textContent = message; els.toast.classList.add('show');
   setTimeout(() => els.toast.classList.remove('show'), 1800);
@@ -524,50 +519,19 @@ function clearProjectFilters() {
   toast('Filters cleared');
 }
 
-function openProject(id) {
-  const p = state.projects.find(x=>x.id===id);
-  $('project-id').value = p?.id || '';
-  $('dialog-title').textContent = p ? 'Edit project' : 'New project';
-  $('title-ar').value = p?.title_ar || '';
-  $('title-en').value = p?.title_en || '';
-  $('assignee').value = p?.assignee || 'Unassigned';
-  $('status').innerHTML = p
-    ? statusOptions(p.status,true)
-    : STATUS_ORDER.slice(0,2).map(status=>`<option value="${status}">${STATUS[status]}</option>`).join('');
-  $('status').value = p?.status || 'not_started';
-  $('start-date').value = p?.start_date || '';
-  $('due-date').value = p?.due_date || '';
-  updateDeadlineWarning($('due-date').value,p?.due_date || '');
-  $('translated-pages').value = p?.translated_pages || 0;
-  $('translated-pages').max = p?.page_count_verified ? (p?.pages || '') : '';
-  $('translated-pages-total').textContent = p?.page_count_verified && p?.pages
-    ? `/ ${p.pages} verified source pages`
-    : 'verified total unavailable';
-  $('google-doc-url').value = p?.google_doc_url || '';
-  $('cover-url').value = p?.cover_url || '';
-  $('cover-file').value = '';
-  $('upload-cover').disabled = !p?.id;
-  $('remove-uploaded-cover').disabled = !p?.has_uploaded_cover;
-  $('cover-upload-note').textContent = p?.id ? '' : 'Save this project before importing a photo.';
-  renderCoverPreview(p);
-  if (p?.has_uploaded_cover) ensureUploadedCover(p.id).then(() => { if (Number($('project-id').value) === p.id) renderCoverPreview(p); });
-  $('source-pdf-url').value = p?.source_pdf_url || '';
-  $('pdf-state').innerHTML = p ? (
-    p.pdf_available
-      ? `<span>Verified direct PDF available · ${p.pages} physical pages</span>`
-      : p.pdf_missing
-        ? `<span class="missing">PDF missing or unusable${p.package_url ? ' — archive only provides a ZIP/RAR package' : ''}${p.pdf_check_note ? ` · ${escapeHtml(p.pdf_check_note)}` : ''}</span>`
-        : `<span>PDF awaiting verification${p.pdf_check_note ? ` · ${escapeHtml(p.pdf_check_note)}` : ''}</span>`
-  ) : '';
-  $('published').checked = Boolean(p?.published);
-  $('published').disabled = $('status').value !== 'published';
-  $('notes').value = p?.notes || '';
-  const meta = [];
-  if (p?.completed_at) meta.push(`Translation finished ${new Date(p.completed_at).toLocaleDateString()}${p.completed_by ? ` by ${escapeHtml(p.completed_by)}` : ''}`);
-  if (p?.published_at) meta.push(`Published ${new Date(p.published_at).toLocaleDateString()}${p.published_by ? ` by ${escapeHtml(p.published_by)}` : ''}`);
-  $('completion-meta').innerHTML = meta.map(x => `<span>${x}</span>`).join('');
-  els.dialog.showModal();
+function openProjectsPreset(preset) {
+  resetProjectFilters();
+  if (preset === 'active') $('filter-status').value='__active__';
+  if (preset === 'translating') $('filter-status').value='in_progress';
+  if (preset === 'needs_formatting') $('filter-status').value='review';
+  if (preset === 'needs_review') $('filter-status').value='completed';
+  if (preset === 'deadlines') $('filter-schedule').value='with_deadline';
+  if (preset === 'missing_pdf') $('filter-missing-pdf').checked=true;
+  if (preset === 'checking_pdf') $('filter-checking-pdf').checked=true;
+  setView('projects');
+  renderProjects();
 }
+
 function openPersonWork(person) {
   if (person === 'Zahraa' || person === 'Mohammed') {
     els.search.value='';
@@ -1334,8 +1298,14 @@ function setView(view) {
   state.view = view;
   document.querySelectorAll('.view').forEach(x=>x.classList.remove('active-view'));
   $(`${view}-view`).classList.add('active-view');
-  document.querySelectorAll('.nav-item').forEach(x=>x.classList.toggle('active', x.dataset.view===view));
+  document.querySelectorAll('.nav-item').forEach(button=>{
+    const active=button.dataset.view===view;
+    button.classList.toggle('active',active);
+    if (active) button.setAttribute('aria-current','page');
+    else button.removeAttribute('aria-current');
+  });
   els.title.textContent = ({dashboard:'Dashboard',projects:'Projects',board:'Board',timeline:'Timeline',stats:'Stats',activity:'Activity'})[view];
+  els.search.hidden=!['projects','board','timeline'].includes(view);
 }
 
 function openProject(id) {
@@ -1345,13 +1315,18 @@ function openProject(id) {
   $('title-ar').value = p?.title_ar || '';
   $('title-en').value = p?.title_en || '';
   $('assignee').value = p?.assignee || 'Unassigned';
+  $('status').innerHTML = p
+    ? statusOptions(p.status,true)
+    : STATUS_ORDER.slice(0,2).map(status=>`<option value="${status}">${STATUS[status]}</option>`).join('');
   $('status').value = p?.status || 'not_started';
   $('start-date').value = p?.start_date || '';
   $('due-date').value = p?.due_date || '';
   updateDeadlineWarning($('due-date').value,p?.due_date || '');
   $('translated-pages').value = p?.translated_pages || 0;
-  $('translated-pages').max = p?.pages || ''; 
-  $('translated-pages-total').textContent = p?.pages ? `/ ${p.pages} source pages` : 'source pages';
+  $('translated-pages').max = p?.page_count_verified ? (p?.pages || '') : '';
+  $('translated-pages-total').textContent = p?.page_count_verified && p?.pages
+    ? `/ ${p.pages} verified source pages`
+    : 'verified total unavailable';
   $('google-doc-url').value = p?.google_doc_url || '';
   $('cover-url').value = p?.cover_url || '';
   $('cover-file').value = '';
@@ -1363,12 +1338,13 @@ function openProject(id) {
   $('source-pdf-url').value = p?.source_pdf_url || '';
   $('pdf-state').innerHTML = p ? (
     p.pdf_available
-      ? `<span>Verified direct PDF available</span>`
+      ? `<span>Verified direct PDF available · ${p.pages} physical pages</span>`
       : p.pdf_missing
         ? `<span class="missing">PDF missing or unusable${p.package_url ? ' — archive only provides a ZIP/RAR package' : ''}${p.pdf_check_note ? ` · ${escapeHtml(p.pdf_check_note)}` : ''}</span>`
         : `<span>PDF awaiting verification${p.pdf_check_note ? ` · ${escapeHtml(p.pdf_check_note)}` : ''}</span>`
   ) : '';
   $('published').checked = Boolean(p?.published);
+  $('published').disabled = $('status').value !== 'published';
   $('notes').value = p?.notes || '';
   const meta = [];
   if (p?.completed_at) meta.push(`Translation finished ${new Date(p.completed_at).toLocaleDateString()}${p.completed_by ? ` by ${escapeHtml(p.completed_by)}` : ''}`);
