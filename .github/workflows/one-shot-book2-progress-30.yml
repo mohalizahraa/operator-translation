@@ -1,0 +1,39 @@
+name: One-shot Book 2 Progress 30
+
+on:
+  push:
+    paths:
+      - '.github/workflows/one-shot-book2-progress-30.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: [self-hosted, macOS, ARM64]
+    timeout-minutes: 5
+    steps:
+      - name: Publish verified 30/375 checkpoint
+        shell: bash
+        run: |
+          set -euo pipefail
+          progress=$(cat <<'JSON'
+          {
+            "translated_pages": 30,
+            "expected_previous_pages": 25,
+            "source_total_pages": 375,
+            "source_pdf_sha256": "48d338363f4443d291c4e53365efef6eb36deb87ddfe788bb1e8559cd1c58cbf",
+            "google_doc_revision": "ANLCKQkDlWNarVPr_Lvsc0lcYxc76bSzuFMuuz4dmbwwfwCYgG5wNPbH1fPRtrVWUkLimrYcrpFE21cY5fAljZ3ssc_yi4xANeGmYlZOaRY",
+            "verification_note": "Verified English coverage through physical source page 30 in the linked Google Doc. Pages 26-30 preserve the continuation of the Qur'an/Sunnah methodology discussion, the rule that doctrinal affiliation does not itself invalidate a trustworthy narrator, Sunni hadith-critic evidence, the Ahl al-Bayt-school parallel, al-Tusi's criteria, and al-Hakim's conclusion. All 20 source footnotes introduced on pages 26-30 are present as native Google Docs footnotes; whole-document footnote count is 48 with zero empty notes. Translation remains in progress; publication formatting/QA is not complete."
+          }
+          JSON
+          )
+          curl -fsS -X PATCH             -H 'content-type: application/json'             -H 'x-workbench-actor: Zahraa'             --data "$progress"             https://haydari-translation-workbench.pages.dev/api/projects/5/progress
+
+          project=$(cat <<'JSON'
+          {
+            "notes": "Translation active. Verified source-page checkpoint: 30/375 as of 2026-10-06. Pages 1-30 are written in the linked English Google Doc. Pages 26-30 add the Qur'an/Sunnah continuation, narrator-acceptance rules across doctrinal differences, al-Tusi's parallel criteria, and all 20 source footnotes as native Google Docs footnotes. Continue sequentially from physical source page 31; publish another verified checkpoint as the next batch lands."
+          }
+          JSON
+          )
+          curl -fsS -X PATCH             -H 'content-type: application/json'             -H 'x-workbench-actor: Zahraa'             --data "$project"             https://haydari-translation-workbench.pages.dev/api/projects/5
