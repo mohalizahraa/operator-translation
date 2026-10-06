@@ -1,4 +1,4 @@
-name: One-shot Book 2 Source 76-80
+name: One-shot Book 2 Source 87-91
 
 on:
   push:
@@ -14,11 +14,11 @@ jobs:
     timeout-minutes: 15
     env:
       SOURCE_URL: "https://haydari-translation-workbench.pages.dev/api/pdf/5"
-      START_PAGE: "76"
-      END_PAGE: "80"
+      START_PAGE: "87"
+      END_PAGE: "91"
     steps:
       - uses: actions/checkout@v4
-      - name: Fetch and render canonical Workbench PDF pages 21-25
+      - name: Fetch and render canonical Workbench PDF pages 87-91
         shell: bash
         run: |
           set -euo pipefail
@@ -35,10 +35,10 @@ jobs:
           let end = Int(ProcessInfo.processInfo.environment["END_PAGE"]!)!
           for physical in start...end {
             guard let page = doc.page(at: physical - 1) else { continue }
-            let thumb = page.thumbnail(of: NSSize(width: 1400, height: 1980), for: .mediaBox)
+            let thumb = page.thumbnail(of: NSSize(width: 1800, height: 2546), for: .mediaBox)
             guard let tiff = thumb.tiffRepresentation,
                   let rep = NSBitmapImageRep(data: tiff),
-                  let jpg = rep.representation(using: .jpeg, properties: [.compressionFactor: 0.90]) else { continue }
+                  let jpg = rep.representation(using: .jpeg, properties: [.compressionFactor: 0.94]) else { continue }
             let b64 = jpg.base64EncodedString()
             print(String(format: "PAGE_%03d_BEGIN", physical))
             var i = b64.startIndex
