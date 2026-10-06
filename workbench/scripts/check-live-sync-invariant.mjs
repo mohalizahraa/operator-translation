@@ -36,8 +36,6 @@ if (pdfAudit.includes('pdf_check_note = ?, updated_at = ?')) {
   throw new Error('Live-sync invariant regression: background PDF audit must not overwrite semantic project updated_at.');
 }
 
-console.log('Live-sync invariant: PASS');
-
 if (projectsIndex.includes('syncActiveTranslationMarkers')) {
   throw new Error('Live-sync invariant regression: GET /api/projects must remain read-only.');
 }
@@ -45,3 +43,8 @@ if (progressSync.includes('SET notes =')) {
   throw new Error('Live-sync invariant regression: verified marker sync must not overwrite project notes.');
 }
 requireText(progressSync, "headers.get('x-workbench-actor')", 'verified marker sync preserves collaborator attribution');
+for (const field of ['p.title_en','p.pages','p.notes','p.source_pdf_url','p.pdf_checked_at','p.pdf_check_note','p.page_count_verified','p.has_uploaded_cover']) {
+  requireText(app, field, `shared project render signature includes ${field}`);
+}
+
+console.log('Live-sync invariant: PASS');
