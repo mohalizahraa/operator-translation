@@ -1,0 +1,31 @@
+name: One-shot Book 2 Site Note 35
+
+on:
+  push:
+    paths:
+      - '.github/workflows/one-shot-book2-site-note-35.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  update:
+    runs-on: [self-hosted, macOS, ARM64]
+    timeout-minutes: 5
+    steps:
+      - name: Update live Workbench note for 35/375
+        shell: bash
+        run: |
+          set -euo pipefail
+          body=$(cat <<'JSON'
+          {
+            "status": "in_progress",
+            "notes": "Translation active. Verified source-page checkpoint: 35/375 as of 2026-10-06. Pages 1-35 are written in the linked English Google Doc. Pages 31-35 complete the narrator-acceptance discussion, the critique of exclusionary methodology, the hadith and Qur'anic principle on following the Prophet, the Results and Findings section, and the transition to the book's focus on tawassul. The manuscript currently contains 56 native Google Docs footnotes; all 8 source footnotes from pages 31-35 are native notes. Continue sequentially from physical source page 36 and publish the next verified checkpoint as it lands."
+          }
+          JSON
+          )
+          curl -fsS -X PATCH \
+            -H 'content-type: application/json' \
+            -H 'x-workbench-actor: Zahraa' \
+            --data "$body" \
+            https://haydari-translation-workbench.pages.dev/api/projects/5
