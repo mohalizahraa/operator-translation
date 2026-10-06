@@ -1,4 +1,4 @@
-name: One-shot Book 2 Source 21-25
+name: One-shot Book 2 Source 76-80
 
 on:
   push:
@@ -14,8 +14,8 @@ jobs:
     timeout-minutes: 15
     env:
       SOURCE_URL: "https://haydari-translation-workbench.pages.dev/api/pdf/5"
-      START_PAGE: "21"
-      END_PAGE: "25"
+      START_PAGE: "76"
+      END_PAGE: "80"
     steps:
       - uses: actions/checkout@v4
       - name: Fetch and render canonical Workbench PDF pages 21-25
