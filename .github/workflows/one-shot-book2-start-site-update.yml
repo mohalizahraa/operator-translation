@@ -1,0 +1,32 @@
+name: One-shot Book 2 Start Site Update
+
+on:
+  push:
+    paths:
+      - '.github/workflows/one-shot-book2-start-site-update.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  update:
+    runs-on: [self-hosted, macOS, ARM64]
+    timeout-minutes: 5
+    steps:
+      - name: Mark Book 2 translation active on live Workbench
+        shell: bash
+        run: |
+          set -euo pipefail
+          body=$(cat <<'JSON'
+          {
+            "status": "in_progress",
+            "start_date": "2026-10-06",
+            "notes": "Translation started on 2026-10-06. Canonical 375-page source PDF verified; opening pages are being translated under the current Operator Arabic-book translation profile. Live translated-page progress remains 0/375 until source pages are written to and verified in the linked English Google Doc. Publish verified progress checkpoints as each completed page batch lands."
+          }
+          JSON
+          )
+          curl -fsS -X PATCH \
+            -H 'content-type: application/json' \
+            -H 'x-workbench-actor: Zahraa' \
+            --data "$body" \
+            https://haydari-translation-workbench.pages.dev/api/projects/5
