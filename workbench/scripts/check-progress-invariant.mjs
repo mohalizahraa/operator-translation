@@ -54,3 +54,8 @@ assert(
   !progressSync.includes('SET notes ='),
   'Verified progress synchronization must never overwrite freeform project notes.'
 );
+
+assert(
+  generic.includes('Verified source-page translation must reach the physical PDF total before Needs Formatting.'),
+  'Verified translation completion gate is missing from generic project PATCH.'
+);
