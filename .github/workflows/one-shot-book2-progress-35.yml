@@ -1,4 +1,4 @@
-name: One-shot Book 2 Progress 70
+name: One-shot Book 2 Progress 75
 
 on:
   push:
@@ -13,18 +13,18 @@ jobs:
     runs-on: [self-hosted, macOS, ARM64]
     timeout-minutes: 5
     steps:
-      - name: Publish verified 70/375 translation checkpoint
+      - name: Publish verified 75/375 translation checkpoint
         shell: bash
         run: |
           set -euo pipefail
           body=$(cat <<'JSON'
           {
-            "translated_pages": 70,
-            "expected_previous_pages": 60,
+            "translated_pages": 75,
+            "expected_previous_pages": 70,
             "source_total_pages": 375,
             "source_pdf_sha256": "48d338363f4443d291c4e53365efef6eb36deb87ddfe788bb1e8559cd1c58cbf",
-            "google_doc_revision": "ANLCKQlFpoKqBapLYb1x_tQMU9zBlXTjYPBgNdYVta5FMRigv81886vGziPze47521ttQnrA-muYT62IiOLalWicrl9nUeYM6KijUjhDyzA",
-            "verification_note": "Verified English manuscript coverage through physical source page 70 in the linked Google Doc. Pages 61-70 complete Ibn Taymiyyah\u0027s stated position on visitation, summarize six consequences of that position, begin the response to his claims, present Sunni and Ahl al-Bayt visitation narrations, and open the evidence from scholars before and after Ibn Taymiyyah. All 33 source notes from pages 61-70 are native Google Docs footnotes; the manuscript now contains 126 native footnotes total. No readable Arabic-script manuscript prose remains in the newly translated batch. Translation remains in progress; continue sequentially from physical source page 71."
+            "google_doc_revision": "ANLCKQnOdK0yparXNLFHHgpkLNclig5iAaC2eZk6g3zcdiw68sQWGOjpnCfvP-hznhc4vyfqXaMtJGpY8W3-nLRmT74E_ks9MvWN_DaNh64",
+            "verification_note": "Verified English manuscript coverage through physical source page 75 in the linked Google Doc. Pages 71-75 continue the evidence from scholars after Ibn Taymiyyah and open the response to the claim that the Salaf and people of Madinah did not visit the Prophet\u0027s grave. All 16 source notes from pages 71-75 are native Google Docs footnotes; the manuscript now contains 142 native footnotes total. No readable Arabic-script manuscript prose remains in the newly translated batch. Translation remains in progress; continue sequentially from physical source page 76."
           }
           JSON
           )
