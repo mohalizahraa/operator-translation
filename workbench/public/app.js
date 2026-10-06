@@ -1,3 +1,6 @@
+const WorkbenchCore=globalThis.WorkbenchCore;
+if (!WorkbenchCore) throw new Error('Workbench calculation core did not load.');
+
 const STATUS = {
   not_started: 'Not Started',
   in_progress: 'Translating',
@@ -586,7 +589,6 @@ function paceModel({projects=corpusProjects(), paceEvents=state.paceEvents, acto
   const normalizedEvents=[];
   for (const event of sourceEvents) {
     if (!projectIds.has(Number(event.project_id))) continue;
-    if (!actorMatches(event.actor,actor)) continue;
     const before=parseActivityJson(event.before_json) || {};
     const after=parseActivityJson(event.after_json) || {};
     const when=parseDateTime(event.created_at);
@@ -596,11 +598,13 @@ function paceModel({projects=corpusProjects(), paceEvents=state.paceEvents, acto
       project_id:Number(event.project_id),
       created_at:when.toISOString(),
       date_key:localDateKey(when),
+      actor:event.actor || 'Unknown',
       before_pages:Number(before.translated_pages || 0),
       after_pages:Number(after.translated_pages || 0),
     });
   }
-  const dailyObject=WorkbenchCore.reconcilePageDeltas(normalizedEvents);
+  const acceptedActors=actor ? (actor==='Mohammed' ? ['Mohammed','Brother'] : [actor]) : null;
+  const dailyObject=WorkbenchCore.reconcilePageDeltas(normalizedEvents,acceptedActors);
   const dailyPages=new Map(Object.entries(dailyObject).map(([key,value])=>[key,Number(value)]));
 
   let pagesPerDay=0;
@@ -1096,7 +1100,10 @@ function renderTimeline() {
   const todayKey=localDateKey();
   const today=timelineDay(todayKey);
   if (!dated.length) {
-    $('timeline-visual').innerHTML='<div class="timeline-empty">Add a start date or deadline to place a book on the timeline.</div>';
+    const hasSearch=Boolean(els.search.value.trim());
+    $('timeline-visual').innerHTML=hasSearch && !scoped.length
+      ? '<div class="timeline-empty">No books match this search in the current view.</div>'
+      : '<div class="timeline-empty">Add a start date or deadline to place a book on the timeline.</div>';
   } else {
     const points=[today];
     dated.forEach(p=>{
@@ -1367,8 +1374,8 @@ async function saveProject(event) {
     toast('Move workflow one stage at a time.');
     return;
   }
-  if (payload.published && payload.status!=='published') {
-    toast('Only a Publish Ready book can be marked Published.');
+  if (payload.published && currentProject?.status!=='published') {
+    toast('Save Publish Ready first, then mark the book Published.');
     return;
   }
   if (payload.due_date && !confirmSuspiciousDeadline(payload.due_date,currentProject?.due_date || '')) return;
@@ -1816,9 +1823,11 @@ $('published').addEventListener('change',()=>{
   }
 });
 $('status').addEventListener('change',()=>{
-  const ready=$('status').value==='published';
-  $('published').disabled=!ready;
-  if (!ready) $('published').checked=false;
+  const id=Number($('project-id').value) || null;
+  const current=id ? state.projects.find(p=>p.id===id) : null;
+  const alreadyReady=current?.status==='published' && $('status').value==='published';
+  $('published').disabled=!alreadyReady;
+  if (!alreadyReady) $('published').checked=false;
 });
 $('clear-project-filters')?.addEventListener('click',clearProjectFilters);
 $('retry-workspace')?.addEventListener('click',loadWorkspace);
