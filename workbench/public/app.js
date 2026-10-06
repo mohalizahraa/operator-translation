@@ -1,3 +1,6 @@
+const WorkbenchCore=globalThis.WorkbenchCore;
+if (!WorkbenchCore) throw new Error('Workbench calculation core did not load.');
+
 const STATUS = {
   not_started: 'Not Started',
   in_progress: 'Translating',
@@ -30,6 +33,7 @@ let liveRevisionInFlight = false;
 let markerSyncInFlight = false;
 let markerSyncCursor = 0;
 let lastMarkerSyncAt = 0;
+let liveSyncStarted = false;
 
 const $ = (id) => document.getElementById(id);
 const els = {
@@ -145,21 +149,27 @@ function localDateKeyAfterDays(days) {
   date.setDate(date.getDate() + days);
   return localDateKey(date);
 }
-function median(values) {
-  const sorted=values.filter(Number.isFinite).sort((a,b)=>a-b);
-  if (!sorted.length) return 400;
-  const mid=Math.floor(sorted.length/2);
-  return sorted.length%2 ? sorted[mid] : (sorted[mid-1]+sorted[mid])/2;
+function corpusProjects(projects=state.projects) {
+  return projects.filter(project=>Boolean(project.catalog_id));
 }
 function looksLikeIndexedVolume(p) {
   return /(?:^|[\s,(])(?:ج|جزء|vol(?:ume)?\.?|part)\s*\(?\d+/iu.test(`${p?.title_ar || ''} ${p?.title_en || ''}`);
 }
 function estimatedPages(p, fallbackPages) {
-  const pages=Number(p?.pages);
-  if (Number.isFinite(pages) && pages > 0) return pages;
-  const volumes=Number(p?.volumes);
-  if (Number.isFinite(volumes) && volumes > 1 && !looksLikeIndexedVolume(p)) return fallbackPages * volumes;
-  return fallbackPages;
+  return WorkbenchCore.estimatedPages(p,fallbackPages,looksLikeIndexedVolume(p));
+}
+function projectSearchText(p) {
+  return `${p.title_ar || ''} ${p.title_en || ''} ${p.translit || ''} ${p.author || ''} ${p.author_ar || ''} ${p.category || ''} ${p.topic_en || ''} ${p.topic_ar || ''}`.toLowerCase();
+}
+function projectMatchesSearch(p, query=els.search.value) {
+  const q=String(query || '').trim().toLowerCase();
+  return !q || projectSearchText(p).includes(q);
+}
+function statusTransitionAllowed(from,to) {
+  return WorkbenchCore.statusTransitionAllowed(STATUS_ORDER,from,to);
+}
+function workflowTransitionAllowed(project,to) {
+  return WorkbenchCore.workflowTransitionAllowed(STATUS_ORDER,project,to);
 }
 function assigneeOptions(current) { return ASSIGNEES.map(name => `<option value="${name}" ${current===name?'selected':''}>${name}</option>`).join(''); }
 function bookTitleMarkup(project,{compact=false}={}) {
@@ -173,7 +183,12 @@ function activityBookTitleMarkup(activity) {
   if (project) return bookTitleMarkup(project,{compact:true});
   return activity.title_ar ? `<span class="book-title-pair compact"><span class="book-title-ar" dir="rtl">${escapeHtml(activity.title_ar)}</span></span>` : '';
 }
-function statusOptions(current) { return STATUS_ORDER.map(status => `<option value="${status}" ${current===status?'selected':''}>${STATUS[status]}</option>`).join(''); }
+function statusOptions(current, adjacentOnly=false, project=null) {
+  const statuses=adjacentOnly
+    ? STATUS_ORDER.filter(status=>project ? workflowTransitionAllowed(project,status) : statusTransitionAllowed(current,status))
+    : STATUS_ORDER;
+  return statuses.map(status => `<option value="${status}" ${current===status?'selected':''}>${STATUS[status]}</option>`).join('');
+}
 function assigneeLabel(value) { return value === 'Both' ? 'Shared' : value; }
 function assigneeBadgeMarkup(p) { return `<span class="pill assignee-pill assignee-${String(p.assignee || 'Unassigned').toLowerCase()}">${escapeHtml(assigneeLabel(p.assignee || 'Unassigned'))}</span>`; }
 function coverMarkup(p, compact=false) {
@@ -206,7 +221,7 @@ function workOnBookMarkup(p) {
 function quickControlsMarkup(p, compact=false) {
   return `<div class="quick-controls ${compact ? 'compact-quick-controls' : ''}">
     <label class="quick-field"><span>Assigned</span><select class="quick-assignee" data-project-id="${p.id}" draggable="false" aria-label="Assign ${escapeHtml(p.title_ar)}">${assigneeOptions(p.assignee)}</select></label>
-    ${compact ? `<label class="quick-field quick-status-field"><span>Status</span><select class="quick-status" data-project-id="${p.id}" draggable="false" aria-label="Status for ${escapeHtml(p.title_ar)}">${statusOptions(p.status)}</select></label>` : ''}
+    ${compact ? `<label class="quick-field quick-status-field"><span>Status</span><select class="quick-status" data-project-id="${p.id}" draggable="false" aria-label="Status for ${escapeHtml(p.title_ar)}">${statusOptions(p.status,true,p)}</select></label>` : ''}
     <div class="quick-field quick-deadline-field"><span>Deadline</span><div class="quick-date-row"><input class="quick-deadline" data-project-id="${p.id}" draggable="false" type="date" value="${escapeHtml(p.due_date || '')}" aria-label="Deadline for ${escapeHtml(p.title_ar)}">${p.due_date ? `<button class="quick-clear-date" type="button" data-clear-deadline="${p.id}" aria-label="Remove deadline for ${escapeHtml(p.title_ar)}">Remove</button>` : ''}</div></div>
   </div>`;
 }
@@ -284,7 +299,6 @@ function sortProjects(projects, sort='updated') {
 }
 
 function filteredProjects() {
-  const q = els.search.value.trim().toLowerCase();
   const topic = $('filter-topic')?.value || '';
   const assignee = $('filter-assignee')?.value || '';
   const assigneeMatch = p => !assignee || (assignee === '__mine__' ? (p.assignee === state.actor || p.assignee === 'Both') : p.assignee === assignee);
@@ -298,7 +312,6 @@ function filteredProjects() {
   const today = localDateKey();
   const thisMonth = today.slice(0,7);
   const filtered = state.projects.filter(p => {
-    const text = `${p.title_ar} ${p.title_en || ''} ${p.translit || ''} ${p.author || ''} ${p.author_ar || ''} ${p.category || ''} ${p.topic_en || ''} ${p.topic_ar || ''}`.toLowerCase();
     const scheduleMatch = !schedule
       || (schedule === 'overdue' && p.due_date && p.due_date < today && !isPublishReady(p))
       || (schedule === 'due_month' && p.due_date && monthKey(p.due_date) === thisMonth && !isPublishReady(p))
@@ -306,7 +319,7 @@ function filteredProjects() {
       || (schedule === 'no_deadline' && !p.due_date && !isPublishReady(p));
     const statusMatch = !status
       || (status === '__active__' ? ['in_progress','review','completed'].includes(p.status) : p.status === status);
-    return (!q || text.includes(q))
+    return projectMatchesSearch(p)
       && (!topic || p.topic_en === topic)
       && assigneeMatch(p)
       && statusMatch
@@ -318,7 +331,6 @@ function filteredProjects() {
   });
   return sortProjects(filtered, sort);
 }
-
 function seriesInfo(p) {
   const item=state.seriesMap?.books?.[p?.catalog_id];
   if (!item) return null;
@@ -460,11 +472,21 @@ function bindQuickActions(root=document) {
   root.querySelectorAll('.quick-status').forEach(select => select.addEventListener('change', async event => {
     event.stopPropagation();
     const id=Number(select.dataset.projectId);
+    const project=state.projects.find(p=>p.id===id);
+    const previous=project?.status || 'not_started';
+    const requested=select.value;
+    if (!workflowTransitionAllowed(project,requested)) {
+      select.value=previous;
+      toast(previous==='in_progress' && requested==='review' && project?.page_count_verified
+        ? 'Finish the verified source-page translation before Needs Formatting.'
+        : 'Move workflow one stage at a time.');
+      return;
+    }
     try {
-      await api(`/api/projects/${id}`, {method:'PATCH',body:JSON.stringify({status:select.value})});
+      await api(`/api/projects/${id}`,{method:'PATCH',body:JSON.stringify({status:select.value})});
       await loadData();
       toast(`Moved to ${STATUS[select.value]}`);
-    } catch (error) { toast(error.message); }
+    } catch (error) { select.value=previous; toast(error.message); }
   }));
   root.querySelectorAll('.quick-deadline').forEach(input => input.addEventListener('change', async event => {
     event.stopPropagation();
@@ -489,13 +511,12 @@ function bindQuickActions(root=document) {
     openEnglishBookDialog(Number(button.dataset.linkEnglish));
   }));
 }
-
 function resetProjectFilters() {
   els.search.value='';
+  state.selectedIds.clear();
   ['filter-topic','filter-assignee','filter-status','filter-schedule'].forEach(id=>{ if ($(id)) $(id).value=''; });
   ['filter-missing-pdf','filter-checking-pdf','filter-missing-cover','filter-no-english'].forEach(id=>{ if ($(id)) $(id).checked=false; });
 }
-
 function clearProjectFilters() {
   resetProjectFilters();
   renderProjects();
@@ -531,27 +552,26 @@ function openPersonWork(person) {
   renderProjects();
 }
 
-function paceModel({projects=state.projects, paceEvents=state.paceEvents, actor=null}={}) {
-  const projectIds=new Set(projects.map(p=>Number(p.id)));
-  const total = projects.length;
-  const translated = projects.filter(isTranslated).length;
-  const published = projects.filter(p => p.published).length;
-  const completedProjects = projects
+function paceModel({projects=corpusProjects(), paceEvents=state.paceEvents, actor=null, universe=corpusProjects()}={}) {
+  const scopedProjects=corpusProjects(projects);
+  const projectIds=new Set(scopedProjects.map(p=>Number(p.id)));
+  const total = scopedProjects.length;
+  const translated = scopedProjects.filter(isTranslated).length;
+  const published = scopedProjects.filter(p => p.published).length;
+  const completedProjects = scopedProjects
     .map(p=>({project:p,date:parseDateTime(p.completed_at)}))
     .filter(x=>x.date)
     .sort((a,b)=>a.date-b.date);
-  const events=completedProjects.map(x=>x.date);
 
-  const knownPages=projects.map(p=>Number(p.pages)).filter(n=>Number.isFinite(n)&&n>0);
-  const fallbackPages=Math.round(median(knownPages));
+  const fallbackPages=WorkbenchCore.verifiedFallbackPages(corpusProjects(universe));
   const workloadOf=p=>estimatedPages(p,fallbackPages);
 
   const representedSeries=new Set();
-  for (const p of projects) {
+  for (const p of corpusProjects(universe)) {
     const info=seriesInfo(p);
     if (info && info.item.role !== 'umbrella') representedSeries.add(info.key);
   }
-  const workloadProjects=projects.filter(p=>{
+  const workloadProjects=scopedProjects.filter(p=>{
     const info=seriesInfo(p);
     return !(info?.item?.role === 'umbrella' && representedSeries.has(info.key));
   });
@@ -565,19 +585,29 @@ function paceModel({projects=state.projects, paceEvents=state.paceEvents, actor=
   },0);
   const remainingWork=Math.max(0,totalWork-completedWork);
 
-  const pageEvents=(paceEvents?.length ? paceEvents : state.activity.filter(a=>a.action==='translation progress'));
-  const dailyPages=new Map();
-  for (const event of pageEvents) {
+  const sourceEvents=(paceEvents?.length
+    ? paceEvents
+    : state.activity.filter(a=>['translation progress','translation progress correction'].includes(a.action)));
+  const normalizedEvents=[];
+  for (const event of sourceEvents) {
     if (!projectIds.has(Number(event.project_id))) continue;
-    if (actor && event.actor !== actor) continue;
     const before=parseActivityJson(event.before_json) || {};
     const after=parseActivityJson(event.after_json) || {};
-    const delta=Number(after.translated_pages || 0)-Number(before.translated_pages || 0);
     const when=parseDateTime(event.created_at);
-    if (!(delta > 0) || !when) continue;
-    const key=localDateKey(when);
-    dailyPages.set(key,(dailyPages.get(key)||0)+delta);
+    if (!when) continue;
+    normalizedEvents.push({
+      id:event.id,
+      project_id:Number(event.project_id),
+      created_at:when.toISOString(),
+      date_key:localDateKey(when),
+      actor:event.actor || 'Unknown',
+      before_pages:Number(before.translated_pages || 0),
+      after_pages:Number(after.translated_pages || 0),
+    });
   }
+  const acceptedActors=actor ? (actor==='Mohammed' ? ['Mohammed','Brother'] : [actor]) : null;
+  const dailyObject=WorkbenchCore.reconcilePageDeltas(normalizedEvents,acceptedActors);
+  const dailyPages=new Map(Object.entries(dailyObject).map(([key,value])=>[key,Number(value)]));
 
   let pagesPerDay=0;
   let observedDays=0;
@@ -585,7 +615,7 @@ function paceModel({projects=state.projects, paceEvents=state.paceEvents, actor=
   let loggedPages=0;
   const now=new Date();
   const today=new Date(now); today.setHours(12,0,0,0);
-  const positiveKeys=[...dailyPages.keys()].sort();
+  const positiveKeys=[...dailyPages.entries()].filter(([,pages])=>pages>0).map(([key])=>key).sort();
   if (positiveKeys.length) {
     const firstParts=positiveKeys[0].split('-').map(Number);
     const first=new Date(firstParts[0],firstParts[1]-1,firstParts[2],12,0,0,0);
@@ -610,6 +640,43 @@ function paceModel({projects=state.projects, paceEvents=state.paceEvents, actor=
     pagesPerDay=weightTotal ? weightedPages/weightTotal : 0;
   }
 
+  const translatedStatus=status=>['review','completed','published'].includes(status);
+  const completionTransitions=[];
+  const projectsWithTransition=new Set();
+  for (const activity of state.activity) {
+    const projectId=Number(activity.project_id);
+    if (!projectIds.has(projectId)) continue;
+    const before=parseActivityJson(activity.before_json) || {};
+    const after=parseActivityJson(activity.after_json) || {};
+    if (!before.status || !after.status) continue;
+    const wasTranslated=translatedStatus(before.status);
+    const becameTranslated=translatedStatus(after.status);
+    if (wasTranslated===becameTranslated) continue;
+    const when=parseDateTime(activity.created_at);
+    if (!when) continue;
+    projectsWithTransition.add(projectId);
+    completionTransitions.push({
+      id:activity.id,
+      project_id:projectId,
+      created_at:when.toISOString(),
+      date_key:localDateKey(when),
+      delta:becameTranslated ? 1 : -1,
+    });
+  }
+  for (const project of scopedProjects) {
+    if (!isTranslated(project) || projectsWithTransition.has(Number(project.id))) continue;
+    const when=parseDateTime(project.completed_at);
+    if (!when) continue;
+    completionTransitions.push({
+      id:`fallback-${project.id}`,
+      project_id:Number(project.id),
+      created_at:when.toISOString(),
+      date_key:localDateKey(when),
+      delta:1,
+    });
+  }
+  const history=WorkbenchCore.completionHistory(completionTransitions,translated);
+
   const paceReady=remainingWork===0 || (observedDays>=7 && progressDays>=3 && pagesPerDay>0.05);
   const forecastDate=remainingWork===0
     ? now
@@ -618,8 +685,8 @@ function paceModel({projects=state.projects, paceEvents=state.paceEvents, actor=
   const todayPages=dailyPages.get(localDateKey(today)) || 0;
 
   return {
-    total,translated,published,events,completedProjects,
-    fallbackPages,totalWork,completedWork,remainingWork,workloadPercent,
+    total,translated,published,completionEvents:history.events,historyBaseline:history.baseline,
+    completedProjects,fallbackPages,totalWork,completedWork,remainingWork,workloadPercent,
     pagesPerDay,pagesPer30:pagesPerDay*30,observedDays,progressDays,loggedPages,todayPages,
     paceReady,forecastDate,paceHalfLifeDays:14,paceWindowDays:90
   };
@@ -627,6 +694,17 @@ function paceModel({projects=state.projects, paceEvents=state.paceEvents, actor=
 function translationProgressMarkup(p, compact=false, showZero=false) {
   const done=Math.max(0,Number(p.translated_pages || 0));
   const total=Math.max(0,Number(p.pages || 0));
+  if (isTranslated(p) && p.page_count_verified && total>0 && done<total) {
+    return `<div class="book-translation-progress ${compact?'compact':''} legacy-complete" aria-label="Translation complete; historical page checkpoint unavailable">
+      <div class="book-progress-copy"><span>Translation complete</span><strong>Legacy checkpoint unavailable</strong></div>
+    </div>`;
+  }
+  if (!p.page_count_verified) {
+    if (!showZero && !done) return '';
+    return `<div class="book-translation-progress ${compact?'compact':''} unverified" aria-label="${done} source pages translated; total page count unverified">
+      <div class="book-progress-copy"><span>${done} pages translated</span><strong>Total unverified</strong></div>
+    </div>`;
+  }
   if (!total || (!showZero && !done)) return '';
   const percent=Math.min(100,Math.round((done/total)*100));
   return `<div class="book-translation-progress ${compact?'compact':''} ${done===0?'zero':''}" aria-label="${done} of ${total} source pages translated">
@@ -671,29 +749,39 @@ function renderTranslationLive() {
       return TITLE_COLLATOR.compare(a.title_ar || '',b.title_ar || '');
     });
   const assignedIds=new Set(assigned.map(p=>Number(p.id)));
-  const latest=state.activity.filter(a=>a.action==='translation progress' && assignedIds.has(Number(a.project_id))).slice(0,5);
+  const latest=state.activity
+    .filter(a=>['translation progress','translation progress correction'].includes(a.action) && assignedIds.has(Number(a.project_id)))
+    .slice(0,5);
   $('live-progress-summary').textContent=`${assigned.length} assigned · updates live`;
   const assignedMarkup=assigned.length ? assigned.map(p=>{
     const done=Number(p.translated_pages || 0), total=Number(p.pages || 0);
-    const percent=total ? Math.min(100,Math.round(done/total*100)) : 0;
-    return `<button type="button" class="live-translation-row ${done===0?'zero':''}" data-live-project="${p.id}">
-      <div class="live-translation-copy">${bookTitleMarkup(p,{compact:true})}<strong>${done}/${total} pages</strong></div>
-      <div class="live-translation-track"><span style="width:${percent}%"></span></div>
+    const verified=Boolean(p.page_count_verified && total>0);
+    const legacyComplete=Boolean(isTranslated(p) && verified && done<total);
+    const percent=verified && !legacyComplete ? Math.min(100,Math.round(done/total*100)) : 0;
+    const progressText=legacyComplete
+      ? 'Translation complete · legacy checkpoint unavailable'
+      : (verified ? `${done}/${total} pages` : `${done} pages · total unverified`);
+    return `<button type="button" class="live-translation-row ${done===0?'zero':''} ${verified?'':'unverified'} ${legacyComplete?'legacy-complete':''}" data-live-project="${p.id}">
+      <div class="live-translation-copy">${bookTitleMarkup(p,{compact:true})}<strong>${progressText}</strong></div>
+      ${verified && !legacyComplete ? `<div class="live-translation-track"><span style="width:${percent}%"></span></div>` : ''}
     </button>`;
   }).join('') : '<div class="live-empty">No books are assigned here yet.</div>';
   const feedMarkup=latest.length ? latest.map(a=>{
     const after=parseActivityJson(a.after_json) || {};
-    const done=Number(after.translated_pages || 0), total=Number(after.pages || 0);
-    const when=new Date(a.created_at.replace(' ','T')+'Z');
-    return `<div class="translation-feed-item"><span class="translation-feed-dot"></span><div><strong>${done}/${total} pages</strong>${activityBookTitleMarkup(a)}</div><time>${when.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})}</time></div>`;
+    const project=state.projects.find(p=>Number(p.id)===Number(a.project_id));
+    const done=Number(after.translated_pages || 0), total=Number(after.pages || project?.pages || 0);
+    const verified=Boolean(project?.page_count_verified && total>0);
+    const when=parseDateTime(a.created_at) || new Date();
+    const label=a.action==='translation progress correction' ? 'Corrected to' : 'Advanced to';
+    return `<div class="translation-feed-item"><span class="translation-feed-dot"></span><div><strong>${label} ${verified ? `${done}/${total}` : done} pages</strong>${activityBookTitleMarkup(a)}</div><time>${when.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})}</time></div>`;
   }).join('') : '<div class="live-empty subtle">Page updates will appear here as translation advances.</div>';
   $('live-translation-active').innerHTML=assignedMarkup;
   $('live-translation-feed').innerHTML=feedMarkup;
   $('live-translation-active').querySelectorAll('[data-live-project]').forEach(button=>button.addEventListener('click',()=>openProject(Number(button.dataset.liveProject))));
 }
-
 function renderDashboard() {
-  const corpusModel = paceModel();
+  const corpus=corpusProjects();
+  const corpusModel = paceModel({projects:corpus,universe:corpus});
   const {total,translated,published} = corpusModel;
   $('translation-ratio').textContent = `${translated} / ${total}`;
   $('publication-ratio').textContent = `${published} / ${total}`;
@@ -702,10 +790,10 @@ function renderDashboard() {
   $('translation-bar').style.width = `${pct(translated,total)}%`;
   $('publication-bar').style.width = `${pct(published,total)}%`;
 
-  const translating = state.projects.filter(p => p.status === 'in_progress').length;
-  const needsFormatting = state.projects.filter(p => p.status === 'review').length;
-  const needsReview = state.projects.filter(p => p.status === 'completed').length;
-  const due = state.projects.filter(p => p.due_date && !isPublishReady(p));
+  const translating = corpus.filter(p => p.status === 'in_progress').length;
+  const needsFormatting = corpus.filter(p => p.status === 'review').length;
+  const needsReview = corpus.filter(p => p.status === 'completed').length;
+  const due = corpus.filter(p => p.due_date && !isPublishReady(p));
   const todayKey=localDateKey();
   const overdue=due.filter(p=>p.due_date<todayKey).length;
   const dueToday=due.filter(p=>p.due_date===todayKey).length;
@@ -713,8 +801,8 @@ function renderDashboard() {
   if (overdue) deadlineBits.push(`${overdue} overdue`);
   if (dueToday) deadlineBits.push(`${dueToday} today`);
   const deadlineLabel=deadlineBits.length ? `With deadlines · ${deadlineBits.join(' · ')}` : 'With deadlines';
-  const missingPdf = state.projects.filter(p => p.pdf_missing).length;
-  const uncheckedPdf = state.projects.filter(p => p.pdf_unchecked).length;
+  const missingPdf = corpus.filter(p => p.pdf_missing).length;
+  const uncheckedPdf = corpus.filter(p => p.pdf_unchecked).length;
   const rightNowRows = [
     ['translating','Translating', translating],
     ['needs_formatting','Needs formatting', needsFormatting],
@@ -727,7 +815,7 @@ function renderDashboard() {
 
   const people = ['Zahraa','Mohammed','Both','Unassigned'];
   $('people-summary').innerHTML = people.map(person => {
-    const list = state.projects.filter(p=>p.assignee===person);
+    const list = corpus.filter(p=>p.assignee===person);
     const done = list.filter(isTranslated).length;
     return `<button type="button" class="summary-row summary-link" data-dashboard-person="${person}"><span>${escapeHtml(assigneeLabel(person))}</span><strong>${done}/${list.length} translated</strong></button>`;
   }).join('');
@@ -738,7 +826,8 @@ function renderDashboard() {
     state.projects.filter(p => p.assignee === state.actor || p.assignee === 'Both'),
     'title'
   );
-  const personalModel=paceModel({projects:assigned,actor:state.actor});
+  const assignedCorpus=corpusProjects(assigned);
+  const personalModel=paceModel({projects:assignedCorpus,actor:state.actor,universe:corpus});
   const paceValue=personalModel.pagesPerDay>0 ? (personalModel.pagesPerDay>=10 ? personalModel.pagesPerDay.toFixed(0) : personalModel.pagesPerDay.toFixed(1)) : '—';
   const finishValue=personalModel.remainingWork===0
     ? 'Done'
@@ -754,27 +843,30 @@ function renderDashboard() {
     <div class="pace-metric"><span>Recent pace</span><strong>${paceValue}</strong><small>source pages / day</small></div>
     <div class="pace-metric"><span>At this rate</span><strong>${escapeHtml(finishValue)}</strong><small>${escapeHtml(finishNote)}</small></div>
     <div class="pace-metric"><span>Remaining</span><strong>${Math.round(personalModel.remainingWork).toLocaleString()}</strong><small>page-equivalents</small></div>
-    <div class="pace-metric"><span>Workload translated</span><strong>${personalModel.workloadPercent}%</strong><small>assigned books only</small></div>
+    <div class="pace-metric"><span>Workload translated</span><strong>${personalModel.workloadPercent}%</strong><small>assigned catalogue books only</small></div>
     <div class="pace-evidence">${escapeHtml(evidenceText)}</div>`;
   $('my-projects-title').textContent = `${state.actor}'s assigned projects`;
   $('my-projects-count').textContent = `${assigned.length} book${assigned.length===1?'':'s'}`;
-  $('my-projects').innerHTML = assigned.map(assignedProjectMarkup).join('') || `<div class="assigned-empty">No books are assigned to ${escapeHtml(state.actor)} yet.</div>`;
+  $('my-projects').innerHTML = assigned.map(assignedProjectMarkup).join('') || `<div class="assigned-empty">No catalogue books are assigned to ${escapeHtml(state.actor)} yet.</div>`;
   bindProjectClicks($('my-projects'));
   renderTranslationLive();
 }
-
 function renderBatchToolbar() {
   const toolbar=$('batch-toolbar');
   if (!toolbar) return;
   const selected=state.selectedIds.size;
   toolbar.classList.toggle('hidden', selected === 0);
-  $('batch-count').textContent=`${selected} selected`;
   const visible=filteredProjects();
+  const visibleIds=new Set(visible.map(p=>p.id));
+  const visibleSelected=[...state.selectedIds].filter(id=>visibleIds.has(id)).length;
+  const hiddenSelected=selected-visibleSelected;
+  $('batch-count').textContent=hiddenSelected
+    ? `${selected} selected · ${hiddenSelected} outside current filter`
+    : `${selected} selected`;
   const allVisible=visible.length>0 && visible.every(p=>state.selectedIds.has(p.id));
   $('select-visible').checked=allVisible;
   $('select-visible').indeterminate=!allVisible && visible.some(p=>state.selectedIds.has(p.id));
 }
-
 function seriesGroupedMarkup(list) {
   const grouped=new Map();
   const standalone=[];
@@ -874,6 +966,13 @@ async function applyBatch() {
   if ($('batch-status').value) patch.status=$('batch-status').value;
   if ($('batch-deadline').value) patch.due_date=$('batch-deadline').value;
   if (!Object.keys(patch).length) { toast('Choose a batch change first'); return; }
+  if (patch.status) {
+    const invalid=ids.map(id=>state.projects.find(p=>p.id===id)).filter(p=>p && !workflowTransitionAllowed(p,patch.status));
+    if (invalid.length) {
+      toast(`${invalid.length} selected book${invalid.length===1?'':'s'} cannot move to ${STATUS[patch.status]} yet.`);
+      return;
+    }
+  }
   if (patch.due_date && !confirmSuspiciousDeadline(patch.due_date,'')) return;
   $('apply-batch').disabled=true;
   let failures=0;
@@ -892,10 +991,8 @@ async function applyBatch() {
     $('apply-batch').disabled=false;
   }
 }
-
 function renderBoard() {
-  const q = els.search.value.trim().toLowerCase();
-  const matching = state.projects.filter(p=>!q || `${p.title_ar} ${p.title_en||''} ${p.translit||''} ${p.author||''} ${p.category||''}`.toLowerCase().includes(q));
+  const matching = state.projects.filter(projectMatchesSearch);
   const base = matching.filter(viewScopeMatches);
   const unassigned = state.viewScope === 'Shared' ? matching.filter(p=>p.assignee === 'Unassigned') : [];
   syncViewScopeSwitch();
@@ -932,7 +1029,6 @@ function renderBoard() {
   bindProjectClicks($('board'));
   bindBoardDrag();
 }
-
 function bindBoardDrag() {
   const board = $('board');
   board.querySelectorAll('.project-card[draggable="true"]').forEach(card => {
@@ -964,6 +1060,12 @@ function bindBoardDrag() {
       const project = state.projects.find(item => item.id === id);
       const status = list.dataset.status;
       if (!project || !STATUS[status] || project.status === status) return;
+      if (!workflowTransitionAllowed(project,status)) {
+        toast(project.status==='in_progress' && status==='review' && project.page_count_verified
+          ? 'Finish the verified source-page translation before Needs Formatting.'
+          : 'Move workflow one stage at a time.');
+        return;
+      }
       try {
         await api(`/api/projects/${id}`, { method: 'PATCH', body: JSON.stringify({ status }) });
         await loadData();
@@ -974,7 +1076,6 @@ function bindBoardDrag() {
     });
   });
 }
-
 function timelineDay(value) {
   if (!value) return null;
   const parts=String(value).split('-').map(Number);
@@ -996,11 +1097,12 @@ function timelineMonths(minDay,maxDay) {
   return segments;
 }
 function renderTimeline() {
-  const scoped=state.projects.filter(viewScopeMatches);
+  const matching=state.projects.filter(projectMatchesSearch);
+  const scoped=matching.filter(viewScopeMatches);
   const dated=scoped.filter(p=>p.start_date || p.due_date);
   const unscheduled=scoped.filter(p=>!p.start_date && !p.due_date && !isPublishReady(p));
   const unassigned=state.viewScope === 'Shared'
-    ? state.projects.filter(p=>p.assignee === 'Unassigned' && (p.start_date || p.due_date || !isPublishReady(p)))
+    ? matching.filter(p=>p.assignee === 'Unassigned' && (p.start_date || p.due_date || !isPublishReady(p)))
     : [];
   syncViewScopeSwitch();
   if ($('timeline-scope-summary')) {
@@ -1011,7 +1113,10 @@ function renderTimeline() {
   const todayKey=localDateKey();
   const today=timelineDay(todayKey);
   if (!dated.length) {
-    $('timeline-visual').innerHTML='<div class="timeline-empty">Add a start date or deadline to place a book on the timeline.</div>';
+    const hasSearch=Boolean(els.search.value.trim());
+    $('timeline-visual').innerHTML=hasSearch && !scoped.length
+      ? '<div class="timeline-empty">No books match this search in the current view.</div>'
+      : '<div class="timeline-empty">Add a start date or deadline to place a book on the timeline.</div>';
   } else {
     const points=[today];
     dated.forEach(p=>{
@@ -1078,18 +1183,19 @@ function renderTimeline() {
 }
 
 function renderStats() {
-  const model = paceModel();
+  const corpus=corpusProjects();
+  const model = paceModel({projects:corpus,universe:corpus});
   const today = localDateKey();
-  const open = state.projects.filter(p=>!isPublishReady(p));
+  const open = corpus.filter(p=>!isPublishReady(p));
   const overdue = open.filter(p=>p.due_date && p.due_date < today).length;
   const next30 = localDateKeyAfterDays(30);
   const dueSoon = open.filter(p=>p.due_date && p.due_date >= today && p.due_date <= next30).length;
   const unscheduled = open.filter(p=>!p.due_date).length;
 
   $('stat-translated').textContent = model.translated;
-  $('stat-translated-sub').textContent = `of ${model.total} books · ${pct(model.translated,model.total)}%`;
+  $('stat-translated-sub').textContent = `of ${model.total} catalogue books · ${pct(model.translated,model.total)}%`;
   $('stat-published').textContent = model.published;
-  $('stat-published-sub').textContent = `of ${model.total} books · ${pct(model.published,model.total)}%`;
+  $('stat-published-sub').textContent = `of ${model.total} catalogue books · ${pct(model.published,model.total)}%`;
   const paceText=model.pagesPerDay>0 ? (model.pagesPerDay>=10 ? model.pagesPerDay.toFixed(0) : model.pagesPerDay.toFixed(1)) : '—';
   $('stat-pace').textContent = paceText;
   const paceSub=$('stat-pace-sub');
@@ -1107,7 +1213,7 @@ function renderStats() {
       ? `${Math.round(model.remainingWork).toLocaleString()} page-equivalents remain · 90-day maximum history`
       : (model.loggedPages
         ? `Forecast unlocks after 7 observed days + 3 progress days; currently ${model.observedDays} + ${model.progressDays}.`
-        : 'Log source-page progress to start forecasting'));
+        : 'Log verified source-page progress to start forecasting'));
 
   $('stat-workload-pace').textContent = `${model.workloadPercent}%`;
   const workloadPaceSub=$('stat-workload-pace-sub');
@@ -1115,13 +1221,13 @@ function renderStats() {
   $('stat-workload-forecast').textContent = Math.round(model.remainingWork).toLocaleString();
   $('stat-workload-forecast-sub').textContent = model.remainingWork===0
     ? 'No translation workload remains'
-    : `page-equivalents remain · unknown counts use ~${model.fallbackPages} pages; duplicate series umbrellas excluded`;
+    : `page-equivalents remain · unknown physical counts use corpus median ~${model.fallbackPages}; duplicate series umbrellas excluded`;
 
   $('stats-by-person').innerHTML = ASSIGNEES.map(person => {
-    const list=state.projects.filter(p=>p.assignee===person);
+    const list=corpus.filter(p=>p.assignee===person);
     const done=list.filter(isTranslated).length;
-    const recentByPerson=model.completedProjects.filter(x=>x.date>=new Date(Date.now()-30*86400000) && x.project.completed_by===person).length;
-    return `<div class="summary-row"><span>${person}</span><strong>${done}/${list.length} · ${pct(done,list.length)}%${['Zahraa','Mohammed'].includes(person) ? ` · ${recentByPerson}/30d` : ''}</strong></div>`;
+    const recentByPerson=model.completedProjects.filter(x=>x.date>=new Date(Date.now()-30*86400000) && (x.project.completed_by===person || (person==='Mohammed' && x.project.completed_by==='Brother'))).length;
+    return `<div class="summary-row"><span>${escapeHtml(assigneeLabel(person))}</span><strong>${done}/${list.length} · ${pct(done,list.length)}%${['Zahraa','Mohammed'].includes(person) ? ` · ${recentByPerson}/30d` : ''}</strong></div>`;
   }).join('');
   $('stats-deadlines').innerHTML = [
     ['Overdue',overdue],['Due in next 30 days',dueSoon],['Without deadline (not Publish Ready)',unscheduled]
@@ -1129,30 +1235,32 @@ function renderStats() {
 
   $('progress-chart').innerHTML = progressChartMarkup(model);
 }
-
 function progressChartMarkup(model) {
-  if (!model.events.length) return '<div class="chart-empty">Translation history will appear here after the first book reaches Needs Formatting or later.</div>';
+  const events=model.completionEvents || [];
+  if (!events.length && !model.historyBaseline) return '<div class="chart-empty">Translation history will appear here after the first book reaches Needs Formatting or later.</div>';
   const width=760, height=280, left=46, right=18, top=18, bottom=42;
-  const start = new Date(model.events[0]); start.setHours(0,0,0,0);
   const now = new Date(); now.setHours(23,59,59,999);
+  const firstEvent=events[0]?.created_at ? new Date(events[0].created_at) : new Date(now.getTime()-86400000);
+  const start = new Date(firstEvent); start.setHours(0,0,0,0);
   const span = Math.max(86400000,now-start);
-  const dayCounts = new Map();
-  for (const d of model.events) {
-    const key=d.toISOString().slice(0,10);
-    dayCounts.set(key,(dayCounts.get(key)||0)+1);
+  const dayDeltas = new Map();
+  for (const event of events) {
+    const key=event.date_key;
+    if (!key) continue;
+    dayDeltas.set(key,(dayDeltas.get(key)||0)+Number(event.delta || 0));
   }
-  let running=0;
-  const points=[{date:start,count:0}];
-  for (const [key,n] of [...dayCounts.entries()].sort(([a],[b])=>a.localeCompare(b))) {
-    running += n;
-    points.push({date:new Date(`${key}T12:00:00Z`),count:running});
+  let running=Math.max(0,Number(model.historyBaseline || 0));
+  const points=[{date:start,count:running}];
+  for (const [key,delta] of [...dayDeltas.entries()].sort(([a],[b])=>a.localeCompare(b))) {
+    running=Math.max(0,Math.min(model.total,running+delta));
+    points.push({date:new Date(`${key}T12:00:00`),count:running});
   }
   points.push({date:now,count:model.translated});
   const x=d=>left+((d-start)/span)*(width-left-right);
   const y=n=>top+(1-(n/Math.max(1,model.total)))*(height-top-bottom);
   const path=points.map((p,i)=>`${i?'L':'M'} ${x(p.date).toFixed(1)} ${y(p.count).toFixed(1)}`).join(' ');
   const pctNow=pct(model.translated,model.total);
-  return `<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="Cumulative translation completion history">
+  return `<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="Translation-stage history reconstructed from recorded workflow transitions">
     <line class="chart-axis" x1="${left}" y1="${top}" x2="${left}" y2="${height-bottom}"></line>
     <line class="chart-axis" x1="${left}" y1="${height-bottom}" x2="${width-right}" y2="${height-bottom}"></line>
     <line class="chart-grid" x1="${left}" y1="${y(model.total/2)}" x2="${width-right}" y2="${y(model.total/2)}"></line>
@@ -1166,13 +1274,12 @@ function progressChartMarkup(model) {
     <text class="chart-label" x="${width-right}" y="${height-12}" text-anchor="end">Today</text>
   </svg>`;
 }
-
 function activityActorGroup(activity) {
   if (activity.actor === 'Zahraa') return 'Zahraa';
   if (activity.actor === 'Mohammed' || activity.actor === 'Brother') return 'Mohammed';
-  return 'System';
+  if (activity.actor === 'System') return 'System';
+  return 'Unknown';
 }
-
 function syncActivityFilters() {
   document.querySelectorAll('[data-activity-actor]').forEach(button=>{
     const active=button.dataset.activityActor===state.activityActorFilter;
@@ -1186,29 +1293,39 @@ function renderActivity() {
   syncActivityFilters();
   const filtered=state.activity.filter(a=>{
     const actorMatch=state.activityActorFilter === 'all' || activityActorGroup(a) === state.activityActorFilter;
-    const type= a.action === 'translation progress' ? 'translation' : 'project';
+    const type=['translation progress','translation progress correction'].includes(a.action) ? 'translation' : 'project';
     const typeMatch=state.activityTypeFilter === 'all' || type === state.activityTypeFilter;
     return actorMatch && typeMatch;
   });
   if ($('activity-filter-summary')) $('activity-filter-summary').textContent=`${filtered.length} of ${state.activity.length} events`;
   $('activity-list').innerHTML = filtered.map(a => {
-    const when=new Date(a.created_at.replace(' ','T')+'Z');
-    if (a.action === 'translation progress') {
+    const when=parseDateTime(a.created_at) || new Date();
+    if (['translation progress','translation progress correction'].includes(a.action)) {
       const after=parseActivityJson(a.after_json) || {};
-      return `<div class="activity-item activity-translation"><time>${when.toLocaleDateString()}</time><div><strong>${Number(after.translated_pages || 0)}/${Number(after.pages || 0)} pages translated</strong>${activityBookTitleMarkup(a)}</div><small>${when.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})}</small></div>`;
+      const project=state.projects.find(p=>Number(p.id)===Number(a.project_id));
+      const done=Number(after.translated_pages || 0), total=Number(after.pages || project?.pages || 0);
+      const verified=Boolean(project?.page_count_verified && total>0);
+      const label=a.action==='translation progress correction' ? 'Progress corrected' : 'Pages translated';
+      const amount=verified ? `${done}/${total}` : `${done} · total unverified`;
+      return `<div class="activity-item activity-translation"><time>${when.toLocaleDateString()}</time><div><strong>${label}: ${amount}</strong>${activityBookTitleMarkup(a)}</div><small>${escapeHtml(activityActorGroup(a))} · ${when.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})}</small></div>`;
     }
-    return `<div class="activity-item"><time>${when.toLocaleDateString()}</time><div><strong>${escapeHtml(a.actor)}</strong> ${escapeHtml(a.action)}${activityBookTitleMarkup(a)}</div><small>${when.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})}</small></div>`;
+    return `<div class="activity-item"><time>${when.toLocaleDateString()}</time><div><strong>${escapeHtml(a.actor || 'Unknown')}</strong> ${escapeHtml(a.action)}${activityBookTitleMarkup(a)}</div><small>${when.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})}</small></div>`;
   }).join('') || '<p class="muted">No activity matches these filters.</p>';
 }
-
 function render() { renderDashboard(); renderProjects(); renderBoard(); renderTimeline(); renderStats(); renderActivity(); hydrateUploadedCovers(document); }
 
 function setView(view) {
   state.view = view;
   document.querySelectorAll('.view').forEach(x=>x.classList.remove('active-view'));
   $(`${view}-view`).classList.add('active-view');
-  document.querySelectorAll('.nav-item').forEach(x=>x.classList.toggle('active', x.dataset.view===view));
+  document.querySelectorAll('.nav-item').forEach(button=>{
+    const active=button.dataset.view===view;
+    button.classList.toggle('active',active);
+    if (active) button.setAttribute('aria-current','page');
+    else button.removeAttribute('aria-current');
+  });
   els.title.textContent = ({dashboard:'Dashboard',projects:'Projects',board:'Board',timeline:'Timeline',stats:'Stats',activity:'Activity'})[view];
+  els.search.hidden=!['projects','board','timeline'].includes(view);
 }
 
 function openProject(id) {
@@ -1218,13 +1335,22 @@ function openProject(id) {
   $('title-ar').value = p?.title_ar || '';
   $('title-en').value = p?.title_en || '';
   $('assignee').value = p?.assignee || 'Unassigned';
+  $('status').innerHTML = p
+    ? statusOptions(p.status,true,p)
+    : STATUS_ORDER.slice(0,2).map(status=>`<option value="${status}">${STATUS[status]}</option>`).join('');
   $('status').value = p?.status || 'not_started';
   $('start-date').value = p?.start_date || '';
   $('due-date').value = p?.due_date || '';
   updateDeadlineWarning($('due-date').value,p?.due_date || '');
-  $('translated-pages').value = p?.translated_pages || 0;
-  $('translated-pages').max = p?.pages || ''; 
-  $('translated-pages-total').textContent = p?.pages ? `/ ${p.pages} source pages` : 'source pages';
+  const translatedPages=Number(p?.translated_pages || 0);
+  const sourcePages=Number(p?.pages || 0);
+  const legacyComplete=Boolean(p && isTranslated(p) && p.page_count_verified && sourcePages>0 && translatedPages<sourcePages);
+  $('translated-pages').value = legacyComplete ? '' : translatedPages;
+  $('translated-pages').placeholder = legacyComplete ? 'Complete' : '';
+  $('translated-pages').max = p?.page_count_verified && !legacyComplete ? (p?.pages || '') : '';
+  $('translated-pages-total').textContent = legacyComplete
+    ? 'historical completion · page checkpoint unavailable'
+    : (p?.page_count_verified && p?.pages ? `/ ${p.pages} verified source pages` : 'verified total unavailable');
   $('google-doc-url').value = p?.google_doc_url || '';
   $('cover-url').value = p?.cover_url || '';
   $('cover-file').value = '';
@@ -1236,12 +1362,13 @@ function openProject(id) {
   $('source-pdf-url').value = p?.source_pdf_url || '';
   $('pdf-state').innerHTML = p ? (
     p.pdf_available
-      ? `<span>Verified direct PDF available</span>`
+      ? `<span>Verified direct PDF available · ${p.pages} physical pages</span>`
       : p.pdf_missing
         ? `<span class="missing">PDF missing or unusable${p.package_url ? ' — archive only provides a ZIP/RAR package' : ''}${p.pdf_check_note ? ` · ${escapeHtml(p.pdf_check_note)}` : ''}</span>`
         : `<span>PDF awaiting verification${p.pdf_check_note ? ` · ${escapeHtml(p.pdf_check_note)}` : ''}</span>`
   ) : '';
   $('published').checked = Boolean(p?.published);
+  $('published').disabled = $('status').value !== 'published';
   $('notes').value = p?.notes || '';
   const meta = [];
   if (p?.completed_at) meta.push(`Translation finished ${new Date(p.completed_at).toLocaleDateString()}${p.completed_by ? ` by ${escapeHtml(p.completed_by)}` : ''}`);
@@ -1260,6 +1387,16 @@ async function saveProject(event) {
     published: $('published').checked, notes: $('notes').value.trim(),
   };
   const currentProject=id ? state.projects.find(p=>p.id===id) : null;
+  if (currentProject && !workflowTransitionAllowed(currentProject,payload.status)) {
+    toast(currentProject.status==='in_progress' && payload.status==='review' && currentProject.page_count_verified
+      ? 'Finish the verified source-page translation before Needs Formatting.'
+      : 'Move workflow one stage at a time.');
+    return;
+  }
+  if (payload.published && currentProject?.status!=='published') {
+    toast('Save Publish Ready first, then mark the book Published.');
+    return;
+  }
   if (payload.due_date && !confirmSuspiciousDeadline(payload.due_date,currentProject?.due_date || '')) return;
   try {
     if (id) await api(`/api/projects/${id}`, {method:'PATCH', body:JSON.stringify(payload)});
@@ -1267,7 +1404,6 @@ async function saveProject(event) {
     els.dialog.close(); await loadData(); toast(id ? 'Project updated' : 'Project created');
   } catch (e) { toast(e.message); }
 }
-
 function renderCoverPreview(project=null) {
   const uploaded = project?.id ? state.coverObjectUrls.get(project.id) : '';
   const manual = $('cover-url')?.value.trim();
@@ -1443,9 +1579,14 @@ async function saveEnglishBook(event) {
 
 function sharedDataSignature(projects, activity, paceEvents) {
   const projectState=projects.map(p=>[
-    p.id,p.updated_at,p.status,p.assignee,p.translated_pages,p.translation_progress_at,
-    p.start_date,p.due_date,p.google_doc_url,p.cover_url,p.has_uploaded_cover,
-    p.published_at,p.pdf_status
+    p.id,p.catalog_id,p.updated_at,
+    p.title_ar,p.title_en,p.translit,p.author,p.author_ar,p.category,p.topic_en,p.topic_ar,
+    p.package_url,p.pages,p.volumes,p.catalog_date,
+    p.assignee,p.status,p.start_date,p.due_date,p.notes,
+    p.translated_pages,p.translation_progress_at,p.completed_at,p.completed_by,
+    p.published,p.published_at,p.published_by,
+    p.source_url,p.source_pdf_url,p.pdf_status,p.pdf_checked_at,p.pdf_check_note,p.page_count_verified,p.page_count_basis,
+    p.google_doc_url,p.cover_url,p.has_uploaded_cover
   ]);
   return JSON.stringify([
     projectState,
@@ -1467,7 +1608,7 @@ async function fetchSharedData() {
   const [projects, activity] = await Promise.all([api('/api/projects'), api('/api/activity')]);
   const nextProjects=projects.projects || [];
   const nextActivity=activity.activity || [];
-  const nextPaceEvents=activity.pace_events || nextActivity.filter(a=>a.action==='translation progress');
+  const nextPaceEvents=activity.pace_events || nextActivity.filter(a=>['translation progress','translation progress correction'].includes(a.action));
   return {projects:nextProjects,activity:nextActivity,paceEvents:nextPaceEvents,revision};
 }
 
@@ -1509,7 +1650,7 @@ async function syncVerifiedTranslationMarkers() {
   lastMarkerSyncAt=now;
 
   const candidates=state.projects
-    .filter(p=>p.status==='in_progress' && p.google_doc_url)
+    .filter(p=>p.status==='in_progress' && p.google_doc_url && p.page_count_verified)
     .sort((a,b)=>String(b.translation_progress_at || '').localeCompare(String(a.translation_progress_at || '')));
 
   if (!candidates.length) {
@@ -1563,13 +1704,14 @@ function scheduleLiveRevisionPoll(delay=LIVE_REVISION_MS) {
 }
 
 function startLiveSync() {
+  if (liveSyncStarted) return;
+  liveSyncStarted=true;
   scheduleLiveRevisionPoll();
   window.addEventListener('focus',()=>syncSharedData({allowHidden:true}));
   document.addEventListener('visibilitychange',()=>{
     if (!document.hidden) syncSharedData({allowHidden:true});
   });
 }
-
 async function refreshProjects() {
   const projects = await api('/api/projects');
   state.projects = projects.projects || [];
@@ -1591,6 +1733,35 @@ async function auditPdfs() {
   }
 }
 
+function setWorkspaceError(message='') {
+  const panel=$('workspace-error');
+  const hasError=Boolean(message);
+  if (panel) panel.hidden=!hasError;
+  document.body.classList.toggle('workspace-data-unavailable',hasError);
+  if (hasError && $('workspace-error-detail')) $('workspace-error-detail').textContent=message;
+}
+
+async function loadWorkspace() {
+  const retry=$('retry-workspace');
+  if (retry) retry.disabled=true;
+  try {
+    const health = await api('/api/health');
+    state.pdfAudit = health.pdfs || null;
+    await Promise.all([loadCoverMap(),loadSeriesMap()]);
+    await loadData();
+    setWorkspaceError('');
+    startLiveSync();
+    if (state.pdfAudit?.unchecked) auditPdfs().catch(error => toast(`PDF verification paused: ${error.message}`));
+    return true;
+  } catch (error) {
+    setWorkspaceError(`The Workbench could not load live project data: ${error.message}`);
+    toast('Live project data is unavailable');
+    return false;
+  } finally {
+    if (retry) retry.disabled=false;
+  }
+}
+
 async function init() {
   clearLegacyAccessKey();
   els.actor.value = state.actor;
@@ -1599,16 +1770,8 @@ async function init() {
   syncActivityFilters();
   if ($('sort-projects')) $('sort-projects').value = state.projectSort;
   if ($('group-projects')) $('group-projects').value = state.projectGrouping;
-  try {
-    const health = await api('/api/health');
-    state.pdfAudit = health.pdfs || null;
-    await Promise.all([loadCoverMap(),loadSeriesMap()]);
-    await loadData();
-    startLiveSync();
-    if (state.pdfAudit?.unchecked) auditPdfs().catch(error => toast(`PDF verification paused: ${error.message}`));
-  } catch (e) {
-    toast(`Could not load workspace: ${e.message}`);
-  }
+  setView(state.view);
+  await loadWorkspace();
 }
 
 document.querySelectorAll('.nav-item').forEach(btn=>btn.addEventListener('click',()=>setView(btn.dataset.view)));
@@ -1638,11 +1801,17 @@ $('activity-type')?.addEventListener('change',()=>{
 });
 document.querySelectorAll('[data-jump-view]').forEach(btn=>btn.addEventListener('click',()=>setView(btn.dataset.jumpView)));
 $('view-my-projects')?.addEventListener('click',()=>{
+  resetProjectFilters();
   $('filter-assignee').value='__mine__';
   setView('projects');
   renderProjects();
 });
-els.search.addEventListener('input',()=>{renderProjects();renderBoard();});
+els.search.addEventListener('input',()=>{
+  if (state.view==='projects') state.selectedIds.clear();
+  renderProjects();
+  renderBoard();
+  renderTimeline();
+});
 els.actor.addEventListener('change',()=>{
   state.actor=els.actor.value;
   localStorage.setItem('haydariActor',state.actor);
@@ -1650,7 +1819,10 @@ els.actor.addEventListener('change',()=>{
   renderDashboard();
   if ($('filter-assignee')?.value === '__mine__') renderProjects();
 });
-['filter-topic','filter-assignee','filter-status','filter-schedule','filter-missing-pdf','filter-checking-pdf','filter-missing-cover','filter-no-english'].forEach(id=>$(id)?.addEventListener('change',renderProjects));
+['filter-topic','filter-assignee','filter-status','filter-schedule','filter-missing-pdf','filter-checking-pdf','filter-missing-cover','filter-no-english'].forEach(id=>$(id)?.addEventListener('change',()=>{
+  state.selectedIds.clear();
+  renderProjects();
+}));
 $('sort-projects')?.addEventListener('change',()=>{state.projectSort=$('sort-projects').value;localStorage.setItem('haydariProjectSort',state.projectSort);renderProjects();});
 $('group-projects')?.addEventListener('change',()=>{state.projectGrouping=$('group-projects').value;localStorage.setItem('haydariProjectGrouping',state.projectGrouping);renderProjects();});
 $('new-project').addEventListener('click',()=>openProject(null));
@@ -1668,9 +1840,21 @@ $('clear-due-date')?.addEventListener('click',async ()=>{
     updateDeadlineWarning('','');
   } catch (error) { toast(error.message); }
 });
-$('published').addEventListener('change',()=>{ if ($('published').checked) $('status').value='published'; });
-$('status').addEventListener('change',()=>{ if ($('status').value!=='published') $('published').checked=false; });
+$('published').addEventListener('change',()=>{
+  if ($('published').checked && $('status').value!=='published') {
+    $('published').checked=false;
+    toast('Move the book to Publish Ready before marking it Published.');
+  }
+});
+$('status').addEventListener('change',()=>{
+  const id=Number($('project-id').value) || null;
+  const current=id ? state.projects.find(p=>p.id===id) : null;
+  const alreadyReady=current?.status==='published' && $('status').value==='published';
+  $('published').disabled=!alreadyReady;
+  if (!alreadyReady) $('published').checked=false;
+});
 $('clear-project-filters')?.addEventListener('click',clearProjectFilters);
+$('retry-workspace')?.addEventListener('click',loadWorkspace);
 $('timeline-jump-today')?.addEventListener('click',()=>{
   const scroll=$('timeline-visual')?.querySelector('.timeline-scroll');
   if (!scroll) return;

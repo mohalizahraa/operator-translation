@@ -22,6 +22,10 @@ async function readMarker(context) {
 
   const project=await context.env.DB.prepare('SELECT * FROM projects WHERE id = ?').bind(id).first();
   if (!project) return {status:404,data:{error:'Project not found.'}};
+  const normalizedProject=normalizeProject(project);
+  if (!normalizedProject.page_count_verified) {
+    return {status:409,data:{error:'Verified marker sync requires a verified physical-PDF page denominator.'}};
+  }
 
   const docId=googleDocId(project.google_doc_url);
   if (!docId) return {status:200,data:{project:normalizeProject(project),marker_found:false,unchanged:true}};
@@ -57,25 +61,13 @@ async function readMarker(context) {
   return {
     status:200,
     data:{
-      project:normalizeProject(project),
+      project:normalizedProject,
       marker_found:true,
       marker_pages:pages,
       marker_total:total,
       export_sha256:hex(digest),
     }
   };
-}
-
-function progressNote(pages,total) {
-  const next = pages < total ? ` Continue sequentially from physical source page ${pages + 1}.` : '';
-  return `Translation active. Verified physical source-page checkpoint: ${pages}/${total}. Live progress is synchronized from the linked English Google Doc WBPROGRESS marker.${next}`;
-}
-
-async function refreshProgressNote(context,id,pages,total) {
-  const note=progressNote(pages,total);
-  await context.env.DB.prepare(
-    'UPDATE projects SET notes = ? WHERE id = ? AND (notes IS NULL OR notes <> ?)'
-  ).bind(note,id,note).run();
 }
 
 export async function onRequestGet(context) {
@@ -94,9 +86,7 @@ export async function onRequestPost(context) {
   const current=Number(project.translated_pages || 0);
   const pages=Number(markerResult.data.marker_pages);
   if (pages <= current) {
-    if (pages === current) await refreshProgressNote(context,id,pages,Number(markerResult.data.marker_total));
-    const refreshed=await context.env.DB.prepare('SELECT * FROM projects WHERE id = ?').bind(id).first();
-    return json({...markerResult.data,project:normalizeProject(refreshed || project),unchanged:true});
+    return json({...markerResult.data,unchanged:true});
   }
 
   const latest=await context.env.DB.prepare(
@@ -112,7 +102,11 @@ export async function onRequestPost(context) {
 
   const headers=new Headers(context.request.headers);
   headers.set('content-type','application/json');
-  headers.set('x-workbench-actor','System');
+  const requestedActor=(headers.get('x-workbench-actor') || '').trim();
+  const progressActor=['Zahraa','Mohammed'].includes(requestedActor)
+    ? requestedActor
+    : (['Zahraa','Mohammed'].includes(project.assignee) ? project.assignee : 'System');
+  headers.set('x-workbench-actor',progressActor);
   const request=new Request(context.request.url,{
     method:'PATCH',
     headers,
@@ -126,7 +120,5 @@ export async function onRequestPost(context) {
     }),
   });
 
-  const response=await publishProgress({...context,request});
-  if (response.ok) await refreshProgressNote(context,id,pages,Number(markerResult.data.marker_total));
-  return response;
+  return publishProgress({...context,request});
 }

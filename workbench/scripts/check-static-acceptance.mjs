@@ -22,6 +22,8 @@ const headersSource = await fs.readFile(new URL('public/_headers', root), 'utf8'
 const projectPatchSource = await fs.readFile(new URL('functions/api/projects/[id].js', root), 'utf8');
 const revisionSource = await fs.readFile(new URL('functions/api/revision.js', root), 'utf8');
 const progressSyncSource = await fs.readFile(new URL('functions/api/projects/[id]/progress-sync.js', root), 'utf8');
+const modelCoreSource = await fs.readFile(new URL('public/model-core.js', root), 'utf8');
+const projectsIndexSource = await fs.readFile(new URL('functions/api/projects/index.js', root), 'utf8');
 
 
 const marker = 'export const BOOK_CATALOG = ';
@@ -111,13 +113,15 @@ assert(indexSource.includes('data-dashboard-preset') === false, 'Dashboard drill
 assert(appSource.includes('data-dashboard-preset=') && appSource.includes('function openProjectsPreset(preset)') && appSource.includes('function openPersonWork(person)'), 'Dashboard summaries are not navigational.');
 assert(appSource.includes("['translating','Translating', translating]") && appSource.includes("['needs_formatting','Needs formatting', needsFormatting]") && appSource.includes("['needs_review','Needs review', needsReview]"), 'Dashboard Right now must expose literal workflow stages instead of a vague Active aggregate.');
 assert(appSource.includes('const overdue=due.filter') && appSource.includes('const dueToday=due.filter') && appSource.includes('deadlineBits.push(`${overdue} overdue`)') && appSource.includes('deadlineBits.push(`${dueToday} today`)'), 'Dashboard deadline summary must distinguish overdue and due-today work.');
-assert(appSource.includes('function paceModel({projects=state.projects, paceEvents=state.paceEvents, actor=null}={})'), 'Scoped pace model contract is missing.');
+assert(appSource.includes('function paceModel({projects=corpusProjects(), paceEvents=state.paceEvents, actor=null, universe=corpusProjects()}={})'), 'Scoped pace model contract is missing.');
+assert(modelCoreSource.includes('verifiedFallbackPages') && modelCoreSource.includes('reconcilePageDeltas') && modelCoreSource.includes('completionHistory'), 'Testable calculation core is incomplete.');
+assert(appSource.includes('WorkbenchCore.verifiedFallbackPages(corpusProjects(universe))'), 'Pace fallback must be derived from verified corpus page counts.');
 assert(appSource.includes('const weightedHalfLifeDays=14;') && appSource.includes('cap.setDate(cap.getDate()-89);'), 'Pace model must retain the 14-day half-life over at most 90 days.');
 assert(appSource.includes('observedDays>=7 && progressDays>=3'), 'Pace forecast evidence gate regressed.');
 assert(appSource.includes('const pages=dailyPages.get(key)||0;') && appSource.includes('weightTotal+=weight;'), 'Pace model must include zero-progress days in the weighted denominator.');
 assert(appSource.includes('if (!projectIds.has(Number(event.project_id))) continue;'), 'Pace model must scope events to the selected project set.');
-assert(appSource.includes('if (actor && event.actor !== actor) continue;'), 'Personal pace must exclude another collaborator\'s progress events on Shared/Both books.');
-assert(appSource.includes('const personalModel=paceModel({projects:assigned,actor:state.actor});'), 'Dashboard pace must be scoped to the selected collaborator.');
+assert(appSource.includes("const acceptedActors=actor ? (actor==='Mohammed' ? ['Mohammed','Brother'] : [actor]) : null;") && appSource.includes('WorkbenchCore.reconcilePageDeltas(normalizedEvents,acceptedActors)'), 'Personal pace must apply collaborator attribution after correction reconciliation.');
+assert(appSource.includes('const assignedCorpus=corpusProjects(assigned);') && appSource.includes('const personalModel=paceModel({projects:assignedCorpus,actor:state.actor,universe:corpus});'), 'Dashboard pace must use the selected collaborator\'s catalogue assignments without hiding operational ad-hoc projects.');
 assert(appSource.includes("toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'})"), 'At this rate must show an exact calendar finish date once the evidence gate opens.');
 assert(indexSource.includes('id="pace-panel-title"') && indexSource.includes('id="pace-summary"') && indexSource.includes('id="stat-forecast"'), 'NaNo-style pace/projection surfaces are missing.');
 assert(!appSource.includes('chart-projection'), 'Book-count completion history must not mix in a page-workload forecast.');
@@ -133,6 +137,7 @@ assert(indexSource.includes('id="timeline-jump-today"'), 'Timeline Today control
 const appAssetVersion = indexSource.match(/\/app\.js\?v=([^"'&\\s]+)/)?.[1];
 const stylesAssetVersion = indexSource.match(/\/styles\.css\?v=([^"'&\\s]+)/)?.[1];
 assert(appAssetVersion && stylesAssetVersion, 'Workbench JS/CSS must both carry explicit cache-busting versions.');
+assert(indexSource.includes('/model-core.js?v='), 'Calculation core must be cache-busted and loaded before app.js.');
 assert(headersSource.includes('/app.js') && headersSource.includes('/styles.css') && headersSource.includes('Cache-Control: no-cache'), 'Workbench JS/CSS freshness headers are missing.');
 assert(appSource.includes('timeline-due-marker'), 'Timeline due marker is missing.');
 assert(appSource.includes('async function setProjectDeadline(id, value)'), 'Shared deadline mutation helper is missing.');
@@ -152,7 +157,7 @@ assert(appSource.includes('translationProgressMarkup(p,true,true)'), 'Assigned b
 assert(indexSource.includes('id="live-progress-summary"'), 'Assigned live-progress summary is missing.');
 assert(indexSource.includes('id="live-translation-active"') && indexSource.includes('id="live-translation-feed"'), 'Live translation Dashboard surface is missing.');
 assert(indexSource.includes('id="translated-pages"'), 'Project source-page progress field is missing.');
-assert(appSource.includes("a.action === 'translation progress'"), 'Activity does not render translation-page events specially.');
+assert(appSource.includes("['translation progress','translation progress correction'].includes(a.action)"), 'Activity does not render translation progress and corrections consistently.');
 assert(appSource.includes('due_date:value || null'), 'Deadline clearing does not send explicit null.');
 assert(appSource.includes('data-clear-deadline'), 'Inline Remove deadline action is missing.');
 assert(indexSource.includes('id="clear-due-date"'), 'Editor Remove deadline action is missing.');
@@ -182,6 +187,20 @@ assert(indexSource.includes('id="published"'), 'Separate Published control is mi
 assert(libSource.includes("'production-stages-v2'"), 'Status-model migration is missing.');
 assert(libSource.includes('pages = COALESCE(?, pages)') && libSource.includes('physical_pages'), 'Verified physical PDF page counts are not applied to Workbench runtime denominators.');
 assert(appSource.includes('PDF count unverified'), 'Unverified fallback page counts are not labeled honestly in the Projects surface.');
+assert(appSource.includes('Translation complete · legacy checkpoint unavailable') && appSource.includes('historical completion · page checkpoint unavailable'), 'Historical completed books with pre-checkpoint provenance can still render as false zero progress.');
 assert(!indexSource.includes('>In Progress</option>') && !indexSource.includes('>Review</option>') && !indexSource.includes('>Completed</option>'), 'Legacy status labels remain in the UI.');
 
 console.log(`Workbench static acceptance passed: 176 books, 10 topics, 176 covers, 172 available PDFs, 4 missing, 0 unchecked, 172 physical page counts verified, ${pdfAudit.page_count_mismatches} catalog/page mismatches reconciled at runtime.`);
+
+assert(!projectsIndexSource.includes('syncActiveTranslationMarkers'), 'GET /api/projects must not mutate translation progress.');
+assert(!progressSyncSource.includes('SET notes ='), 'Progress sync must not overwrite project notes.');
+assert(projectPatchSource.includes('validStatusTransition') && projectPatchSource.includes('Math.abs(a-b) === 1'), 'Workflow stage jumps are not blocked.');
+assert(projectPatchSource.includes('before.status !== \'published\''), 'Publication can still be combined with entering Publish Ready.');
+assert(projectsIndexSource.includes("!['not_started','in_progress'].includes(status)"), 'New projects can still be created past Translating.');
+assert(appSource.includes('projectMatchesSearch') && appSource.includes('renderTimeline();'), 'Shared book search is not consistently projected into Timeline.');
+assert(stylesSource.includes('--parchment:#EEECE6') && stylesSource.includes('--paper:#F7F5EF') && stylesSource.includes('--sage:#596861'), 'Low-light-safe cooler palette tokens are missing.');
+assert(stylesSource.includes('@media (prefers-reduced-motion:reduce)') && stylesSource.includes('@media (prefers-contrast:more)'), 'Accessibility preference handling is incomplete.');
+assert(stylesSource.includes('@media (hover:none) and (pointer:coarse)') && stylesSource.includes('.timeline-bar{height:44px;min-height:44px;top:7px}'), 'Coarse-pointer touch-target floor is incomplete.');
+assert(stylesSource.includes('--status-not-started:#D6D5CF') && stylesSource.includes('--status-ready:#805359'), 'Low-light status palette tokens are incomplete.');
+assert(!['#F4EDDC','#F7F0E1','#C7A56E','#D8D1BD','#C6A56A','#D2B980','#B88132','#CAA05D','#829987','#9DAF9F','#8F4844','#A45B55'].some(color=>stylesSource.includes(color)), 'Legacy warm visual literals remain after low-light palette consolidation.');
+assert(appSource.includes("p.google_doc_url && p.page_count_verified"), 'Verified marker sync still includes books without a verified physical-page denominator.');

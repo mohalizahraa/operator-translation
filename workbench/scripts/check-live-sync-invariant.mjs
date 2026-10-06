@@ -3,6 +3,8 @@ import fs from 'node:fs';
 const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
 const revision = fs.readFileSync(new URL('../functions/api/revision.js', import.meta.url), 'utf8');
 const pdfAudit = fs.readFileSync(new URL('../functions/api/pdf-audit.js', import.meta.url), 'utf8');
+const projectsIndex = fs.readFileSync(new URL('../functions/api/projects/index.js', import.meta.url), 'utf8');
+const progressSync = fs.readFileSync(new URL('../functions/api/projects/[id]/progress-sync.js', import.meta.url), 'utf8');
 
 function requireText(source, needle, label) {
   if (!source.includes(needle)) {
@@ -32,6 +34,17 @@ requireText(revision, 'GROUP_CONCAT', 'stable metadata projection in revision to
 
 if (pdfAudit.includes('pdf_check_note = ?, updated_at = ?')) {
   throw new Error('Live-sync invariant regression: background PDF audit must not overwrite semantic project updated_at.');
+}
+
+if (projectsIndex.includes('syncActiveTranslationMarkers')) {
+  throw new Error('Live-sync invariant regression: GET /api/projects must remain read-only.');
+}
+if (progressSync.includes('SET notes =')) {
+  throw new Error('Live-sync invariant regression: verified marker sync must not overwrite project notes.');
+}
+requireText(progressSync, "headers.get('x-workbench-actor')", 'verified marker sync preserves collaborator attribution');
+for (const field of ['p.title_en','p.pages','p.notes','p.source_pdf_url','p.pdf_checked_at','p.pdf_check_note','p.page_count_verified','p.has_uploaded_cover']) {
+  requireText(app, field, `shared project render signature includes ${field}`);
 }
 
 console.log('Live-sync invariant: PASS');
