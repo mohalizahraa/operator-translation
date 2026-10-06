@@ -16,6 +16,10 @@ export async function onRequestPatch(context) {
 
   const before = await context.env.DB.prepare('SELECT * FROM projects WHERE id = ?').bind(id).first();
   if (!before) return json({ error: 'Project not found.' }, 404);
+  const normalizedBefore=normalizeProject(before);
+  if (!normalizedBefore.page_count_verified) {
+    return json({ error: 'Translation page checkpoints require a verified physical-PDF page denominator.' }, 409);
+  }
 
   const body = await context.request.json().catch(() => null);
   if (!body || typeof body !== 'object') return json({ error: 'Invalid JSON body.' }, 400);
