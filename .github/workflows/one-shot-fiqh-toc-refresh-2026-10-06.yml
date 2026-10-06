@@ -1,5 +1,6 @@
 name: One-shot Fiqh al-Aqidah TOC Refresh 2026-10-06
 # terminal native-TOC refresh after heading, honorific, footnote, and translation review
+# trigger 1
 
 on:
   push:
