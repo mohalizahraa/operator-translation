@@ -168,6 +168,9 @@ function projectMatchesSearch(p, query=els.search.value) {
 function statusTransitionAllowed(from,to) {
   return WorkbenchCore.statusTransitionAllowed(STATUS_ORDER,from,to);
 }
+function workflowTransitionAllowed(project,to) {
+  return WorkbenchCore.workflowTransitionAllowed(STATUS_ORDER,project,to);
+}
 function assigneeOptions(current) { return ASSIGNEES.map(name => `<option value="${name}" ${current===name?'selected':''}>${name}</option>`).join(''); }
 function bookTitleMarkup(project,{compact=false}={}) {
   if (!project) return '';
@@ -180,9 +183,9 @@ function activityBookTitleMarkup(activity) {
   if (project) return bookTitleMarkup(project,{compact:true});
   return activity.title_ar ? `<span class="book-title-pair compact"><span class="book-title-ar" dir="rtl">${escapeHtml(activity.title_ar)}</span></span>` : '';
 }
-function statusOptions(current, adjacentOnly=false) {
+function statusOptions(current, adjacentOnly=false, project=null) {
   const statuses=adjacentOnly
-    ? STATUS_ORDER.filter(status=>statusTransitionAllowed(current,status))
+    ? STATUS_ORDER.filter(status=>project ? workflowTransitionAllowed(project,status) : statusTransitionAllowed(current,status))
     : STATUS_ORDER;
   return statuses.map(status => `<option value="${status}" ${current===status?'selected':''}>${STATUS[status]}</option>`).join('');
 }
@@ -218,7 +221,7 @@ function workOnBookMarkup(p) {
 function quickControlsMarkup(p, compact=false) {
   return `<div class="quick-controls ${compact ? 'compact-quick-controls' : ''}">
     <label class="quick-field"><span>Assigned</span><select class="quick-assignee" data-project-id="${p.id}" draggable="false" aria-label="Assign ${escapeHtml(p.title_ar)}">${assigneeOptions(p.assignee)}</select></label>
-    ${compact ? `<label class="quick-field quick-status-field"><span>Status</span><select class="quick-status" data-project-id="${p.id}" draggable="false" aria-label="Status for ${escapeHtml(p.title_ar)}">${statusOptions(p.status,true)}</select></label>` : ''}
+    ${compact ? `<label class="quick-field quick-status-field"><span>Status</span><select class="quick-status" data-project-id="${p.id}" draggable="false" aria-label="Status for ${escapeHtml(p.title_ar)}">${statusOptions(p.status,true,p)}</select></label>` : ''}
     <div class="quick-field quick-deadline-field"><span>Deadline</span><div class="quick-date-row"><input class="quick-deadline" data-project-id="${p.id}" draggable="false" type="date" value="${escapeHtml(p.due_date || '')}" aria-label="Deadline for ${escapeHtml(p.title_ar)}">${p.due_date ? `<button class="quick-clear-date" type="button" data-clear-deadline="${p.id}" aria-label="Remove deadline for ${escapeHtml(p.title_ar)}">Remove</button>` : ''}</div></div>
   </div>`;
 }
@@ -471,9 +474,12 @@ function bindQuickActions(root=document) {
     const id=Number(select.dataset.projectId);
     const project=state.projects.find(p=>p.id===id);
     const previous=project?.status || 'not_started';
-    if (!statusTransitionAllowed(previous,select.value)) {
+    const requested=select.value;
+    if (!workflowTransitionAllowed(project,requested)) {
       select.value=previous;
-      toast('Move workflow one stage at a time.');
+      toast(previous==='in_progress' && requested==='review' && project?.page_count_verified
+        ? 'Finish the verified source-page translation before Needs Formatting.'
+        : 'Move workflow one stage at a time.');
       return;
     }
     try {
@@ -952,9 +958,9 @@ async function applyBatch() {
   if ($('batch-deadline').value) patch.due_date=$('batch-deadline').value;
   if (!Object.keys(patch).length) { toast('Choose a batch change first'); return; }
   if (patch.status) {
-    const invalid=ids.map(id=>state.projects.find(p=>p.id===id)).filter(p=>p && !statusTransitionAllowed(p.status,patch.status));
+    const invalid=ids.map(id=>state.projects.find(p=>p.id===id)).filter(p=>p && !workflowTransitionAllowed(p,patch.status));
     if (invalid.length) {
-      toast(`${invalid.length} selected book${invalid.length===1?'':'s'} cannot move directly to ${STATUS[patch.status]}. Move one stage at a time.`);
+      toast(`${invalid.length} selected book${invalid.length===1?'':'s'} cannot move to ${STATUS[patch.status]} yet.`);
       return;
     }
   }
@@ -1045,8 +1051,10 @@ function bindBoardDrag() {
       const project = state.projects.find(item => item.id === id);
       const status = list.dataset.status;
       if (!project || !STATUS[status] || project.status === status) return;
-      if (!statusTransitionAllowed(project.status,status)) {
-        toast('Move workflow one stage at a time.');
+      if (!workflowTransitionAllowed(project,status)) {
+        toast(project.status==='in_progress' && status==='review' && project.page_count_verified
+          ? 'Finish the verified source-page translation before Needs Formatting.'
+          : 'Move workflow one stage at a time.');
         return;
       }
       try {
@@ -1319,7 +1327,7 @@ function openProject(id) {
   $('title-en').value = p?.title_en || '';
   $('assignee').value = p?.assignee || 'Unassigned';
   $('status').innerHTML = p
-    ? statusOptions(p.status,true)
+    ? statusOptions(p.status,true,p)
     : STATUS_ORDER.slice(0,2).map(status=>`<option value="${status}">${STATUS[status]}</option>`).join('');
   $('status').value = p?.status || 'not_started';
   $('start-date').value = p?.start_date || '';
@@ -1366,8 +1374,10 @@ async function saveProject(event) {
     published: $('published').checked, notes: $('notes').value.trim(),
   };
   const currentProject=id ? state.projects.find(p=>p.id===id) : null;
-  if (currentProject && !statusTransitionAllowed(currentProject.status,payload.status)) {
-    toast('Move workflow one stage at a time.');
+  if (currentProject && !workflowTransitionAllowed(currentProject,payload.status)) {
+    toast(currentProject.status==='in_progress' && payload.status==='review' && currentProject.page_count_verified
+      ? 'Finish the verified source-page translation before Needs Formatting.'
+      : 'Move workflow one stage at a time.');
     return;
   }
   if (payload.published && currentProject?.status!=='published') {
