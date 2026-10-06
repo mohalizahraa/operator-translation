@@ -39,9 +39,8 @@ export async function onRequestPatch(context) {
   if (body.status !== undefined && !validStatusTransition(before.status, body.status)) {
     return json({ error: 'Workflow stages must move one step at a time: Not Started → Translating → Needs Formatting → Needs Review → Publish Ready.' }, 409);
   }
-  const requestedStatus = body.status ?? before.status;
-  if (body.published === true && requestedStatus !== 'published') {
-    return json({ error: 'Only a Publish Ready book can be marked Published.' }, 409);
+  if (body.published === true && before.status !== 'published') {
+    return json({ error: 'Save the book as Publish Ready first; publication is a separate step.' }, 409);
   }
   if (body.assignee !== undefined && !validAssignees.has(body.assignee)) return json({ error: 'Invalid assignee.' }, 400);
 
