@@ -168,10 +168,6 @@ function projectMatchesSearch(p, query=els.search.value) {
 function statusTransitionAllowed(from,to) {
   return WorkbenchCore.statusTransitionAllowed(STATUS_ORDER,from,to);
 }
-function actorMatches(eventActor, actor) {
-  if (!actor) return true;
-  return eventActor===actor || (actor==='Mohammed' && eventActor==='Brother');
-}
 function assigneeOptions(current) { return ASSIGNEES.map(name => `<option value="${name}" ${current===name?'selected':''}>${name}</option>`).join(''); }
 function bookTitleMarkup(project,{compact=false}={}) {
   if (!project) return '';
