@@ -187,6 +187,7 @@ assert(indexSource.includes('id="published"'), 'Separate Published control is mi
 assert(libSource.includes("'production-stages-v2'"), 'Status-model migration is missing.');
 assert(libSource.includes('pages = COALESCE(?, pages)') && libSource.includes('physical_pages'), 'Verified physical PDF page counts are not applied to Workbench runtime denominators.');
 assert(appSource.includes('PDF count unverified'), 'Unverified fallback page counts are not labeled honestly in the Projects surface.');
+assert(appSource.includes('Translation complete · legacy checkpoint unavailable') && appSource.includes('historical completion · page checkpoint unavailable'), 'Historical completed books with pre-checkpoint provenance can still render as false zero progress.');
 assert(!indexSource.includes('>In Progress</option>') && !indexSource.includes('>Review</option>') && !indexSource.includes('>Completed</option>'), 'Legacy status labels remain in the UI.');
 
 console.log(`Workbench static acceptance passed: 176 books, 10 topics, 176 covers, 172 available PDFs, 4 missing, 0 unchecked, 172 physical page counts verified, ${pdfAudit.page_count_mismatches} catalog/page mismatches reconciled at runtime.`);
