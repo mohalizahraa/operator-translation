@@ -1,4 +1,4 @@
-name: One-shot Book 2 Progress 50
+name: One-shot Book 2 Progress 55
 
 on:
   push:
@@ -13,18 +13,18 @@ jobs:
     runs-on: [self-hosted, macOS, ARM64]
     timeout-minutes: 5
     steps:
-      - name: Publish verified 50/375 translation checkpoint
+      - name: Publish verified 55/375 translation checkpoint
         shell: bash
         run: |
           set -euo pipefail
           body=$(cat <<'JSON'
           {
-            "translated_pages": 50,
-            "expected_previous_pages": 45,
+            "translated_pages": 55,
+            "expected_previous_pages": 50,
             "source_total_pages": 375,
             "source_pdf_sha256": "48d338363f4443d291c4e53365efef6eb36deb87ddfe788bb1e8559cd1c58cbf",
-            "google_doc_revision": "ANLCKQmainuN1MG-M5oBlGHXN55dCxd1okyiaPFoZLFHlBdVKVzZ0WaWBEocQ793AmGKqDumLopAJSLGkwBTS_8wJ_bO7esuja0M1eAxII0",
-            "verification_note": "Verified English coverage through physical source page 50 in the linked Google Doc. Pages 46-49 continue the evidence for barzakhī life, expand the philosophical discussion of death, and open the second issue concerning the Prophet\u0027s connection with the world after death. Page 50 presents the first view, attributed to Ibn Taymiyyah and Ibn Bāz, that the connection is severed apart from limited exceptions; the final sentence continues onto page 51. All 10 source footnotes from pages 46-50 are native Google Docs footnotes; the manuscript now has 76 native footnotes total. Zero readable Arabic runs were found in the checked English text surfaces. Translation remains in progress; continue sequentially from physical page 51."
+            "google_doc_revision": "ANLCKQm-2noJuvwppQG1IV4RQVj-96TQGSuaFCOQ2aRHTvZP5aXjun1kfA5z_LEfATsgIiPMEmIwemmaXoUImeRIm6001Ewt3ehlTarlEso",
+            "verification_note": "Verified English coverage through physical source page 55 in the linked Google Doc. Pages 51-54 complete the two views on the Prophet\u0027s connection with worldly life after death, explain the movement of the spirit in barzakhī life, discuss the consequences of the two positions, and close Chapter Two with results/findings. Page 55 is the Chapter Three opener on the legitimacy of visiting the Prophet\u0027s grave. All 6 source footnotes from pages 51-53 are native Google Docs footnotes; the manuscript now has 82 native footnotes total. Zero readable Arabic runs were found in the checked English text surfaces. Translation remains in progress; continue sequentially from physical page 56."
           }
           JSON
           )
