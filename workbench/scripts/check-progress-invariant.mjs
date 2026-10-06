@@ -47,8 +47,8 @@ assert(
   'Generic project PATCH must enforce adjacent workflow transitions.'
 );
 assert(
-  generic.includes('Only a Publish Ready book can be marked Published.'),
-  'Published must remain independent from workflow and require Publish Ready.'
+  generic.includes('Save the book as Publish Ready first; publication is a separate step.'),
+  'Published must remain a separate post-Publish-Ready step.'
 );
 assert(
   !progressSync.includes('SET notes ='),
