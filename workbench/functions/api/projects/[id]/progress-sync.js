@@ -22,6 +22,10 @@ async function readMarker(context) {
 
   const project=await context.env.DB.prepare('SELECT * FROM projects WHERE id = ?').bind(id).first();
   if (!project) return {status:404,data:{error:'Project not found.'}};
+  const normalizedProject=normalizeProject(project);
+  if (!normalizedProject.page_count_verified) {
+    return {status:409,data:{error:'Verified marker sync requires a verified physical-PDF page denominator.'}};
+  }
 
   const docId=googleDocId(project.google_doc_url);
   if (!docId) return {status:200,data:{project:normalizeProject(project),marker_found:false,unchanged:true}};
@@ -57,7 +61,7 @@ async function readMarker(context) {
   return {
     status:200,
     data:{
-      project:normalizeProject(project),
+      project:normalizedProject,
       marker_found:true,
       marker_pages:pages,
       marker_total:total,
