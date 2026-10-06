@@ -1,0 +1,140 @@
+name: One-shot Prophetic Measures Native Structure
+
+on:
+  push:
+    paths:
+      - '.github/workflows/one-shot-prophetic-measures-native-structure.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  native-structure:
+    runs-on: [self-hosted, macOS, ARM64]
+    timeout-minutes: 20
+    env:
+      DOC_URL: https://docs.google.com/document/d/1C8ZOE14w9mUF27hBowwnk42d_fG2cl32R2T5GAeepS8/edit
+      PLAYWRIGHT_BROWSERS_PATH: /tmp/operator-playwright-browsers
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install ephemeral browser driver
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install chromium
+      - name: Insert native page numbers and native table of contents
+        shell: bash
+        run: |
+          cat > ./native-structure.mjs <<'NODE'
+          import { chromium } from "playwright";
+          const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+          const browser=await chromium.launch({headless:true});
+          const context=await browser.newContext({viewport:{width:1440,height:1000},locale:"en-US"});
+          const page=await context.newPage();
+
+          async function clickIfVisible(loc,timeout=1200){
+            try{if(await loc.isVisible({timeout})){await loc.click();return true}}catch{}
+            return false;
+          }
+          async function dismiss(){
+            for(const label of ["Got it","No thanks","Dismiss","Close"]){
+              await clickIfVisible(page.getByRole("button",{name:label,exact:true}));
+            }
+          }
+          async function focusEditor(){
+            await dismiss();
+            for(const loc of [page.locator(".kix-appview-editor"),page.locator(".kix-page-paginated"),page.locator('[role="textbox"]')]){
+              if(await loc.first().isVisible({timeout:1800}).catch(()=>false)){await loc.first().click({position:{x:160,y:180}});return;}
+            }
+            await page.mouse.click(800,450);
+          }
+          async function findInDoc(q){
+            await focusEditor();
+            await page.keyboard.press("Meta+f");
+            await sleep(300);
+            await page.keyboard.type(q,{delay:20});
+            await sleep(800);
+            const close=page.getByLabel("Close",{exact:true}).first();
+            if(await close.isVisible({timeout:900}).catch(()=>false)) await close.click(); else await page.keyboard.press("Escape");
+            await sleep(600);
+          }
+          async function openInsert(){
+            await dismiss();
+            const m=page.locator("#docs-insert-menu");
+            if(await m.isVisible({timeout:2500}).catch(()=>false)){await m.click();return;}
+            const t=page.getByText("Insert",{exact:true}).first();
+            if(!(await t.isVisible({timeout:2500}).catch(()=>false))) throw new Error("Insert menu unavailable");
+            await t.click();
+          }
+          async function insertPageNumbers(){
+            await focusEditor();
+            await openInsert(); await sleep(450);
+            const pe=page.getByText("Page elements",{exact:true}).last();
+            if(await pe.isVisible({timeout:1400}).catch(()=>false)){await pe.hover();await sleep(500);}
+            let pn=page.getByText("Page number",{exact:true}).last();
+            if(!(await pn.isVisible({timeout:1600}).catch(()=>false))) pn=page.getByText(/Page number/i).last();
+            if(!(await pn.isVisible({timeout:2000}).catch(()=>false))) throw new Error("Page number menu unavailable");
+            await pn.hover(); await sleep(700);
+            const strong=[
+              page.getByLabel(/page number.*header.*(?:first|every|all)/i).last(),
+              page.getByLabel(/header.*page number.*(?:first|every|all)/i).last(),
+              page.locator('[aria-label*="page number" i][aria-label*="header" i]').filter({hasNotText:/second|skip/i}).first()
+            ];
+            for(const loc of strong){if(await loc.isVisible({timeout:700}).catch(()=>false)){await loc.click();console.log("PAGE_NUMBERS_INSERTED");await sleep(4000);return;}}
+            const nodes=page.locator('[role="menuitem"]:visible,[role="button"]:visible,[tabindex="0"]:visible');
+            const n=await nodes.count(); const c=[];
+            for(let i=0;i<n;i++){
+              const node=nodes.nth(i), aria=(await node.getAttribute("aria-label"))||"", title=(await node.getAttribute("title"))||"", txt=((await node.textContent())||"").trim();
+              const all=(aria+" "+title+" "+txt).trim();
+              if(/page number/i.test(all)&&!/^page number$/i.test(all)&&!/more options|page count/i.test(all)) c.push({i,all});
+            }
+            if(!c.length) throw new Error("Page number preset unavailable");
+            let chosen=c.find(x=>/header|top/i.test(x.all)&&!/skip|second page|start.*2/i.test(x.all))||c[0];
+            await nodes.nth(chosen.i).click(); console.log("PAGE_NUMBERS_INSERTED_FALLBACK"); await sleep(4000);
+          }
+          async function insertToc(){
+            await findInDoc("Contents");
+            await page.keyboard.press("ArrowRight");
+            await page.keyboard.press("End");
+            await page.keyboard.press("Enter");
+            await sleep(500);
+            await openInsert(); await sleep(450);
+            const pe=page.getByText("Page elements",{exact:true}).last();
+            if(await pe.isVisible({timeout:1300}).catch(()=>false)){await pe.hover();await sleep(450);}
+            let toc=page.getByText("Table of contents",{exact:true}).last();
+            if(!(await toc.isVisible({timeout:1600}).catch(()=>false))) toc=page.getByText(/Table of contents/i).last();
+            if(!(await toc.isVisible({timeout:2000}).catch(()=>false))) throw new Error("TOC menu unavailable");
+            await toc.hover(); await sleep(650);
+            for(const pattern of [/dotted/i,/dots/i,/page numbers/i,/numbers/i]){
+              const l=page.getByLabel(pattern).last();
+              if(await l.isVisible({timeout:650}).catch(()=>false)){await l.click();console.log("TOC_INSERTED");await sleep(7000);return;}
+              const x=page.getByText(pattern).last();
+              if(await x.isVisible({timeout:650}).catch(()=>false)){await x.click();console.log("TOC_INSERTED_TEXT");await sleep(7000);return;}
+            }
+            const nodes=page.locator('[role="menuitem"]:visible,[role="button"]:visible,[tabindex="0"]:visible');
+            const n=await nodes.count(), c=[];
+            for(let i=0;i<n;i++){
+              const node=nodes.nth(i), aria=(await node.getAttribute("aria-label"))||"", title=(await node.getAttribute("title"))||"";
+              if(/table of contents|page number|dot/i.test(aria+" "+title)) c.push(i);
+            }
+            if(!c.length) throw new Error("TOC style preset unavailable");
+            await nodes.nth(c[Math.min(1,c.length-1)]).click(); console.log("TOC_INSERTED_FALLBACK"); await sleep(7000);
+          }
+          try{
+            await page.goto(process.env.DOC_URL,{waitUntil:"domcontentloaded",timeout:120000});
+            await sleep(10000);
+            if(/accounts\.google\.com/.test(page.url())) throw new Error("Document requires sign-in");
+            await insertPageNumbers();
+            await insertToc();
+            console.log("NATIVE_STRUCTURE_COMPLETE");
+          } finally { await browser.close(); }
+          NODE
+          node ./native-structure.mjs
+      - name: Remove ephemeral browser payload
+        if: always()
+        run: |
+          rm -f ./native-structure.mjs
+          rm -rf /tmp/operator-playwright-browsers
+          rm -rf node_modules/playwright node_modules/playwright-core node_modules/.bin/playwright
