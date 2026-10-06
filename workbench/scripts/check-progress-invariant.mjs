@@ -25,6 +25,14 @@ assert(
   !app.includes("Number(p.translated_pages || 0) > 0"),
   'Verified marker sync must bootstrap in-progress projects from 0 translated pages.'
 );
+assert(
+  progress.includes('Translation page checkpoints require a verified physical-PDF page denominator.'),
+  'Progress endpoint must reject unverified physical-page denominators.'
+);
+assert(
+  progressSync.includes('Verified marker sync requires a verified physical-PDF page denominator.'),
+  'Marker sync must reject unverified physical-page denominators.'
+);
 for (const required of ['expected_previous_pages','source_total_pages','source_pdf_sha256','google_doc_revision']) {
   assert(progress.includes(required), `Progress endpoint missing required checkpoint field: ${required}`);
 }
@@ -47,7 +55,7 @@ assert(
   'Generic project PATCH must enforce adjacent workflow transitions.'
 );
 assert(
-  generic.includes('Save the book as Publish Ready first; publication is a separate step.'),
+  generic.includes('publication is a separate step and cannot remain set while rewinding workflow.'),
   'Published must remain a separate post-Publish-Ready step.'
 );
 assert(
