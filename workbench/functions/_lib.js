@@ -328,7 +328,13 @@ export function normalizeHttpUrl(raw) {
 }
 
 export function validIsoDate(raw) {
-  return raw === null || raw === undefined || raw === '' || /^\d{4}-\d{2}-\d{2}$/.test(String(raw));
+  if (raw === null || raw === undefined || raw === '') return true;
+  const value=String(raw);
+  const match=value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!match) return false;
+  const year=Number(match[1]), month=Number(match[2]), day=Number(match[3]);
+  const date=new Date(Date.UTC(year,month-1,day));
+  return date.getUTCFullYear()===year && date.getUTCMonth()===month-1 && date.getUTCDate()===day;
 }
 
 export function actorFromRequest(request) {
