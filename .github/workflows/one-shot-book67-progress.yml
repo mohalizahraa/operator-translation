@@ -13,18 +13,18 @@ jobs:
     runs-on: [self-hosted, macOS, ARM64]
     timeout-minutes: 5
     steps:
-      - name: Publish verified 490/584 checkpoint
+      - name: Publish verified 584/584 text-complete checkpoint
         shell: bash
         run: |
           set -euo pipefail
           body=$(cat <<'JSON'
           {
-            "translated_pages": 490,
-            "expected_previous_pages": 480,
+            "translated_pages": 584,
+            "expected_previous_pages": 490,
             "source_total_pages": 584,
             "source_pdf_sha256": "f42595fd7c50e10116b944351e7d59150f2cf90c7d8a93315bcea03fc6f41e0d",
-            "google_doc_revision": "ANLCKQlzsLvmETeAAfg_GAMRhqydy-NU2OeheJqoJx3aVNNYZyUCtGPFFhoRIhDc0I4IgItZa1vQXvIL8ZxLylYs-hxMUpoWrmV9eIn99z4",
-            "verification_note": "Verified continuous English translation coverage through physical source page 490 in the live Google Doc. Pages 481-490 were translated from the authoritative Book 67 OCR/source artifact and read back successfully, including headings, Qur'anic and hadith material, poetry, and source-note staging text. Translation remains in progress; resume at physical source page 491."
+            "google_doc_revision": "ANLCKQmUIlKyLGw977QvTd6eiU9YzF4Zg8GOV77r_IFMe2lSRDref3diy3M9PXMpimBQ1JoPUdK0Uc0NMMSUB7pdfJ-eoB-J_bg7dNGuxKg",
+            "verification_note": "Verified text-complete English coverage across all 584 physical source pages in the live Google Doc. Whole-document text scan found zero readable Arabic runs; all 333 bibliography entries are represented in English/Latin-script form and all 619 body note markers have corresponding note definitions. Translation is complete; full translator-profile formatting and publication QA are now in progress. Do not treat 584/584 as publication-QA complete until native notes/TOC, structural formatting, typography, pagination, and rendered-page checks pass."
           }
           JSON
           )
