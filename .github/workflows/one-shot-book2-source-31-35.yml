@@ -1,4 +1,4 @@
-name: One-shot Book 2 Source 61-65
+name: One-shot Book 2 Source 66-70
 
 on:
   push:
@@ -14,11 +14,11 @@ jobs:
     timeout-minutes: 15
     env:
       SOURCE_URL: "https://haydari-translation-workbench.pages.dev/api/pdf/5"
-      START_PAGE: "61"
-      END_PAGE: "65"
+      START_PAGE: "66"
+      END_PAGE: "70"
     steps:
       - uses: actions/checkout@v4
-      - name: Render source pages 61-65
+      - name: Render source pages 66-70
         shell: bash
         run: |
           set -euo pipefail
