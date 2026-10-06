@@ -66,6 +66,18 @@ async function readMarker(context) {
   };
 }
 
+function progressNote(pages,total) {
+  const next = pages < total ? ` Continue sequentially from physical source page ${pages + 1}.` : '';
+  return `Translation active. Verified physical source-page checkpoint: ${pages}/${total}. Live progress is synchronized from the linked English Google Doc WBPROGRESS marker.${next}`;
+}
+
+async function refreshProgressNote(context,id,pages,total) {
+  const note=progressNote(pages,total);
+  await context.env.DB.prepare(
+    'UPDATE projects SET notes = ? WHERE id = ? AND (notes IS NULL OR notes <> ?)'
+  ).bind(note,id,note).run();
+}
+
 export async function onRequestGet(context) {
   const result=await readMarker(context);
   return json(result.data,result.status);
@@ -82,7 +94,9 @@ export async function onRequestPost(context) {
   const current=Number(project.translated_pages || 0);
   const pages=Number(markerResult.data.marker_pages);
   if (pages <= current) {
-    return json({...markerResult.data,unchanged:true});
+    if (pages === current) await refreshProgressNote(context,id,pages,Number(markerResult.data.marker_total));
+    const refreshed=await context.env.DB.prepare('SELECT * FROM projects WHERE id = ?').bind(id).first();
+    return json({...markerResult.data,project:normalizeProject(refreshed || project),unchanged:true});
   }
 
   const latest=await context.env.DB.prepare(
@@ -112,5 +126,7 @@ export async function onRequestPost(context) {
     }),
   });
 
-  return publishProgress({...context,request});
+  const response=await publishProgress({...context,request});
+  if (response.ok) await refreshProgressNote(context,id,pages,Number(markerResult.data.marker_total));
+  return response;
 }
