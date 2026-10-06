@@ -30,11 +30,10 @@ export async function onRequestPost(context) {
   if (pdfUrl === false) return json({ error: 'Arabic source PDF must use an http(s) URL.' }, 400);
   if (!validIsoDate(body.start_date) || !validIsoDate(body.due_date)) return json({ error: 'Dates must use YYYY-MM-DD.' }, 400);
   const actor = actorFromRequest(context.request);
-  const now = new Date().toISOString();
-  const completedAt = ['review','completed','published'].includes(status) ? now : null;
-  const completedBy = completedAt ? actor : null;
-  const publishedAt = body.published ? now : null;
-  const publishedBy = publishedAt ? actor : null;
+  const completedAt = null;
+  const completedBy = null;
+  const publishedAt = null;
+  const publishedBy = null;
   const pdfStatus = pdfUrl ? 'unchecked' : 'missing';
   const pdfNote = pdfUrl ? 'Awaiting validation' : 'No direct PDF URL';
   const result = await context.env.DB.prepare(
