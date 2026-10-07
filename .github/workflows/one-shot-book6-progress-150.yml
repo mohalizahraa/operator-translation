@@ -1,0 +1,80 @@
+name: One-shot Book 6 Progress 150
+
+on:
+  push:
+    paths:
+      - '.github/workflows/one-shot-book6-progress-150.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: [self-hosted, operator-translation, macOS, ARM64]
+    timeout-minutes: 5
+    steps:
+      - name: Publish verified 150/487 translation checkpoint
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          curl -fsS https://haydari-translation-workbench.pages.dev/api/projects -o /tmp/projects-before.json
+          previous=$(python3 - <<'PY'
+          import json
+          d=json.load(open('/tmp/projects-before.json'))
+          p=next(x for x in d['projects'] if int(x['id'])==6)
+          n=int(p['translated_pages'])
+          assert 0 <= n <= 150, n
+          print(n)
+          PY
+          )
+
+          curl -L --fail --retry 3 'https://docs.google.com/document/d/1DmCHtfaYsWwWKavXipTrWZo9oq0E4tq2FZVySoSa18A/export?format=txt' -o /tmp/book6-en.txt
+          grep -Fq '⟦WBPROGRESS:6:150:487⟧' /tmp/book6-en.txt
+          grep -Fq '[[NEXT_BATCH]]' /tmp/book6-en.txt
+          grep -Fq 'Preventing the Arousal of Anger' /tmp/book6-en.txt
+          export_sha=$(shasum -a 256 /tmp/book6-en.txt | awk '{print $1}')
+
+          python3 - "$previous" "$export_sha" >/tmp/progress.json <<'PY'
+          import json,sys
+          previous=int(sys.argv[1]); export_sha=sys.argv[2]
+          print(json.dumps({
+            "translated_pages":150,
+            "expected_previous_pages":previous,
+            "source_total_pages":487,
+            "source_pdf_sha256":"210ba1d2de0a91bf10fad1ef19fa7276b00c7764036bf8c1861294426bada0ee",
+            "google_doc_revision":"public-export-sha256:"+export_sha,
+            "verification_note":"Verified continuous Arabic-source-to-English translation through physical source page 150 of 487. Source identity is locked to SHA-256 210ba1d2de0a91bf10fad1ef19fa7276b00c7764036bf8c1861294426bada0ee. The manuscript reaches the opening of 'Preventing the Arousal of Anger' on physical page 150. Translation remains active; publication-formatting and native-footnote normalization are separate later work. Continue sequentially from physical source page 151."
+          },ensure_ascii=False))
+          PY
+
+          if [ "$previous" -lt 150 ]; then
+            curl -fsS -X PATCH -H 'content-type: application/json' -H 'x-workbench-actor: Zahraa' \
+              --data @/tmp/progress.json https://haydari-translation-workbench.pages.dev/api/projects/6/progress
+            printf '\n'
+          fi
+
+          cat >/tmp/project.json <<'JSON'
+          {
+            "status":"in_progress",
+            "notes":"Translation active. Verified physical source-page checkpoint: 150/487. Continuous translation reaches the opening of ‘Preventing the Arousal of Anger’ on physical page 150. Publication-formatting/native-footnote normalization remains separate later work. Continue sequentially from physical source page 151."
+          }
+          JSON
+          curl -fsS -X PATCH -H 'content-type: application/json' -H 'x-workbench-actor: Zahraa' \
+            --data @/tmp/project.json https://haydari-translation-workbench.pages.dev/api/projects/6
+          printf '\n'
+
+      - name: Verify live Workbench readback
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsS https://haydari-translation-workbench.pages.dev/api/projects -o /tmp/projects-after.json
+          python3 - <<'PY'
+          import json
+          d=json.load(open('/tmp/projects-after.json'))
+          p=next(x for x in d['projects'] if int(x['id'])==6)
+          assert int(p['translated_pages'])==150, p['translated_pages']
+          assert p['status']=='in_progress', p['status']
+          assert '150/487' in (p.get('notes') or ''), p.get('notes')
+          print('BOOK6_PROGRESS_150_VERIFIED')
+          PY
