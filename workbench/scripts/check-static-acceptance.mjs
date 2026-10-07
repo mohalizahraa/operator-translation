@@ -194,11 +194,13 @@ assert(libSource.includes("'production-stages-v2'"), 'Status-model migration is 
 assert(libSource.includes('pages = COALESCE(?, pages)') && libSource.includes('physical_pages'), 'Verified physical PDF page counts are not applied to Workbench runtime denominators.');
 assert(appSource.includes('PDF count unverified'), 'Unverified fallback page counts are not labeled honestly in the Projects surface.');
 assert(
-  appSource.includes('Translation complete · historical checkpoint unavailable') &&
-  appSource.includes("legacyComplete ? 100") &&
-  appSource.includes("Translation complete · 100% · historical checkpoint unavailable") &&
+  appSource.includes('function translationDisplayPages(p)') &&
+  appSource.includes('return isTranslated(p) && p.page_count_verified && total>0 && done<total ? total : done;') &&
+  !appSource.includes('Translation complete · 100% · historical checkpoint unavailable') &&
+  !appSource.includes('legacy-complete') &&
+  !stylesSource.includes('legacy-complete') &&
   appSource.includes('historical completion · page checkpoint unavailable'),
-  'Historical completed books must render a full 100% translation bar while preserving missing-checkpoint provenance.'
+  'Completed pre-checkpoint books must use the normal X/Y 100% progress visual; provenance belongs in detail metadata, not a special list-card species.'
 );
 assert(!indexSource.includes('>In Progress</option>') && !indexSource.includes('>Review</option>') && !indexSource.includes('>Completed</option>'), 'Legacy status labels remain in the UI.');
 
