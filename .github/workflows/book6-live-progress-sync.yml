@@ -1,0 +1,42 @@
+name: Book 6 Live Progress Sync
+
+on:
+  push:
+    paths:
+      - '.github/workflows/book6-live-progress-sync.yml'
+      - 'workbench/book6-progress-sync-trigger.txt'
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: [self-hosted, operator-translation, macOS, ARM64]
+    timeout-minutes: 5
+    steps:
+      - name: Sync verified Google Doc marker to Workbench
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsS -X POST             -H 'x-workbench-actor: Zahraa'             https://haydari-translation-workbench.pages.dev/api/projects/6/progress-sync             -o /tmp/sync.json
+          cat /tmp/sync.json
+          python3 - <<'PY'
+          import json
+          d=json.load(open('/tmp/sync.json'))
+          if d.get('error'):
+              raise SystemExit(d['error'])
+          print('BOOK6_MARKER_SYNC_OK')
+          PY
+      - name: Verify live project reflects marker
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsS https://haydari-translation-workbench.pages.dev/api/projects/6/progress-sync -o /tmp/readback.json
+          python3 - <<'PY'
+          import json
+          d=json.load(open('/tmp/readback.json'))
+          p=int(d['project']['translated_pages'])
+          m=int(d['marker_pages'])
+          assert p==m, (p,m)
+          print(f'BOOK6_LIVE_PROGRESS_VERIFIED={p}/{d["marker_total"]}')
+          PY
