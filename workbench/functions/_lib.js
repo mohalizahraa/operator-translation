@@ -259,8 +259,10 @@ export async function ensureCatalog(db) {
       const after = { ...row, notes:stableNote, updated_at:now };
       await db.batch([
         db.prepare('UPDATE projects SET notes=?, updated_at=? WHERE id=? AND notes=?').bind(stableNote,now,row.id,staleNote),
-        db.prepare("INSERT INTO activity (project_id, actor, action, before_json, after_json, created_at) VALUES (?, 'System', 'retired stale translation resume note', ?, ?, ?)")
-          .bind(row.id,JSON.stringify(row),JSON.stringify(after),now),
+        db.prepare(`INSERT INTO activity (project_id, actor, action, before_json, after_json, created_at)
+          SELECT ?, 'System', 'retired stale translation resume note', ?, ?, ?
+          WHERE EXISTS (SELECT 1 FROM projects WHERE id=? AND notes=? AND updated_at=?)`)
+          .bind(row.id,JSON.stringify(row),JSON.stringify(after),now,row.id,stableNote,now),
       ]);
     }
     await db.prepare(
