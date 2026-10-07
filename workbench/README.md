@@ -155,6 +155,7 @@ A second official-site sweep recovered the seven-book **مفاهيم قرآني�
 ### Visual congruence + cover resilience — 2026-10-03
 
 - Equivalent action roles now share one font-size/line-height/height/padding/radius contract across Dashboard, Projects, Board, Timeline, and dialogs. The prior `English Book` button font-inheritance override is explicitly eliminated.
+- Typography is semantic rather than screen-local: **EB Garamond** owns editorial English headings/titles, **Amiri** owns Arabic titles, and **Inter** owns controls, event prose, and metadata. Same semantic role → same family/weight/scale. Activity rows must render event prose as UI text, the Arabic+English book title as one paired editorial unit, and date/actor/time as readable secondary metadata; ad-hoc per-surface font overrides that break this hierarchy are regressions.
 - Official cover images are now requested through a same-origin `/api/official-cover/:catalogId` proxy with edge caching and a fallback that strips obsolete PageSpeed URL wrappers. This prevents brittle direct hotlink rendering from making mapped covers appear missing.
 - Timeline now uses workflow-status color on bars, explicit due-end markers for ranges, and a `Today` control that centers the current date without changing project data.
 
