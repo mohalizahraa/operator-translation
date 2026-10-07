@@ -135,6 +135,29 @@ function parseDateTime(value) {
 }
 function isTranslated(p) { return ['review','completed','published'].includes(p.status); }
 function isPublishReady(p) { return p.status === 'published'; }
+function assignmentScopeSummary(person, projects=corpusProjects()) {
+  const direct=projects.filter(p=>p.assignee===person);
+  const directDone=direct.filter(isTranslated).length;
+  if (!['Zahraa','Mohammed'].includes(person)) {
+    return {direct,directDone,personal:direct,personalDone:directDone,sharedCount:0};
+  }
+  const shared=projects.filter(p=>p.assignee==='Both');
+  const personal=[...direct,...shared];
+  return {
+    direct,
+    directDone,
+    personal,
+    personalDone:personal.filter(isTranslated).length,
+    sharedCount:shared.length,
+  };
+}
+function assignmentScopeText(person, projects=corpusProjects()) {
+  const summary=assignmentScopeSummary(person,projects);
+  if (['Zahraa','Mohammed'].includes(person) && summary.sharedCount) {
+    return `${summary.directDone}/${summary.direct.length} direct · personal ${summary.personalDone}/${summary.personal.length} incl. Shared`;
+  }
+  return `${summary.directDone}/${summary.direct.length} translated`;
+}
 function coverFor(p) { const imported=state.coverMap[p?.catalog_id]; return p?.cover_url || imported?.path || (imported?.source_url ? `/api/official-cover/${encodeURIComponent(p.catalog_id)}` : ''); }
 function hasCover(p) { return Boolean(p?.has_uploaded_cover || coverFor(p)); }
 function monthKey(value) { return String(value || '').slice(0,7); }
@@ -814,9 +837,7 @@ function renderDashboard() {
 
   const people = ['Zahraa','Mohammed','Both','Unassigned'];
   $('people-summary').innerHTML = people.map(person => {
-    const list = corpus.filter(p=>p.assignee===person);
-    const done = list.filter(isTranslated).length;
-    return `<button type="button" class="summary-row summary-link" data-dashboard-person="${person}"><span>${escapeHtml(assigneeLabel(person))}</span><strong>${done}/${list.length} translated</strong></button>`;
+    return `<button type="button" class="summary-row summary-link" data-dashboard-person="${person}"><span>${escapeHtml(assigneeLabel(person))}</span><strong>${escapeHtml(assignmentScopeText(person,corpus))}</strong></button>`;
   }).join('');
   $('now-list').querySelectorAll('[data-dashboard-preset]').forEach(button=>button.addEventListener('click',()=>openProjectsPreset(button.dataset.dashboardPreset)));
   $('people-summary').querySelectorAll('[data-dashboard-person]').forEach(button=>button.addEventListener('click',()=>openPersonWork(button.dataset.dashboardPerson)));
@@ -837,15 +858,20 @@ function renderDashboard() {
   const evidenceText=personalModel.loggedPages
     ? `Today: ${personalModel.todayPages.toLocaleString()} pages · sample: ${personalModel.observedDays}/7 observed days, ${personalModel.progressDays}/3 progress days · 14-day recency weighting`
     : 'No verified page-pace history for these assigned books yet.';
+  const personalCompletedPages=Math.round(personalModel.completedWork).toLocaleString();
+  const personalTotalPages=Math.round(personalModel.totalWork).toLocaleString();
   $('pace-panel-title').textContent=`${state.actor}'s pace & projection`;
   $('pace-summary').innerHTML = `
     <div class="pace-metric"><span>Recent pace</span><strong>${paceValue}</strong><small>source pages / day</small></div>
     <div class="pace-metric"><span>At this rate</span><strong>${escapeHtml(finishValue)}</strong><small>${escapeHtml(finishNote)}</small></div>
-    <div class="pace-metric"><span>Remaining</span><strong>${Math.round(personalModel.remainingWork).toLocaleString()}</strong><small>page-equivalents</small></div>
-    <div class="pace-metric"><span>Workload translated</span><strong>${personalModel.workloadPercent}%</strong><small>assigned catalogue books only</small></div>
+    <div class="pace-metric"><span>Remaining</span><strong>${Math.round(personalModel.remainingWork).toLocaleString()}</strong><small>of ${personalTotalPages} assigned page-equivalents</small></div>
+    <div class="pace-metric"><span>Page-weighted translated</span><strong>${personalModel.workloadPercent}%</strong><small>${personalCompletedPages} / ${personalTotalPages} assigned page-equivalents</small></div>
     <div class="pace-evidence">${escapeHtml(evidenceText)}</div>`;
   $('my-projects-title').textContent = `${state.actor}'s assigned projects`;
-  $('my-projects-count').textContent = `${assigned.length} book${assigned.length===1?'':'s'}`;
+  const directAssigned=assigned.filter(p=>p.assignee===state.actor).length;
+  const sharedAssigned=assigned.filter(p=>p.assignee==='Both').length;
+  const assignmentBreakdown=sharedAssigned ? ` · ${directAssigned} direct + ${sharedAssigned} shared` : ` · ${directAssigned} direct`;
+  $('my-projects-count').textContent = `${assigned.length} book${assigned.length===1?'':'s'}${assignmentBreakdown}`;
   $('my-projects').innerHTML = assigned.map(assignedProjectMarkup).join('') || `<div class="assigned-empty">No catalogue books are assigned to ${escapeHtml(state.actor)} yet.</div>`;
   bindProjectClicks($('my-projects'));
   renderTranslationLive();
@@ -1186,15 +1212,18 @@ function renderStats() {
   const model = paceModel({projects:corpus,universe:corpus});
   const today = localDateKey();
   const open = corpus.filter(p=>!isPublishReady(p));
-  const overdue = open.filter(p=>p.due_date && p.due_date < today).length;
+  const scheduled = open.filter(p=>p.due_date);
+  const overdue = scheduled.filter(p=>p.due_date < today).length;
   const next30 = localDateKeyAfterDays(30);
-  const dueSoon = open.filter(p=>p.due_date && p.due_date >= today && p.due_date <= next30).length;
+  const dueSoon = scheduled.filter(p=>p.due_date >= today && p.due_date <= next30).length;
+  const dueLater = scheduled.filter(p=>p.due_date > next30).length;
   const unscheduled = open.filter(p=>!p.due_date).length;
+  const publishReady = corpus.length-open.length;
 
   $('stat-translated').textContent = model.translated;
-  $('stat-translated-sub').textContent = `of ${model.total} catalogue books · ${pct(model.translated,model.total)}%`;
+  $('stat-translated-sub').textContent = `of ${model.total} catalogue books · ${pct(model.translated,model.total)}% · status-based completion`;
   $('stat-published').textContent = model.published;
-  $('stat-published-sub').textContent = `of ${model.total} catalogue books · ${pct(model.published,model.total)}%`;
+  $('stat-published-sub').textContent = `of ${model.total} catalogue books · ${pct(model.published,model.total)}% · actual publication; Publish Ready is separate`;
   const paceText=model.pagesPerDay>0 ? (model.pagesPerDay>=10 ? model.pagesPerDay.toFixed(0) : model.pagesPerDay.toFixed(1)) : '—';
   $('stat-pace').textContent = paceText;
   const paceSub=$('stat-pace-sub');
@@ -1223,13 +1252,18 @@ function renderStats() {
     : `page-equivalents remain · unknown physical counts use corpus median ~${model.fallbackPages}; duplicate series umbrellas excluded`;
 
   $('stats-by-person').innerHTML = ASSIGNEES.map(person => {
-    const list=corpus.filter(p=>p.assignee===person);
-    const done=list.filter(isTranslated).length;
     const recentByPerson=model.completedProjects.filter(x=>x.date>=new Date(Date.now()-30*86400000) && (x.project.completed_by===person || (person==='Mohammed' && x.project.completed_by==='Brother'))).length;
-    return `<div class="summary-row"><span>${escapeHtml(assigneeLabel(person))}</span><strong>${done}/${list.length} · ${pct(done,list.length)}%${['Zahraa','Mohammed'].includes(person) ? ` · ${recentByPerson}/30d` : ''}</strong></div>`;
+    const recentSuffix=['Zahraa','Mohammed'].includes(person) ? ` · ${recentByPerson} finished/30d` : '';
+    return `<div class="summary-row"><span>${escapeHtml(assigneeLabel(person))}</span><strong>${escapeHtml(assignmentScopeText(person,corpus))}${escapeHtml(recentSuffix)}</strong></div>`;
   }).join('');
   $('stats-deadlines').innerHTML = [
-    ['Overdue',overdue],['Due in next 30 days',dueSoon],['Without deadline (not Publish Ready)',unscheduled]
+    ['Open (not Publish Ready)',open.length],
+    ['With deadline',scheduled.length],
+    ['↳ Overdue',overdue],
+    ['↳ Due in next 30 days',dueSoon],
+    ['↳ Later than 30 days',dueLater],
+    ['Without deadline',unscheduled],
+    ['Publish Ready (excluded)',publishReady],
   ].map(([label,n])=>`<div class="summary-row"><span>${label}</span><strong>${n}</strong></div>`).join('');
 
   $('progress-chart').innerHTML = progressChartMarkup(model);
