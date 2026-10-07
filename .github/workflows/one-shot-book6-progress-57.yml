@@ -1,0 +1,45 @@
+name: One-shot Book 6 Progress 57
+
+on:
+  push:
+    paths:
+      - '.github/workflows/one-shot-book6-progress-57.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: [self-hosted, operator-translation, macOS, ARM64]
+    timeout-minutes: 5
+    steps:
+      - name: Publish verified 57/487 translation checkpoint
+        shell: bash
+        run: |
+          set -euo pipefail
+          progress=$(cat <<'JSON'
+          {
+            "translated_pages": 57,
+            "expected_previous_pages": 0,
+            "source_total_pages": 487,
+            "source_pdf_sha256": "210ba1d2de0a91bf10fad1ef19fa7276b00c7764036bf8c1861294426bada0ee",
+            "google_doc_revision": "ANLCKQknJkW-FEahg3R5ICgqWymFWj4qz070Bl0pIFFSR08cihZKT9BZA4eOus3ijYG_8uBOJfDCYSYwWvkWk5aSnnGdi-0xPTBEBpL_wGo",
+            "verification_note": "Reconciled the live English manuscript against the canonical 487-page Arabic PDF. Continuous translation is complete through physical source page 57; physical page 58 is partially translated. Corrected the previously stale 0/487 website state. Continue from the unfinished portion of physical page 58."
+          }
+          JSON
+          )
+          curl -fsS -X PATCH -H 'content-type: application/json' -H 'x-workbench-actor: Zahraa'             --data "$progress" https://haydari-translation-workbench.pages.dev/api/projects/6/progress
+          printf '\n'
+      - name: Verify live Workbench readback
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsS https://haydari-translation-workbench.pages.dev/api/projects -o /tmp/projects.json
+          python3 - <<'PY'
+          import json
+          data=json.load(open('/tmp/projects.json'))
+          p=next(x for x in data['projects'] if int(x['id'])==6)
+          assert int(p['translated_pages'])==57, p['translated_pages']
+          assert p['status']=='in_progress', p['status']
+          print('BOOK6_PROGRESS_57_VERIFIED')
+          PY
