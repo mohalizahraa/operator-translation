@@ -55,20 +55,20 @@
       <section id="dashboard-view" class="view active-view">
         <div class="progress-section">
           <article class="progress-container">
-            <div class="progress-head"><span class="progress-label">Books' Translation Progress</span><strong id="translation-ratio">0 / 0</strong></div>
+            <div class="progress-head"><span class="progress-label">Catalogue Books Translated</span><strong id="translation-ratio">0 / 0</strong></div>
             <div class="progress-bar"><div class="progress-fill" id="translation-bar"></div></div>
-            <div class="progress-text"><strong id="translation-percent">0%</strong> translation finished</div>
+            <div class="progress-text"><strong id="translation-percent">0%</strong> of catalogue books translated · status-based</div>
           </article>
           <article class="progress-container">
-            <div class="progress-head"><span class="progress-label">Books' Publication Progress</span><strong id="publication-ratio">0 / 0</strong></div>
+            <div class="progress-head"><span class="progress-label">Catalogue Books Published</span><strong id="publication-ratio">0 / 0</strong></div>
             <div class="progress-bar"><div class="progress-fill" id="publication-bar"></div></div>
-            <div class="progress-text"><strong id="publication-percent">0%</strong> published</div>
+            <div class="progress-text"><strong id="publication-percent">0%</strong> actually published · Publish Ready is separate</div>
           </article>
         </div>
 
         <div class="dashboard-grid">
           <section class="panel"><div class="panel-head"><h3>Right now</h3></div><div id="now-list" class="stack"></div></section>
-          <section class="panel"><div class="panel-head"><h3>By person</h3></div><div id="people-summary" class="stack"></div></section>
+          <section class="panel"><div class="panel-head"><h3>Assignment ownership</h3></div><div id="people-summary" class="stack"></div></section>
         </div>
         <section class="panel pace-panel">
           <div class="panel-head"><h3 id="pace-panel-title">Pace & projection</h3><button class="text-button" type="button" data-jump-view="stats">See corpus stats</button></div>
@@ -187,8 +187,8 @@
           <div id="progress-chart" class="progress-chart" aria-label="Translation completion graph"></div>
         </section>
         <div class="dashboard-grid">
-          <section class="panel"><div class="panel-head"><h3>By person</h3></div><div id="stats-by-person" class="stack"></div></section>
-          <section class="panel"><div class="panel-head"><h3>Deadlines</h3></div><div id="stats-deadlines" class="stack"></div></section>
+          <section class="panel"><div class="panel-head"><h3>Assignment ownership</h3></div><div id="stats-by-person" class="stack"></div></section>
+          <section class="panel"><div class="panel-head"><h3>Open scheduling</h3></div><div id="stats-deadlines" class="stack"></div></section>
         </div>
       </section>
 
@@ -272,6 +272,6 @@
 
   <div id="toast" role="status" aria-live="polite"></div>
   <script src="/model-core.js?v=20261006-full-audit-repair"></script>
-  <script type="module" src="/app.js?v=20261007-progress-visual-congruence"></script>
+  <script type="module" src="/app.js?v=20261007-math-scope-coherence"></script>
 </body>
 </html>
