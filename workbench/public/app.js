@@ -126,6 +126,15 @@ function updateDeadlineWarning(value,currentValue='') {
   warning.hidden=!show;
   warning.textContent=show ? 'This deadline is unusually far in the past. Saving it will ask for confirmation.' : '';
 }
+function validProjectDateRange(start,due) {
+  return !start || !due || start <= due;
+}
+function syncProjectDateBounds() {
+  const start=$('start-date')?.value || '';
+  const due=$('due-date')?.value || '';
+  if ($('due-date')) $('due-date').min=start;
+  if ($('start-date')) $('start-date').max=due;
+}
 function escapeHtml(s='') { return String(s).replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
 function parseDateTime(value) {
   if (!value) return null;
@@ -232,6 +241,10 @@ function googleDocLinkMarkup(p) {
 async function setProjectDeadline(id, value) {
   const project=state.projects.find(p=>p.id===id);
   const current=project?.due_date || '';
+  if (value && !validProjectDateRange(project?.start_date || '',value)) {
+    toast('Deadline cannot be before the project start date.');
+    return false;
+  }
   if (value && !confirmSuspiciousDeadline(value,current)) return false;
   await api(`/api/projects/${id}`, {method:'PATCH', body:JSON.stringify({due_date:value || null})});
   await loadData();
@@ -246,7 +259,7 @@ function quickControlsMarkup(p, compact=false) {
   return `<div class="quick-controls ${compact ? 'compact-quick-controls' : ''}">
     <label class="quick-field"><span>Assigned</span><select class="quick-assignee" data-project-id="${p.id}" draggable="false" aria-label="Assign ${escapeHtml(p.title_ar)}">${assigneeOptions(p.assignee)}</select></label>
     ${compact ? `<label class="quick-field quick-status-field"><span>Status</span><select class="quick-status" data-project-id="${p.id}" draggable="false" aria-label="Status for ${escapeHtml(p.title_ar)}">${statusOptions(p.status,true,p)}</select></label>` : ''}
-    <div class="quick-field quick-deadline-field"><span>Deadline</span><div class="quick-date-row"><input class="quick-deadline" data-project-id="${p.id}" draggable="false" type="date" value="${escapeHtml(p.due_date || '')}" aria-label="Deadline for ${escapeHtml(p.title_ar)}">${p.due_date ? `<button class="quick-clear-date" type="button" data-clear-deadline="${p.id}" aria-label="Remove deadline for ${escapeHtml(p.title_ar)}">Remove</button>` : ''}</div></div>
+    <div class="quick-field quick-deadline-field"><span>Deadline</span><div class="quick-date-row"><input class="quick-deadline" data-project-id="${p.id}" draggable="false" type="date" min="${escapeHtml(p.start_date || '')}" value="${escapeHtml(p.due_date || '')}" aria-label="Deadline for ${escapeHtml(p.title_ar)}">${p.due_date ? `<button class="quick-clear-date" type="button" data-clear-deadline="${p.id}" aria-label="Remove deadline for ${escapeHtml(p.title_ar)}">Remove</button>` : ''}</div></div>
   </div>`;
 }
 
@@ -999,7 +1012,16 @@ async function applyBatch() {
       return;
     }
   }
-  if (patch.due_date && !confirmSuspiciousDeadline(patch.due_date,'')) return;
+  if (patch.due_date) {
+    const invalidSchedules=ids
+      .map(id=>state.projects.find(p=>p.id===id))
+      .filter(project=>project && !validProjectDateRange(project.start_date || '',patch.due_date));
+    if (invalidSchedules.length) {
+      toast(`${invalidSchedules.length} selected book${invalidSchedules.length===1?'':'s'} start after that deadline.`);
+      return;
+    }
+    if (!confirmSuspiciousDeadline(patch.due_date,'')) return;
+  }
   $('apply-batch').disabled=true;
   let failures=0;
   try {
@@ -1056,7 +1078,12 @@ function renderBoard() {
   }
   if (!base.length) {
     const hasSearch=Boolean(els.search.value.trim());
-    $('board').innerHTML = `<div class="board-empty-state"><strong>${hasSearch ? 'No matching books' : 'No books in this scope'}</strong><span>${hasSearch ? 'Clear or change the search to see Board cards.' : 'Choose another Board scope to see assigned books.'}</span></div>`;
+    const matchingUnassigned=state.viewScope==='Shared' && unassigned.length>0;
+    const title=matchingUnassigned ? 'No assigned team books match' : (hasSearch ? 'No matching books' : 'No books in this scope');
+    const detail=matchingUnassigned
+      ? 'Matching Unassigned books are shown in Team inbox above.'
+      : (hasSearch ? 'Clear or change the search to see Board cards.' : 'Choose another Board scope to see assigned books.');
+    $('board').innerHTML = `<div class="board-empty-state"><strong>${title}</strong><span>${detail}</span></div>`;
     return;
   }
   $('board').innerHTML = STATUS_ORDER.map(status => {
@@ -1152,8 +1179,11 @@ function renderTimeline() {
   const today=timelineDay(todayKey);
   if (!dated.length) {
     const hasSearch=Boolean(els.search.value.trim());
+    const matchingUnassigned=state.viewScope==='Shared' && unassigned.length>0;
     $('timeline-visual').innerHTML=hasSearch && !scoped.length
-      ? '<div class="timeline-empty">No books match this search in the current view.</div>'
+      ? (matchingUnassigned
+        ? '<div class="timeline-empty">No assigned team books match this search. Matching Unassigned books are shown below.</div>'
+        : '<div class="timeline-empty">No books match this search in the current view.</div>')
       : '<div class="timeline-empty">Add a start date or deadline to place a book on the timeline.</div>';
   } else {
     const points=[today];
@@ -1387,6 +1417,7 @@ function openProject(id) {
   $('status').value = p?.status || 'not_started';
   $('start-date').value = p?.start_date || '';
   $('due-date').value = p?.due_date || '';
+  syncProjectDateBounds();
   updateDeadlineWarning($('due-date').value,p?.due_date || '');
   const translatedPages=Number(p?.translated_pages || 0);
   const sourcePages=Number(p?.pages || 0);
@@ -1441,6 +1472,10 @@ async function saveProject(event) {
   }
   if (payload.published && currentProject?.status!=='published') {
     toast('Save Publish Ready first, then mark the book Published.');
+    return;
+  }
+  if (!validProjectDateRange(payload.start_date,payload.due_date)) {
+    toast('Start date cannot be after the deadline.');
     return;
   }
   if (payload.due_date && !confirmSuspiciousDeadline(payload.due_date,currentProject?.due_date || '')) return;
@@ -1872,7 +1907,9 @@ els.actor.addEventListener('change',()=>{
 $('sort-projects')?.addEventListener('change',()=>{state.projectSort=$('sort-projects').value;localStorage.setItem('haydariProjectSort',state.projectSort);renderProjects();});
 $('group-projects')?.addEventListener('change',()=>{state.projectGrouping=$('group-projects').value;localStorage.setItem('haydariProjectGrouping',state.projectGrouping);renderProjects();});
 $('new-project').addEventListener('click',()=>openProject(null));
+$('start-date')?.addEventListener('input',syncProjectDateBounds);
 $('due-date')?.addEventListener('input',()=>{
+  syncProjectDateBounds();
   const id=Number($('project-id').value) || null;
   const current=id ? state.projects.find(p=>p.id===id)?.due_date || '' : '';
   updateDeadlineWarning($('due-date').value,current);
