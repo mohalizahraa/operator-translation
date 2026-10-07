@@ -9,6 +9,7 @@ const STATUS = {
   published: 'Publish Ready',
 };
 const STATUS_ORDER = Object.keys(STATUS);
+const MOBILE_BOARD_STATUSES = ['all', ...STATUS_ORDER];
 const ASSIGNEES = ['Zahraa','Mohammed','Both','Unassigned'];
 const VIEW_SCOPES = ['Zahraa','Mohammed','Shared'];
 const ACTIVITY_ACTORS = ['all','Zahraa','Mohammed','System'];
@@ -22,7 +23,7 @@ const savedViewScope = localStorage.getItem('haydariViewScope') || localStorage.
 const savedMobileBoardStatus = localStorage.getItem('haydariBoardStatus');
 const savedActivityActor = localStorage.getItem('haydariActivityActor');
 const savedActivityType = localStorage.getItem('haydariActivityType');
-const state = { projects: [], activity: [], paceEvents: [], liveSignature: '', liveRevision: null, pdfAudit: null, coverMap: {}, seriesMap: {groups:{},books:{}}, coverObjectUrls: new Map(), coverLoads: new Map(), selectedIds: new Set(), view: 'dashboard', actor: ['Zahraa', 'Mohammed'].includes(savedActor) ? savedActor : 'Zahraa', projectSort: SORT_VALUES.includes(savedProjectSort) ? savedProjectSort : 'updated', projectGrouping: savedProjectGrouping === 'series' ? 'series' : 'none', viewScope: VIEW_SCOPES.includes(savedViewScope) ? savedViewScope : 'Shared', mobileBoardStatus: STATUS_ORDER.includes(savedMobileBoardStatus) ? savedMobileBoardStatus : 'in_progress', activityActorFilter: ACTIVITY_ACTORS.includes(savedActivityActor) ? savedActivityActor : 'all', activityTypeFilter: ACTIVITY_TYPES.includes(savedActivityType) ? savedActivityType : 'all', pendingWorkOnLink: null };
+const state = { projects: [], activity: [], paceEvents: [], liveSignature: '', liveRevision: null, pdfAudit: null, coverMap: {}, seriesMap: {groups:{},books:{}}, coverObjectUrls: new Map(), coverLoads: new Map(), selectedIds: new Set(), view: 'dashboard', actor: ['Zahraa', 'Mohammed'].includes(savedActor) ? savedActor : 'Zahraa', projectSort: SORT_VALUES.includes(savedProjectSort) ? savedProjectSort : 'updated', projectGrouping: savedProjectGrouping === 'series' ? 'series' : 'none', viewScope: VIEW_SCOPES.includes(savedViewScope) ? savedViewScope : 'Shared', mobileBoardStatus: MOBILE_BOARD_STATUSES.includes(savedMobileBoardStatus) ? savedMobileBoardStatus : 'all', activityActorFilter: ACTIVITY_ACTORS.includes(savedActivityActor) ? savedActivityActor : 'all', activityTypeFilter: ACTIVITY_TYPES.includes(savedActivityType) ? savedActivityType : 'all', pendingWorkOnLink: null };
 const LIVE_REVISION_MS = 2000;
 const LIVE_REVISION_RETRY_MS = 1000;
 const LIVE_MARKER_SYNC_MS = 5000;
@@ -1020,6 +1021,11 @@ function renderBoard() {
   const matching = state.projects.filter(projectMatchesSearch);
   const base = matching.filter(viewScopeMatches);
   const unassigned = state.viewScope === 'Shared' ? matching.filter(p=>p.assignee === 'Unassigned') : [];
+  const selectedStatusHasBooks = state.mobileBoardStatus === 'all' || base.some(p=>p.status === state.mobileBoardStatus);
+  if (base.length && !selectedStatusHasBooks) {
+    state.mobileBoardStatus='all';
+    localStorage.setItem('haydariBoardStatus','all');
+  }
   syncViewScopeSwitch();
   if ($('board-scope-summary')) {
     $('board-scope-summary').textContent = state.viewScope === 'Shared'
@@ -1028,10 +1034,12 @@ function renderBoard() {
   }
   const statusTabs=$('board-status-tabs');
   if (statusTabs) {
-    statusTabs.innerHTML=STATUS_ORDER.map(status=>{
-      const count=base.filter(p=>p.status===status).length;
+    const mobileStatuses=['all',...STATUS_ORDER];
+    statusTabs.innerHTML=mobileStatuses.map(status=>{
+      const count=status==='all' ? base.length : base.filter(p=>p.status===status).length;
       const active=state.mobileBoardStatus===status;
-      return `<button type="button" data-board-status="${status}" class="${active?'active':''}" aria-pressed="${active?'true':'false'}"><span>${STATUS[status]}</span><strong>${count}</strong></button>`;
+      const label=status==='all' ? 'All' : STATUS[status];
+      return `<button type="button" data-board-status="${status}" class="${active?'active':''}" aria-pressed="${active?'true':'false'}"><span>${label}</span><strong>${count}</strong></button>`;
     }).join('');
     statusTabs.querySelectorAll('[data-board-status]').forEach(button=>button.addEventListener('click',()=>{
       state.mobileBoardStatus=button.dataset.boardStatus;
@@ -1046,9 +1054,14 @@ function renderBoard() {
       : '';
     if (!$('board-unassigned').hidden) bindProjectClicks($('board-unassigned'));
   }
+  if (!base.length) {
+    const hasSearch=Boolean(els.search.value.trim());
+    $('board').innerHTML = `<div class="board-empty-state"><strong>${hasSearch ? 'No matching books' : 'No books in this scope'}</strong><span>${hasSearch ? 'Clear or change the search to see Board cards.' : 'Choose another Board scope to see assigned books.'}</span></div>`;
+    return;
+  }
   $('board').innerHTML = STATUS_ORDER.map(status => {
     const list = base.filter(p=>p.status===status);
-    const mobileActive=state.mobileBoardStatus===status ? ' mobile-active' : '';
+    const mobileActive=(state.mobileBoardStatus==='all' || state.mobileBoardStatus===status) ? ' mobile-active' : '';
     return `<section class="board-col${mobileActive}" data-status="${status}"><div class="board-head"><strong>${STATUS[status]}</strong><span class="pill">${list.length}</span></div><div class="board-list" data-status="${status}">${list.map(p=>projectMarkup(p,true)).join('') || '<p class="muted">Empty</p>'}</div></section>`;
   }).join('');
   bindProjectClicks($('board'));
