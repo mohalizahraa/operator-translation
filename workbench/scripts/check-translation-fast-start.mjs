@@ -14,6 +14,7 @@ const context = read('functions/api/projects/[id]/translation-context.js');
 const sourcePack = read('functions/api/projects/[id]/source-pack.js');
 const current = read('functions/api/translations/current.js');
 const project = read('functions/api/projects/[id].js');
+const projectsIndex = read('functions/api/projects/index.js');
 const progress = read('functions/api/projects/[id]/progress.js');
 const progressSync = read('functions/api/projects/[id]/progress-sync.js');
 
@@ -23,6 +24,11 @@ assert(lib.includes('ON CONFLICT(assignee) DO NOTHING'), 'Focus bootstrap must n
 assert(lib.includes("catalog_id='book-2'") && lib.includes('official-series-index'), 'Known book-2 source-recovery seed/index is missing.');
 
 assert(helper.includes("context_version: 'translation-fast-start-v1'"), 'Composite fast-start context version is missing.');
+assert(helper.includes('function translationResumeInstruction(project, nextSourcePage, totalPages)'), 'Fast-start context is not workflow-stage aware.');
+assert(helper.includes("'Translation text is complete. Do not resume source-page translation."), 'Needs Formatting must not instruct an agent to keep translating.');
+assert(helper.includes("'The book is in Needs Review. Do not resume source-page translation."), 'Needs Review must not instruct an agent to keep translating.');
+assert(helper.includes('projectResumeNoteProjection') && helper.includes('volatile translation-resume note was withheld'), 'Conflicting volatile project notes are not quarantined from resume authority.');
+assert(helper.includes('archived_resume_note') && helper.includes("project.status === 'in_progress'"), 'Phase-specific source-pack resume notes are not archived outside Translating.');
 assert(helper.includes('normalizedProject.page_count_verified === true'), 'Fast-start marker use must require a verified physical-page denominator.');
 assert(helper.includes('hasCheckpointSourceIdentity'), 'Fast-start marker use must require checkpointed source-PDF identity.');
 assert(helper.includes('effective_translated_pages') && helper.includes('verified-marker-ahead-of-d1'), 'Context does not reconcile a verified live marker ahead of D1.');
@@ -36,6 +42,7 @@ assert(sourcePack.includes("recordActivity") && sourcePack.includes("'updated tr
 assert(current.includes('resolveCurrentTranslation') && current.includes('getTranslationContext'), 'Current-translation endpoint does not resolve and return a one-hop context.');
 assert(current.includes("'updated translation focus'"), 'Explicit focus mutation must be recorded in Activity.');
 assert(project.includes('syncTranslationFocusForProject'), 'Project lifecycle updates do not synchronize translation focus.');
+assert(projectsIndex.includes('syncTranslationFocusForProject') && projectsIndex.includes('created project'), 'New projects that begin Translating do not synchronize translation focus.');
 assert(progress.includes('syncTranslationFocusForProject'), 'Verified page progress does not synchronize translation focus.');
 assert(progressSync.includes('readPublicProgressMarker'), 'Live marker parsing is not consolidated at the shared translation helper.');
 assert(progressSync.includes("progressActor=['Zahraa','Mohammed'].includes(requestedActor)"), 'Existing collaborator attribution in marker sync was lost.');
