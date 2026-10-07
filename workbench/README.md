@@ -159,6 +159,20 @@ A second official-site sweep recovered the seven-book **مفاهيم قرآني�
 - Timeline now uses workflow-status color on bars, explicit due-end markers for ranges, and a `Today` control that centers the current date without changing project data.
 
 
+## Translation-agent fast start / resume contract — 2026-10-06
+
+The PDF access bridge remains the canonical way to cross a runtime boundary when an agent needs source bytes, but it is no longer the complete startup contract.
+
+For a named project, `GET /api/projects/<id>/translation-context` returns one composite, no-cache resume payload containing the project/workflow identity, canonical PDF route and source hash, verified physical-page denominator, linked English Google Doc, stored checkpoint, safely usable live `WBPROGRESS` marker, exact next physical source page, `[[NEXT_BATCH]]` sentinel, explicit collaborator focus, and any durable source-recovery pack.
+
+For an unnamed **continue/resume translating** request, `GET /api/translations/current?assignee=Zahraa` (or Mohammed/Brother) is the one-hop entry point. It prefers an explicit D1 `translation_focus` pointer and only falls back to the most recently active assigned Translating project. `PATCH /api/translations/current` sets explicit focus after validating assignment and workflow state. Verified page progress and project lifecycle changes keep focus synchronized automatically.
+
+Reusable source-access discoveries belong in `translation_source_packs`, not chat memory. `GET/PATCH /api/projects/<id>/source-pack` persists only recovery/resume knowledge not already owned by the project, PDF audit, checkpoint ledger, or Google Doc. Source-pack mutations and explicit focus mutations record Activity so the existing shared revision token sees them.
+
+The canonical Arabic PDF remains the semantic and physical-page authority. A transcript, mirror, OCR route, or other clean-text witness can accelerate source recovery but must be aligned back to the canonical PDF before physical-page progress advances. The fast-start API is a consolidated projection over existing truth owners, not a second progress counter or source authority.
+
+**Production acceptance:** the current-translation, translation-context, and source-pack routes must return JSON from Pages Functions. A 200 response containing the static Workbench HTML/SPA shell is a stale/failed deployment, not a successful endpoint check.
+
 ## Live source-page translation progress — 2026-10-04
 
 Each project can store a source-PDF page counter (`translated_pages`) against its authoritative catalogue page denominator. The Dashboard exposes one compact **Live translation progress** panel for the selected `Using as` identity: its assigned books (including `Both`) plus up to the five most recent page updates from those same currently assigned books. It must not leak another collaborator's assigned-book progress into the selected identity's feed. Project/assigned cards show a subtle per-book bar only after translation has begun. Translation-progress changes are written to Activity as a dedicated event, so the Activity view remains an auditable chronological feed without turning every screen into a social-feed surface.
