@@ -151,6 +151,52 @@ export async function resolveCurrentTranslation(db, assignee) {
   return derived ? { project: derived, focus_source: 'derived' } : null;
 }
 
+function projectResumeNoteProjection(project, effectivePages, totalPages) {
+  const note=textOrNull(project?.notes);
+  if (!note) return { project_notes:null, project_notes_warning:null };
+
+  const checkpoint=note.match(/Verified physical source-page checkpoint:\s*(\d+)\s*\/\s*(\d+)/i);
+  const continuePage=note.match(/Continue sequentially from physical source page\s+(\d+)/i);
+  const saysActive=/\bTranslation active\b/i.test(note);
+  const staleCheckpoint=Boolean(checkpoint && (
+    Number(checkpoint[1]) !== Number(effectivePages) ||
+    (totalPages > 0 && Number(checkpoint[2]) !== Number(totalPages))
+  ));
+  const stalePhase=project?.status !== 'in_progress' && (saysActive || continuePage);
+
+  if (staleCheckpoint || stalePhase) {
+    return {
+      project_notes:null,
+      project_notes_warning:'A volatile translation-resume note was withheld because it conflicts with authoritative workflow/progress state.',
+    };
+  }
+  return { project_notes:note, project_notes_warning:null };
+}
+
+function translationResumeInstruction(project, nextSourcePage, totalPages) {
+  if (project?.status === 'not_started') {
+    return 'Translation has not started. Link/open the English Book, verify source identity and the canonical PDF, then begin at physical source page 1.';
+  }
+  if (project?.status === 'in_progress') {
+    if (Number.isInteger(nextSourcePage) && nextSourcePage > 0) {
+      return `Open the linked English Doc, confirm the highest verified WBPROGRESS marker and [[NEXT_BATCH]] sentinel, then continue from physical source page ${nextSourcePage} using the canonical PDF plus any stored recovery witness.`;
+    }
+    return `Verified source-page progress has reached the source total${totalPages ? ` of ${totalPages} pages` : ''}. Do not translate further; reconcile the workflow stage before additional source-page work.`;
+  }
+  if (project?.status === 'review') {
+    return 'Translation text is complete. Do not resume source-page translation. Continue the Needs Formatting pass; formatting, review, and publication remain separate gates.';
+  }
+  if (project?.status === 'completed') {
+    return 'The book is in Needs Review. Do not resume source-page translation. Continue human review and resolve review findings before Publish Ready.';
+  }
+  if (project?.status === 'published') {
+    return project?.published_at
+      ? 'The book is Publish Ready and already marked Published. Do not resume translation; only publication maintenance or an explicit workflow rewind can reopen translation work.'
+      : 'The book is Publish Ready. Do not resume source-page translation; actual publication is a separate action.';
+  }
+  return 'Workflow state is not recognized. Do not resume translation until the project state is reconciled.';
+}
+
 export async function getTranslationContext(db, request, projectId) {
   const project = await db.prepare(`
     SELECT p.*, EXISTS(SELECT 1 FROM project_covers c WHERE c.project_id=p.id) AS has_uploaded_cover
@@ -187,6 +233,13 @@ export async function getTranslationContext(db, request, projectId) {
     focusedFor = (focusRows.results || []).map(row => row.assignee);
   }
 
+  const nextSourcePage=totalPages && effectivePages < totalPages ? effectivePages + 1 : null;
+  const projectedNotes=projectResumeNoteProjection(project,effectivePages,totalPages);
+  const normalizedSourcePack=normalizeSourcePack(sourcePack);
+  const sourcePackProjection=project.status === 'in_progress'
+    ? { ...normalizedSourcePack, archived_resume_note:null }
+    : { ...normalizedSourcePack, archived_resume_note:normalizedSourcePack.resume_note, resume_note:null };
+
   const origin = new URL(request.url).origin;
   return {
     context_version: 'translation-fast-start-v1',
@@ -212,7 +265,7 @@ export async function getTranslationContext(db, request, projectId) {
       live_marker_pages: markerPages,
       effective_translated_pages: effectivePages,
       total_pages: totalPages || null,
-      next_source_page: totalPages && effectivePages < totalPages ? effectivePages + 1 : null,
+      next_source_page: nextSourcePage,
       state: progressState,
       marker: totalPages ? `⟦WBPROGRESS:${project.id}:${effectivePages}:${totalPages}⟧` : null,
       sentinel: '[[NEXT_BATCH]]',
@@ -222,12 +275,13 @@ export async function getTranslationContext(db, request, projectId) {
           ? null
           : markerResult.data?.error || 'Progress marker could not be verified.',
     },
-    source_pack: normalizeSourcePack(sourcePack),
+    source_pack: sourcePackProjection,
     resume: {
       phase: project.status,
-      project_notes: project.notes || null,
+      project_notes: projectedNotes.project_notes,
+      project_notes_warning: projectedNotes.project_notes_warning,
       focused_for: focusedFor,
-      instruction: 'Open the linked English Doc, confirm the highest verified WBPROGRESS marker and [[NEXT_BATCH]] sentinel, then continue from next_source_page using the canonical PDF plus any stored recovery witness.',
+      instruction: translationResumeInstruction(project,nextSourcePage,totalPages),
     },
   };
 }
