@@ -1,0 +1,123 @@
+name: One-shot Book 6 OCR 301-487
+
+on:
+  push:
+    paths:
+      - '.github/workflows/one-shot-book6-ocr-301-487.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  ocr:
+    runs-on: [self-hosted, operator-translation, macOS, ARM64]
+    timeout-minutes: 70
+    env:
+      SOURCE_URL: "https://haydari-translation-workbench.pages.dev/api/pdf/6"
+      OUT: "workbench/handoffs/book6-pages-301-487-ocr.txt"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: OCR physical source pages 301 through 487
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --connect-timeout 30 "$SOURCE_URL" -o /tmp/book6.pdf
+          head -c 5 /tmp/book6.pdf | grep -q '%PDF-'
+
+          cat >/tmp/ocr-book6.swift <<'SWIFT'
+          import Foundation
+          import PDFKit
+          import AppKit
+          import Vision
+
+          guard let doc = PDFDocument(url: URL(fileURLWithPath: "/tmp/book6.pdf")) else { exit(2) }
+          guard doc.pageCount == 487 else {
+            fputs("Unexpected physical page count: \(doc.pageCount)\n", stderr)
+            exit(3)
+          }
+
+          let out = ProcessInfo.processInfo.environment["OUT"]!
+          FileManager.default.createFile(atPath: out, contents: nil)
+          guard let handle = FileHandle(forWritingAtPath: out) else { exit(4) }
+          defer { try? handle.close() }
+
+          func emit(_ s: String) {
+            if let d = s.data(using: .utf8) { try? handle.write(contentsOf: d) }
+          }
+
+          emit("SOURCE_PAGE_COUNT=\(doc.pageCount)\n")
+          for physical in 301...487 {
+            autoreleasepool {
+              guard let page = doc.page(at: physical - 1) else { return }
+              let img = page.thumbnail(of: NSSize(width: 2600, height: 3600), for: .mediaBox)
+              guard let cg = img.cgImage(forProposedRect: nil, context: nil, hints: nil) else { return }
+
+              let req = VNRecognizeTextRequest()
+              req.recognitionLevel = .accurate
+              req.usesLanguageCorrection = true
+              if (try? req.supportedRecognitionLanguages()).map({ $0.contains("ar-SA") }) == true {
+                req.recognitionLanguages = ["ar-SA"]
+              }
+              do {
+                try VNImageRequestHandler(cgImage: cg, options: [:]).perform([req])
+              } catch {
+                emit("\n=== PHYSICAL PAGE \(physical) ===\n[OCR_ERROR: \(error)]\n")
+                return
+              }
+
+              let obs = (req.results ?? []).sorted {
+                let ay = $0.boundingBox.midY, by = $1.boundingBox.midY
+                if abs(ay - by) > 0.012 { return ay > by }
+                return $0.boundingBox.midX > $1.boundingBox.midX
+              }
+              let text = obs.compactMap { $0.topCandidates(1).first?.string }.joined(separator: "\n")
+              emit("\n=== PHYSICAL PAGE \(physical) ===\n\(text)\n")
+              if physical % 25 == 0 || physical == 301 || physical == 487 {
+                print("OCR_PAGE=\(physical)")
+              }
+            }
+          }
+          SWIFT
+
+          mkdir -p "$(dirname "$OUT")"
+          swift /tmp/ocr-book6.swift
+          sha=$(shasum -a 256 /tmp/book6.pdf | awk '{print $1}')
+          python3 - "$OUT" "$sha" <<'PY'
+          import sys
+          p, sha = sys.argv[1], sys.argv[2]
+          s = open(p, encoding='utf-8').read()
+          s = f"SOURCE_SHA256={sha}\n" + s
+          open(p, 'w', encoding='utf-8').write(s)
+          PY
+
+          grep -q '^=== PHYSICAL PAGE 301 ===$' "$OUT"
+          grep -q '^=== PHYSICAL PAGE 487 ===$' "$OUT"
+
+          git fetch origin main
+          publish_dir="/tmp/book6-ocr-publish-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          rm -rf "$publish_dir"
+          git worktree add --detach "$publish_dir" origin/main
+          mkdir -p "$publish_dir/$(dirname "$OUT")"
+          cp "$GITHUB_WORKSPACE/$OUT" "$publish_dir/$OUT"
+          (
+            cd "$publish_dir"
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add "$OUT"
+            git commit -m "workbench: OCR Book 6 pages 301-487"
+            for attempt in 1 2 3; do
+              git fetch origin main
+              git rebase origin/main
+              if git push origin HEAD:main; then exit 0; fi
+              sleep 2
+            done
+            exit 1
+          )
+          git worktree remove --force "$publish_dir"
+
+      - name: Cleanup
+        if: always()
+        run: rm -f /tmp/book6.pdf /tmp/ocr-book6.swift
