@@ -150,6 +150,8 @@ assert(appSource.includes('function validProjectDateRange(start,due)') && appSou
 assert(appSource.includes('invalidSchedules') && appSource.includes('start after that deadline'), 'Batch deadline edits can partially apply across impossible schedules.');
 assert(appSource.includes('Matching Unassigned books are shown in Team inbox above.'), 'Board can still contradict a matching Unassigned result in Shared scope.');
 assert(appSource.includes('Matching Unassigned books are shown below.'), 'Timeline can still contradict a matching Unassigned result in Shared scope.');
+assert(appSource.includes('openUnassignedInbox') && appSource.includes('openUnassignedSchedule') && appSource.includes('unassigned-disclosure'), 'Large Shared Unassigned collections are not collapsed/search-aware.');
+assert(stylesSource.includes('.unassigned-disclosure>summary') && stylesSource.includes('.disclosure-chevron'), 'Unassigned disclosure lacks intentional accessible styling.');
 assert(translationSource.includes('projectResumeNoteProjection') && translationSource.includes('translationResumeInstruction'), 'Translation context lacks stage-aware/stale-note protections.');
 assert(projectsIndexSource.includes('syncTranslationFocusForProject(context.env.DB,result,actor)'), 'New Translating project creation does not synchronize translation focus.');
 
