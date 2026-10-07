@@ -139,3 +139,5 @@ jobs:
           rm -f ./project7-native-structure-webkit.mjs
           rm -rf /tmp/operator-playwright-webkit
           rm -rf node_modules/playwright node_modules/playwright-core node_modules/.bin/playwright
+
+# trigger-native-structure-1
