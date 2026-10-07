@@ -54,35 +54,39 @@ jobs:
             }
             await page.mouse.click(800,450);
           }
-          async function findInDoc(q){
+          async function findInDoc(q,nextHits=0){
             await focusEditor();
             await page.keyboard.press("Meta+f");
             await sleep(250);
             await page.keyboard.type(q,{delay:12});
             await sleep(900);
+            for(let i=0;i<nextHits;i++){await page.keyboard.press("Enter");await sleep(700);}
             const close=page.getByLabel("Close",{exact:true}).first();
             if(await close.isVisible({timeout:700}).catch(()=>false)) await close.click({force:true});
             else await page.keyboard.press("Escape");
             await sleep(1600);
           }
-          async function capture(slug,q){
-            await findInDoc(q);
+          async function capture(slug,q,nextHits=0){
+            await findInDoc(q,nextHits);
             const pages=page.locator(".kix-page-paginated:visible");
             const n=await pages.count();
-            let best=-1,bestScore=Infinity;
+            let best=-1,bestScore=Infinity,matched=false;
             for(let i=0;i<n;i++){
-              const b=await pages.nth(i).boundingBox().catch(()=>null);
+              const loc=pages.nth(i);
+              const b=await loc.boundingBox().catch(()=>null);
               if(!b) continue;
               const intersects=b.y<1000 && b.y+b.height>0;
               if(!intersects) continue;
+              const txt=((await loc.textContent().catch(()=>''))||'').replace(/\s+/g,' ');
+              if(txt.includes(q)){best=i;matched=true;break;}
               const score=Math.abs((b.y+b.height/2)-500);
-              if(score<bestScore){best=i;bestScore=score;}
+              if(!matched && score<bestScore){best=i;bestScore=score;}
             }
             const out=process.env.OUT+"/"+slug+".png";
             if(best>=0){
               await pages.nth(best).screenshot({path:out});
               const b=await pages.nth(best).boundingBox();
-              console.log("CAPTURE="+slug+"|"+q+"|pagebox="+JSON.stringify(b));
+              console.log("CAPTURE="+slug+"|"+q+"|next="+nextHits+"|matched="+matched+"|pagebox="+JSON.stringify(b));
             } else {
               await page.screenshot({path:out});
               console.log("CAPTURE_FALLBACK="+slug+"|"+q);
@@ -95,24 +99,24 @@ jobs:
             if(/accounts\.google\.com/.test(page.url())) throw new Error("Document requires sign-in");
 
             const checkpoints=[
-              ["01-title","Features of Jurisprudential Renewal"],
-              ["02-imprint","All rights reserved by the publisher."],
-              ["03-contents","Contents"],
-              ["04-basmalah","In the Name of Allah, the All-Merciful, the Compassionate"],
-              ["05-ch1","Islamic Jurisprudence and the Necessity of Ijtihād"],
-              ["06-ch1-first-section","The Authenticity of Islam and the Changes of the Age"],
-              ["07-ch2","Causes of the Problem in Contemporary Islamic Jurisprudence"],
-              ["08-ch3","Jurisprudential Theories in the Imāmī School"],
-              ["09-ch4","Imam Khomeini and the Theory of Time and Place"],
-              ["10-midbook","The Theory of the Zone of Discretion"],
-              ["11-latebook","Modernity and Contemporaneity in Imam Khomeini’s Jurisprudence"],
-              ["12-indexes","Indexes"],
-              ["13-quran-index","Index of Qurʾanic Verses"],
-              ["14-hadith-index","Index of Hadith"],
-              ["15-references","Index of References and Sources"],
-              ["16-final","ʿAwāʾid al-Ayyām"]
+              ["01-title","Features of Jurisprudential Renewal",0],
+              ["02-imprint","All rights reserved by the publisher.",0],
+              ["03-contents","Contents",0],
+              ["04-basmalah","In the Name of Allah, the All-Merciful, the Compassionate",0],
+              ["05-ch1","Chapter One",0],
+              ["06-ch1-first-section","The Authenticity of Islam and the Changes of the Age",1],
+              ["07-ch2","Chapter Two",0],
+              ["08-ch3","Chapter Three",0],
+              ["09-ch4","Chapter Four",0],
+              ["10-midbook","The Theory of the Zone of Discretion",1],
+              ["11-latebook","Modernity and Contemporaneity in Imam Khomeini’s Jurisprudence",1],
+              ["12-indexes","Indexes",1],
+              ["13-quran-index","Index of Qurʾanic Verses",1],
+              ["14-hadith-index","Index of Hadith",1],
+              ["15-references","Index of References and Sources",1],
+              ["16-final","ʿAwāʾid al-Ayyām",0]
             ];
-            for(const [slug,q] of checkpoints) await capture(slug,q);
+            for(const [slug,q,next] of checkpoints) await capture(slug,q,next);
             fs.writeFileSync(process.env.OUT+"/manifest.json",JSON.stringify(checkpoints,null,2));
             console.log("PROJECT7_VISUAL_QA_CAPTURE_COMPLETE="+checkpoints.length);
           } finally {
