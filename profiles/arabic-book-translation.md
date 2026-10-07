@@ -16,6 +16,18 @@ Treat that Workbench as the live operational surface for project assignment, lin
 
 The Workbench's own project contract remains authoritative for its field semantics, status transitions, access invariants, progress/checkpoint rules, and deployment behavior. Do not duplicate those mechanics into this profile; use the current Workbench/project authority and preserve the URL above as the stable discovery point.
 
+### Fast-start / resume path for Haydari translations
+
+For a Haydari request to **start, continue, resume, or finish translating a book**, use the Workbench's translation fast-start contract before reconstructing the project through the frontend, web search, chat history, or repository archaeology.
+
+- If the active project/book is already identified, retrieve its current composite translation context from the Workbench project fast-start endpoint.
+- If the user says only `continue translating` / `resume` and the collaborator identity is known, resolve the collaborator's current translation through the Workbench current-translation endpoint, which should return the same composite context.
+- Treat that context as an **operational projection over existing owners**, not as a new semantic source. The canonical Arabic PDF remains the semantic and physical-page authority; the linked English Book remains the mutation target; verified checkpoints/markers govern resumable progress; stored transcript, mirror, OCR, or other recovery routes are access witnesses whose recovered wording must still be aligned back to the canonical PDF before source-page progress advances.
+- Once the fast-start context is available, open the linked target and the indicated canonical/recovery source route directly. Do **not** first browse the Workbench UI, rediscover the PDF, search for the English Doc, or reconstruct the resume point from remembered chat state.
+- Fall back to the normal source-access/reconciliation ladder only when the fast-start contract is unavailable, internally stale/conflicted, points to an inaccessible route, lacks a witness needed for the current source defect, or disagrees with stronger live source↔target evidence.
+- When work discovers a reusable source-access fact that would otherwise need to be rediscovered later—such as a clean same-work transcript series, mirror, page-alignment rule, or recurring extraction defect—persist it through the Workbench's source-pack owner after verification instead of leaving it only in chat memory.
+- If Workbench context, the English Doc, and source evidence disagree about the resume boundary, reconcile that conflict first. Speed never authorizes duplicate translation, skipped source units, guessed damaged text, or an unverified progress advance.
+
 
 ## 0. Interpret translation and formatting shorthand as full-profile work
 
