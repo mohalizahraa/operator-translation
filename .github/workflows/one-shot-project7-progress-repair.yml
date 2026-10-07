@@ -70,3 +70,5 @@ jobs:
           assert p['status']==expected, (p['status'],expected)
           print(f'PROJECT7_LIVE_WORKBENCH_VERIFIED={stored}/{total}:{expected}')
           PY
+
+# finish-translation-trigger-219
