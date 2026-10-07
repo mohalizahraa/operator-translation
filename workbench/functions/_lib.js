@@ -238,6 +238,36 @@ export async function ensureCatalog(db) {
     for (let i = 0; i < operations.length; i += 80) await db.batch(operations.slice(i, i + 80));
   }
 
+  // One-time cleanup for a stale generated resume note left behind after book-2
+  // reached its verified physical source total. Guard by exact text + terminal
+  // translation state so user-authored notes are never rewritten heuristically.
+  const staleResumeCleanup = await db.prepare(
+    "SELECT value FROM workbench_meta WHERE key='stale_translation_resume_cleanup_2026_10_07'"
+  ).first();
+  if (staleResumeCleanup?.value !== 'applied') {
+    const row = await db.prepare("SELECT * FROM projects WHERE catalog_id='book-2' LIMIT 1").first();
+    const staleNote = 'Translation active. Verified physical source-page checkpoint: 156/375. Live progress is synchronized from the linked English Google Doc WBPROGRESS marker. Continue sequentially from physical source page 157.';
+    if (
+      row &&
+      row.notes === staleNote &&
+      ['review','completed','published'].includes(row.status) &&
+      Number(row.pages || 0) > 0 &&
+      Number(row.translated_pages || 0) >= Number(row.pages || 0)
+    ) {
+      const now = new Date().toISOString();
+      const stableNote = `Translation text complete through physical source page ${row.pages}/${row.pages}. Formatting, review, and publication are tracked separately by workflow status.`;
+      const after = { ...row, notes:stableNote, updated_at:now };
+      await db.batch([
+        db.prepare('UPDATE projects SET notes=?, updated_at=? WHERE id=? AND notes=?').bind(stableNote,now,row.id,staleNote),
+        db.prepare("INSERT INTO activity (project_id, actor, action, before_json, after_json, created_at) VALUES (?, 'System', 'retired stale translation resume note', ?, ?, ?)")
+          .bind(row.id,JSON.stringify(row),JSON.stringify(after),now),
+      ]);
+    }
+    await db.prepare(
+      "INSERT INTO workbench_meta(key,value) VALUES('stale_translation_resume_cleanup_2026_10_07','applied') ON CONFLICT(key) DO UPDATE SET value=excluded.value"
+    ).run();
+  }
+
   // Bootstrap one current translation per collaborator only when no explicit
   // pointer exists. Later explicit/runtime focus always wins.
   for (const assignee of ['Zahraa','Mohammed','Brother']) {
@@ -397,6 +427,14 @@ export function validIsoDate(raw) {
   const year=Number(match[1]), month=Number(match[2]), day=Number(match[3]);
   const date=new Date(Date.UTC(year,month-1,day));
   return date.getUTCFullYear()===year && date.getUTCMonth()===month-1 && date.getUTCDate()===day;
+}
+
+export function validDateRange(startRaw, dueRaw) {
+  const start=startRaw === null || startRaw === undefined || startRaw === '' ? null : String(startRaw);
+  const due=dueRaw === null || dueRaw === undefined || dueRaw === '' ? null : String(dueRaw);
+  if (!start || !due) return true;
+  if (!validIsoDate(start) || !validIsoDate(due)) return false;
+  return start <= due;
 }
 
 export function actorFromRequest(request) {
