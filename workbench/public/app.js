@@ -1071,8 +1071,9 @@ function renderBoard() {
   }
   if ($('board-unassigned')) {
     $('board-unassigned').hidden = state.viewScope !== 'Shared' || !unassigned.length;
+    const openUnassignedInbox=Boolean(els.search.value.trim()) || !base.length;
     $('board-unassigned').innerHTML = unassigned.length
-      ? `<section class="board-unassigned-panel"><div class="board-unassigned-head"><div><span class="panel-eyebrow">Team inbox</span><strong>Unassigned</strong></div><span class="pill">${unassigned.length}</span></div><div class="board-unassigned-grid">${unassigned.map(p=>projectMarkup(p,true)).join('')}</div></section>`
+      ? `<details class="board-unassigned-panel unassigned-disclosure" ${openUnassignedInbox?'open':''}><summary class="board-unassigned-head"><span class="unassigned-summary-copy"><span class="panel-eyebrow">Team inbox</span><strong>Unassigned</strong></span><span class="unassigned-summary-meta"><span class="pill">${unassigned.length}</span><span class="disclosure-chevron" aria-hidden="true">⌄</span></span></summary><div class="board-unassigned-grid">${unassigned.map(p=>projectMarkup(p,true)).join('')}</div></details>`
       : '';
     if (!$('board-unassigned').hidden) bindProjectClicks($('board-unassigned'));
   }
@@ -1234,11 +1235,12 @@ function renderTimeline() {
     : '';
   if ($('timeline-unassigned')) {
     $('timeline-unassigned').hidden=state.viewScope !== 'Shared' || !unassigned.length;
+    const openUnassignedSchedule=Boolean(els.search.value.trim()) || !scoped.length;
     $('timeline-unassigned').innerHTML=unassigned.length
-      ? `<div class="timeline-unscheduled-head"><span>Unassigned schedule</span><strong>${unassigned.length}</strong></div><div class="timeline-unassigned-grid">${unassigned.map(p=>{
+      ? `<details class="unassigned-disclosure timeline-unassigned-disclosure" ${openUnassignedSchedule?'open':''}><summary class="timeline-unscheduled-head"><span>Unassigned schedule</span><span class="unassigned-summary-meta"><strong>${unassigned.length}</strong><span class="disclosure-chevron" aria-hidden="true">⌄</span></span></summary><div class="timeline-unassigned-grid">${unassigned.map(p=>{
           const schedule=p.start_date && p.due_date ? `${dateText(p.start_date)} → ${dateText(p.due_date)}` : (p.due_date ? `Due ${dateText(p.due_date)}` : (p.start_date ? `Starts ${dateText(p.start_date)}` : 'Without dates'));
           return `<article class="timeline-unassigned-card" data-project-id="${p.id}">${bookTitleMarkup(p,{compact:true})}<div class="timeline-unassigned-meta"><span class="pill status-${p.status}">${STATUS[p.status]}</span><span>${escapeHtml(schedule)}</span></div></article>`;
-        }).join('')}</div>`
+        }).join('')}</div></details>`
       : '';
   }
   bindProjectClicks($('timeline-visual'));
