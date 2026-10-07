@@ -3,7 +3,7 @@ name: One-shot Project 7 Native Structure WebKit
 on:
   push:
     paths:
-      - '.github/workflows/one-shot-intercession-native-structure-webkit.yml'
+      - '.github/workflows/one-shot-project7-native-structure-webkit.yml'
 
 permissions:
   contents: read
@@ -141,3 +141,5 @@ jobs:
           rm -rf node_modules/playwright node_modules/playwright-core node_modules/.bin/playwright
 
 # trigger-native-structure-1
+
+# corrected-trigger-path-1
