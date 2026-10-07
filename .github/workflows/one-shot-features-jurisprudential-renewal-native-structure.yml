@@ -126,3 +126,5 @@ jobs:
           rm -f ./refresh-toc.mjs
           rm -rf /tmp/operator-playwright-browsers
           rm -rf node_modules/playwright node_modules/playwright-core node_modules/.bin/playwright
+
+# terminal-refresh-trigger-2
