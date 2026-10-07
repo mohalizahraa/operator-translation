@@ -1733,8 +1733,21 @@ async function syncVerifiedTranslationMarkers() {
   lastMarkerSyncAt=now;
 
   const candidates=state.projects
-    .filter(p=>p.status==='in_progress' && p.google_doc_url && p.page_count_verified)
-    .sort((a,b)=>String(b.translation_progress_at || '').localeCompare(String(a.translation_progress_at || '')));
+    .filter(p=>
+      p.google_doc_url &&
+      p.page_count_verified &&
+      (
+        p.status==='in_progress' ||
+        (p.status==='not_started' && (p.assignee===state.actor || p.assignee==='Both'))
+      )
+    )
+    .sort((a,b)=>{
+      const active=Number(b.status==='in_progress')-Number(a.status==='in_progress');
+      if (active) return active;
+      const recent=String(b.translation_progress_at || '').localeCompare(String(a.translation_progress_at || ''));
+      if (recent) return recent;
+      return Number(a.id)-Number(b.id);
+    });
 
   if (!candidates.length) {
     markerSyncCursor=0;

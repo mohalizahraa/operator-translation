@@ -27,6 +27,16 @@ assert(
   'Verified marker sync must bootstrap in-progress projects from 0 translated pages.'
 );
 assert(
+  app.includes("(p.status==='not_started' && (p.assignee===state.actor || p.assignee==='Both'))"),
+  'Verified marker sync must include assigned Not Started projects so the first checkpoint can bootstrap from 0.'
+);
+assert(
+  progressSync.includes('bootstrapSourcePdfSha256(project)') &&
+  progressSync.includes('MAX_SOURCE_HASH_BYTES') &&
+  progressSync.includes('sourceHash=bootstrapped.sha256'),
+  'Verified marker sync must safely bootstrap first-checkpoint source identity from the verified available PDF.'
+);
+assert(
   progress.includes('Translation page checkpoints require a verified physical-PDF page denominator.'),
   'Progress endpoint must reject unverified physical-page denominators.'
 );

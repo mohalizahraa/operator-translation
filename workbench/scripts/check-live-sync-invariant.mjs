@@ -17,6 +17,8 @@ requireText(app, 'const LIVE_REVISION_RETRY_MS = 1000;', '1-second retry after t
 requireText(app, 'const LIVE_MARKER_SYNC_MS = 5000;', '5-second verified progress-marker cadence');
 requireText(app, 'let markerSyncCursor = 0;', 'rotating marker-sync cursor');
 requireText(app, 'const batch=Array.from({length:batchSize}', 'round-robin coverage for all eligible active translations');
+requireText(app, "(p.status==='not_started' && (p.assignee===state.actor || p.assignee==='Both'))", 'first-checkpoint marker bootstrap candidates');
+requireText(progressSync, 'bootstrapSourcePdfSha256(project)', 'server-side first-checkpoint source-identity bootstrap');
 requireText(app, "return String(data.revision ?? '');", 'opaque revision-token comparison');
 requireText(app, "window.addEventListener('focus'", 'focus resynchronization');
 requireText(app, "document.addEventListener('visibilitychange'", 'visibility resynchronization');
