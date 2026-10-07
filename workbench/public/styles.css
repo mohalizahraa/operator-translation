@@ -425,9 +425,6 @@ body.workspace-data-unavailable #app{display:none}
   .select-book{width:44px;height:44px;left:-10px;top:-10px}
 }
 
-.book-translation-progress.legacy-complete,.live-translation-row.legacy-complete{border-style:dashed;background:rgba(89,104,97,.055)}
-.book-translation-progress.legacy-complete .book-progress-copy strong,.live-translation-row.legacy-complete .live-translation-copy strong{color:var(--sage)}
-
 
 /* Semantic typography congruence — 2026-10-07 */
 :root{
