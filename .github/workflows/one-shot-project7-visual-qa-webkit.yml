@@ -1,0 +1,136 @@
+name: One-shot Project 7 Visual QA WebKit
+
+on:
+  push:
+    paths:
+      - '.github/workflows/one-shot-project7-visual-qa-webkit.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  visual-qa:
+    runs-on: [self-hosted, macOS, ARM64]
+    timeout-minutes: 20
+    env:
+      DOC_URL: https://docs.google.com/document/d/1fOo0Y8M1UcaKHR-odP87jGRRlCAT3x9i6AVX7qi6lB0/edit
+      PLAYWRIGHT_BROWSERS_PATH: /tmp/operator-playwright-webkit
+      OUT: /tmp/project7-visual-qa
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install ephemeral WebKit driver
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install webkit
+      - name: Capture rendered Google Docs checkpoints
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$OUT"
+          cat > ./project7-visual-qa.mjs <<'NODE'
+          import { webkit } from "playwright";
+          import fs from "node:fs";
+          const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+          const browser=await webkit.launch({headless:true});
+          const context=await browser.newContext({viewport:{width:1440,height:1000},locale:"en-US"});
+          const page=await context.newPage();
+
+          async function clickIfVisible(loc,timeout=800){
+            try{if(await loc.isVisible({timeout})){await loc.click({force:true});return true}}catch{}
+            return false;
+          }
+          async function dismiss(){
+            for(const label of ["Got it","No thanks","Dismiss","Close"]){
+              await clickIfVisible(page.getByRole("button",{name:label,exact:true}));
+            }
+          }
+          async function focusEditor(){
+            await dismiss();
+            for(const loc of [page.locator(".kix-appview-editor").first(),page.locator(".kix-page-paginated").first(),page.locator('[role="textbox"]').first()]){
+              if(await loc.isVisible({timeout:1600}).catch(()=>false)){await loc.click({position:{x:520,y:220},force:true});return;}
+            }
+            await page.mouse.click(800,450);
+          }
+          async function findInDoc(q){
+            await focusEditor();
+            await page.keyboard.press("Meta+f");
+            await sleep(250);
+            await page.keyboard.type(q,{delay:12});
+            await sleep(900);
+            const close=page.getByLabel("Close",{exact:true}).first();
+            if(await close.isVisible({timeout:700}).catch(()=>false)) await close.click({force:true});
+            else await page.keyboard.press("Escape");
+            await sleep(1600);
+          }
+          async function capture(slug,q){
+            await findInDoc(q);
+            const pages=page.locator(".kix-page-paginated:visible");
+            const n=await pages.count();
+            let best=-1,bestScore=Infinity;
+            for(let i=0;i<n;i++){
+              const b=await pages.nth(i).boundingBox().catch(()=>null);
+              if(!b) continue;
+              const intersects=b.y<1000 && b.y+b.height>0;
+              if(!intersects) continue;
+              const score=Math.abs((b.y+b.height/2)-500);
+              if(score<bestScore){best=i;bestScore=score;}
+            }
+            const out=process.env.OUT+"/"+slug+".png";
+            if(best>=0){
+              await pages.nth(best).screenshot({path:out});
+              const b=await pages.nth(best).boundingBox();
+              console.log("CAPTURE="+slug+"|"+q+"|pagebox="+JSON.stringify(b));
+            } else {
+              await page.screenshot({path:out});
+              console.log("CAPTURE_FALLBACK="+slug+"|"+q);
+            }
+          }
+
+          try{
+            await page.goto(process.env.DOC_URL,{waitUntil:"domcontentloaded",timeout:120000});
+            await sleep(12000);
+            if(/accounts\.google\.com/.test(page.url())) throw new Error("Document requires sign-in");
+
+            const checkpoints=[
+              ["01-title","Features of Jurisprudential Renewal"],
+              ["02-imprint","All rights reserved by the publisher."],
+              ["03-contents","Contents"],
+              ["04-basmalah","In the Name of Allah, the All-Merciful, the Compassionate"],
+              ["05-ch1","Islamic Jurisprudence and the Necessity of Ijtihād"],
+              ["06-ch1-first-section","The Authenticity of Islam and the Changes of the Age"],
+              ["07-ch2","Causes of the Problem in Contemporary Islamic Jurisprudence"],
+              ["08-ch3","Jurisprudential Theories in the Imāmī School"],
+              ["09-ch4","Imam Khomeini and the Theory of Time and Place"],
+              ["10-midbook","The Theory of the Zone of Discretion"],
+              ["11-latebook","Modernity and Contemporaneity in Imam Khomeini’s Jurisprudence"],
+              ["12-indexes","Indexes"],
+              ["13-quran-index","Index of Qurʾanic Verses"],
+              ["14-hadith-index","Index of Hadith"],
+              ["15-references","Index of References and Sources"],
+              ["16-final","ʿAwāʾid al-Ayyām"]
+            ];
+            for(const [slug,q] of checkpoints) await capture(slug,q);
+            fs.writeFileSync(process.env.OUT+"/manifest.json",JSON.stringify(checkpoints,null,2));
+            console.log("PROJECT7_VISUAL_QA_CAPTURE_COMPLETE="+checkpoints.length);
+          } finally {
+            await browser.close();
+          }
+          NODE
+          node ./project7-visual-qa.mjs
+      - name: Upload visual QA evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: project7-visual-qa
+          path: /tmp/project7-visual-qa
+          if-no-files-found: error
+          retention-days: 1
+      - name: Remove ephemeral WebKit payload
+        if: always()
+        run: |
+          rm -f ./project7-visual-qa.mjs
+          rm -rf /tmp/operator-playwright-webkit
+          rm -rf node_modules/playwright node_modules/playwright-core node_modules/.bin/playwright
+          rm -rf /tmp/project7-visual-qa
