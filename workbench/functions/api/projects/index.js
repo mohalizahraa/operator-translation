@@ -1,4 +1,5 @@
-import { actorFromRequest, ensureCatalog, json, normalizeGoogleDocUrl, normalizeHttpUrl, normalizeProject, recordActivity, validIsoDate, verifyGoogleDocLinkAccess } from '../../_lib.js';
+import { actorFromRequest, ensureCatalog, json, normalizeGoogleDocUrl, normalizeHttpUrl, normalizeProject, recordActivity, validDateRange, validIsoDate, verifyGoogleDocLinkAccess } from '../../_lib.js';
+import { syncTranslationFocusForProject } from '../../_translation.js';
 const validStatuses = new Set(['not_started','in_progress','review','completed','published']);
 const validAssignees = new Set(['Zahraa','Mohammed','Brother','Both','Unassigned']);
 
@@ -29,6 +30,7 @@ export async function onRequestPost(context) {
   const pdfUrl = normalizeHttpUrl(body.source_pdf_url);
   if (pdfUrl === false) return json({ error: 'Arabic source PDF must use an http(s) URL.' }, 400);
   if (!validIsoDate(body.start_date) || !validIsoDate(body.due_date)) return json({ error: 'Dates must use YYYY-MM-DD.' }, 400);
+  if (!validDateRange(body.start_date,body.due_date)) return json({ error: 'Start date cannot be after the deadline.' }, 409);
   const actor = actorFromRequest(context.request);
   const completedAt = null;
   const completedBy = null;
@@ -47,5 +49,6 @@ export async function onRequestPost(context) {
     body.notes || null, completedAt, completedBy, publishedAt, publishedBy,
   ).first();
   await recordActivity(context.env.DB, result.id, actor, 'created project', null, result);
+  await syncTranslationFocusForProject(context.env.DB,result,actor);
   return json({ project: normalizeProject(result) }, 201);
 }
