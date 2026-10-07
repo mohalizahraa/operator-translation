@@ -691,19 +691,19 @@ function paceModel({projects=corpusProjects(), paceEvents=state.paceEvents, acto
     paceReady,forecastDate,paceHalfLifeDays:14,paceWindowDays:90
   };
 }
-function translationProgressMarkup(p, compact=false, showZero=false) {
+function translationDisplayPages(p) {
   const done=Math.max(0,Number(p.translated_pages || 0));
   const total=Math.max(0,Number(p.pages || 0));
-  if (isTranslated(p) && p.page_count_verified && total>0 && done<total) {
-    return `<div class="book-translation-progress ${compact?'compact':''} legacy-complete" aria-label="Translation complete; 100 percent; historical page checkpoint unavailable">
-      <div class="book-progress-copy"><span>Translation complete · historical checkpoint unavailable</span><strong>100%</strong></div>
-      <div class="book-progress-track"><span style="width:100%"></span></div>
-    </div>`;
-  }
+  return isTranslated(p) && p.page_count_verified && total>0 && done<total ? total : done;
+}
+function translationProgressMarkup(p, compact=false, showZero=false) {
+  const storedDone=Math.max(0,Number(p.translated_pages || 0));
+  const done=translationDisplayPages(p);
+  const total=Math.max(0,Number(p.pages || 0));
   if (!p.page_count_verified) {
-    if (!showZero && !done) return '';
-    return `<div class="book-translation-progress ${compact?'compact':''} unverified" aria-label="${done} source pages translated; total page count unverified">
-      <div class="book-progress-copy"><span>${done} pages translated</span><strong>Total unverified</strong></div>
+    if (!showZero && !storedDone) return '';
+    return `<div class="book-translation-progress ${compact?'compact':''} unverified" aria-label="${storedDone} source pages translated; total page count unverified">
+      <div class="book-progress-copy"><span>${storedDone} pages translated</span><strong>Total unverified</strong></div>
     </div>`;
   }
   if (!total || (!showZero && !done)) return '';
@@ -743,7 +743,7 @@ function renderTranslationLive() {
   const assigned=state.projects
     .filter(p=>p.assignee===state.actor || p.assignee==='Both')
     .sort((a,b)=>{
-      const ap=Number(a.translated_pages || 0), bp=Number(b.translated_pages || 0);
+      const ap=translationDisplayPages(a), bp=translationDisplayPages(b);
       if (Boolean(bp) !== Boolean(ap)) return Number(Boolean(bp))-Number(Boolean(ap));
       const recent=String(b.translation_progress_at || '').localeCompare(String(a.translation_progress_at || ''));
       if (recent) return recent;
@@ -755,14 +755,12 @@ function renderTranslationLive() {
     .slice(0,5);
   $('live-progress-summary').textContent=`${assigned.length} assigned · updates live`;
   const assignedMarkup=assigned.length ? assigned.map(p=>{
-    const done=Number(p.translated_pages || 0), total=Number(p.pages || 0);
+    const storedDone=Math.max(0,Number(p.translated_pages || 0));
+    const done=translationDisplayPages(p), total=Number(p.pages || 0);
     const verified=Boolean(p.page_count_verified && total>0);
-    const legacyComplete=Boolean(isTranslated(p) && verified && done<total);
-    const percent=verified ? (legacyComplete ? 100 : Math.min(100,Math.round(done/total*100))) : 0;
-    const progressText=legacyComplete
-      ? 'Translation complete · 100% · historical checkpoint unavailable'
-      : (verified ? `${done}/${total} pages` : `${done} pages · total unverified`);
-    return `<button type="button" class="live-translation-row ${done===0 && !legacyComplete?'zero':''} ${verified?'':'unverified'} ${legacyComplete?'legacy-complete':''}" data-live-project="${p.id}">
+    const percent=verified ? Math.min(100,Math.round(done/total*100)) : 0;
+    const progressText=verified ? `${done}/${total} pages` : `${storedDone} pages · total unverified`;
+    return `<button type="button" class="live-translation-row ${done===0?'zero':''} ${verified?'':'unverified'}" data-live-project="${p.id}">
       <div class="live-translation-copy">${bookTitleMarkup(p,{compact:true})}<strong>${progressText}</strong></div>
       ${verified ? `<div class="live-translation-track"><span style="width:${percent}%"></span></div>` : ''}
     </button>`;
