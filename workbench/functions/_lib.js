@@ -26,6 +26,24 @@ export async function ensureCatalog(db) {
     FOREIGN KEY(project_id) REFERENCES projects(id) ON DELETE CASCADE
   )`).run();
   await db.prepare('CREATE INDEX IF NOT EXISTS idx_translation_progress_project_created ON translation_progress_checkpoints(project_id, created_at DESC)').run();
+  await db.prepare(`CREATE TABLE IF NOT EXISTS translation_focus (
+    assignee TEXT PRIMARY KEY CHECK (assignee IN ('Zahraa','Mohammed','Brother')),
+    project_id INTEGER NOT NULL,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY(project_id) REFERENCES projects(id) ON DELETE CASCADE
+  )`).run();
+  await db.prepare('CREATE INDEX IF NOT EXISTS idx_translation_focus_project ON translation_focus(project_id)').run();
+  await db.prepare(`CREATE TABLE IF NOT EXISTS translation_source_packs (
+    project_id INTEGER PRIMARY KEY,
+    source_text_kind TEXT,
+    source_text_url TEXT,
+    recovery_routes_json TEXT NOT NULL DEFAULT '[]',
+    page_alignment_note TEXT,
+    known_issues TEXT,
+    resume_note TEXT,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY(project_id) REFERENCES projects(id) ON DELETE CASCADE
+  )`).run();
   const existingColumns = await db.prepare('PRAGMA table_info(projects)').all();
   const names = new Set((existingColumns.results || []).map(row => row.name));
   for (const obsolete of ['priority','blocked','blocker_reason']) {
@@ -218,6 +236,50 @@ export async function ensureCatalog(db) {
       )
     );
     for (let i = 0; i < operations.length; i += 80) await db.batch(operations.slice(i, i + 80));
+  }
+
+  // Bootstrap one current translation per collaborator only when no explicit
+  // pointer exists. Later explicit/runtime focus always wins.
+  for (const assignee of ['Zahraa','Mohammed','Brother']) {
+    await db.prepare(`
+      INSERT INTO translation_focus(assignee, project_id, updated_at)
+      SELECT ?, id, CURRENT_TIMESTAMP
+      FROM projects
+      WHERE status='in_progress' AND (assignee=? OR assignee='Both')
+      ORDER BY COALESCE(translation_progress_at, updated_at, created_at) DESC, id DESC
+      LIMIT 1
+      ON CONFLICT(assignee) DO NOTHING
+    `).bind(assignee, assignee).run();
+  }
+
+  // Public recovery witnesses for the active Tawassul book. These do not
+  // replace the canonical PDF and never overwrite a later-refined D1 source pack.
+  const tawassul = await db.prepare("SELECT id FROM projects WHERE catalog_id='book-2' LIMIT 1").first();
+  if (tawassul?.id) {
+    const routes = JSON.stringify([
+      { kind:'official-series-index', url:'https://alhaydari.com/ar/category/articles/mtarhat-articles/%D9%85%D8%AE%D8%AA%D8%A7%D8%B1%D8%A7%D8%AA-%D9%85%D9%86-%D9%85%D9%82%D8%A7%D9%85%D8%A7%D8%AA-%D8%A7%D9%84%D9%85%D8%B5%D8%B7%D9%81%D9%89-%D9%80-%D9%85%D9%82%D8%A7%D9%84%D8%A7%D8%AA/', label:'Official transcript-series index', note:'Stable discovery root for the full tawassul transcript sequence.' },
+      { kind:'official-transcript', url:'https://alhaydari.com/ar/2013/04/46909/', label:'Official tawassul lecture transcript — episode 5', note:'Clean Arabic recovery witness for the standing/person discussion.' },
+      { kind:'official-transcript', url:'https://alhaydari.com/ar/2013/04/46986/', label:'Official tawassul lecture transcript — episode 6', note:'Clean Arabic recovery witness for the continuation of the tawassul discussion.' },
+      { kind:'official-transcript', url:'https://alhaydari.com/ar/2013/04/46994/', label:'Official tawassul lecture transcript — episode 7', note:'Clean Arabic recovery witness for Ibn Taymiyyah’s denial and the opening of the hadith evidence.' },
+      { kind:'official-transcript', url:'https://alhaydari.com/ar/2013/04/47081/', label:'Official tawassul lecture transcript — episode 8', note:'Clean Arabic recovery witness for the hadith evidence sequence.' },
+      { kind:'official-transcript', url:'https://alhaydari.com/ar/2013/04/47258/', label:'Official tawassul lecture transcript — episode 9', note:'Clean Arabic recovery witness for the blind-man hadith discussion.' },
+      { kind:'official-transcript', url:'https://alhaydari.com/ar/2013/05/47568/', label:'Official tawassul lecture transcript — episode 11', note:'Clean Arabic recovery witness for the continuation of the tawassul argument.' },
+      { kind:'official-transcript', url:'https://alhaydari.com/ar/2013/05/47818/', label:'Official tawassul lecture transcript — episode 12', note:'Clean Arabic recovery witness for later tawassul evidence.' }
+    ]);
+    await db.prepare(`
+      INSERT INTO translation_source_packs(
+        project_id, source_text_kind, source_text_url, recovery_routes_json,
+        page_alignment_note, known_issues, resume_note, updated_at
+      ) VALUES(?, 'official-transcript-series', ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+      ON CONFLICT(project_id) DO NOTHING
+    `).bind(
+      tawassul.id,
+      'https://alhaydari.com/ar/category/articles/mtarhat-articles/%D9%85%D8%AE%D8%AA%D8%A7%D8%B1%D8%A7%D8%AA-%D9%85%D9%86-%D9%85%D9%82%D8%A7%D9%85%D8%A7%D8%AA-%D8%A7%D9%84%D9%85%D8%B5%D8%B7%D9%81%D9%89-%D9%80-%D9%85%D9%82%D8%A7%D9%84%D8%A7%D8%AA/',
+      routes,
+      'Canonical physical PDF remains the semantic and page authority. Use official alhaydari.com transcripts only as clean recovery witnesses and align recovered wording back to the canonical PDF before advancing physical-page progress.',
+      'The canonical PDF text layer becomes heavily garbled in later sections. Do not guess damaged glyph extraction; switch to the stored official transcript recovery routes and verify against the PDF.',
+      'Resume from the highest verified WBPROGRESS marker and the [[NEXT_BATCH]] sentinel in the linked English Google Doc.'
+    ).run();
   }
 
   const auditCurrent = await db.prepare("SELECT value FROM workbench_meta WHERE key = 'pdf_audit_version'").first();
