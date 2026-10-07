@@ -108,6 +108,9 @@ assert(indexSource.match(/data-view-scope="Zahraa"/g)?.length === 2 && indexSour
 assert(appSource.includes("localStorage.setItem('haydariViewScope'") && appSource.includes('function viewScopeMatches(project)'), 'Shared Board/Timeline scope persistence is missing.');
 assert(indexSource.includes('id="timeline-unassigned"') && appSource.includes('Unassigned schedule'), 'Timeline does not retain Unassigned work distinctly in Shared view.');
 assert(indexSource.includes('id="board-status-tabs"') && appSource.includes('data-board-status'), 'Mobile Board status tabs are missing.');
+assert(appSource.includes("const MOBILE_BOARD_STATUSES = ['all', ...STATUS_ORDER]") && appSource.includes("mobileBoardStatus: MOBILE_BOARD_STATUSES.includes(savedMobileBoardStatus) ? savedMobileBoardStatus : 'all'"), 'Mobile Board must default to an All status projection.');
+assert(appSource.includes("selectedStatusHasBooks") && appSource.includes("localStorage.setItem('haydariBoardStatus','all')"), 'Mobile Board must escape remembered empty-status traps when scope changes.');
+assert(appSource.includes("state.mobileBoardStatus==='all' || state.mobileBoardStatus===status") && appSource.includes('board-empty-state'), 'Mobile Board must show all columns by default and render an explicit true-empty state.');
 assert(appSource.includes("root.querySelectorAll('.quick-status')"), 'Tap-friendly Board status mutation is missing.');
 assert(appSource.includes('assigneeBadgeMarkup(p)') && appSource.includes("value === 'Both' ? 'Shared'"), 'Scan-speed Shared assignee badge behavior is missing.');
 assert(indexSource.includes('data-dashboard-preset') === false, 'Dashboard drill-down controls must be rendered from live state, not hard-coded stale counts.');
