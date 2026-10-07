@@ -1,4 +1,4 @@
-import { actorFromRequest, ensureCatalog, json, normalizeGoogleDocUrl, normalizeHttpUrl, normalizeProject, recordActivity, validIsoDate, verifyGoogleDocLinkAccess } from '../../_lib.js';
+import { actorFromRequest, ensureCatalog, json, normalizeGoogleDocUrl, normalizeHttpUrl, normalizeProject, recordActivity, validDateRange, validIsoDate, verifyGoogleDocLinkAccess } from '../../_lib.js';
 import { syncTranslationFocusForProject } from '../../_translation.js';
 
 const fields = new Set([
@@ -73,6 +73,11 @@ export async function onRequestPatch(context) {
   }
   if ((body.start_date !== undefined && !validIsoDate(body.start_date)) || (body.due_date !== undefined && !validIsoDate(body.due_date))) {
     return json({ error: 'Dates must use YYYY-MM-DD.' }, 400);
+  }
+  const nextStartDate=body.start_date !== undefined ? body.start_date : before.start_date;
+  const nextDueDate=body.due_date !== undefined ? body.due_date : before.due_date;
+  if (!validDateRange(nextStartDate,nextDueDate)) {
+    return json({ error: 'Start date cannot be after the deadline.' }, 409);
   }
   if (body.translated_pages !== undefined) {
     return json({ error: 'Translation progress is verification-owned. Use the dedicated progress checkpoint endpoint.' }, 400);
