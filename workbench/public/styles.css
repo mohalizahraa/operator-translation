@@ -311,6 +311,16 @@ body.workspace-data-unavailable #app{display:none}
 .board-unassigned-head strong{font-family:"EB Garamond",serif;font-size:18px;color:var(--oxblood)}
 .board-unassigned-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px}
 .board-unassigned-grid .project-card{height:100%}
+.unassigned-disclosure>summary{list-style:none;cursor:pointer;user-select:none}
+.unassigned-disclosure>summary::-webkit-details-marker{display:none}
+.unassigned-summary-copy{display:grid;gap:2px}
+.unassigned-summary-meta{display:inline-flex;align-items:center;gap:8px}
+.disclosure-chevron{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:999px;color:var(--sage);font:700 14px/1 var(--font-ui,"Inter",sans-serif);transition:transform .16s ease,background .16s ease}
+.unassigned-disclosure>summary:hover .disclosure-chevron{background:rgba(154,131,95,.1);color:var(--ink)}
+.unassigned-disclosure[open] .disclosure-chevron{transform:rotate(180deg)}
+.board-unassigned-panel:not([open]){padding-bottom:10px}
+.timeline-unassigned-disclosure>summary{margin:0}
+.timeline-unassigned-disclosure:not([open]) .timeline-unscheduled-head{margin-bottom:0}
 @media(max-width:720px){
   .board-scope-toolbar{align-items:stretch;flex-direction:column}
   .view-scope-switch{width:100%}
