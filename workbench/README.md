@@ -186,6 +186,8 @@ Page progress is source-relative: **X/Y means X physical pages of the authoritat
 
 The stored Workbench counter is a synchronized checkpoint projection, **not independent proof of manuscript coverage**. If it ever conflicts with authoritative source↔target evidence, stop, reconcile the manuscript, correct the checkpoint, and only then report progress. The authoritative denominator is the actual physical page count of the canonical PDF used by the translation workflow. For **Repentance / book-123**, that PDF is **132 physical pages**; the previous catalogue value of 131 was a metadata mismatch and is corrected here.
 
+**Completed-translation display invariant:** once the canonical workflow status establishes that translation is complete (**Needs Formatting**, **Needs Review**, or **Publish Ready**), every translation-progress bar must render visually at **100%** even when an older project predates page-checkpoint telemetry. Missing historical checkpoint evidence remains explicit secondary provenance (for example, “historical checkpoint unavailable”) and must never make a completed translation look partially or 0% translated. This is a display/provenance rule only: never fabricate or backfill `translated_pages` without verification-owned checkpoint evidence.
+
 
 ### Assigned-workload progress baseline — 2026-10-04
 

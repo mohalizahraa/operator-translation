@@ -695,8 +695,9 @@ function translationProgressMarkup(p, compact=false, showZero=false) {
   const done=Math.max(0,Number(p.translated_pages || 0));
   const total=Math.max(0,Number(p.pages || 0));
   if (isTranslated(p) && p.page_count_verified && total>0 && done<total) {
-    return `<div class="book-translation-progress ${compact?'compact':''} legacy-complete" aria-label="Translation complete; historical page checkpoint unavailable">
-      <div class="book-progress-copy"><span>Translation complete</span><strong>Legacy checkpoint unavailable</strong></div>
+    return `<div class="book-translation-progress ${compact?'compact':''} legacy-complete" aria-label="Translation complete; 100 percent; historical page checkpoint unavailable">
+      <div class="book-progress-copy"><span>Translation complete · historical checkpoint unavailable</span><strong>100%</strong></div>
+      <div class="book-progress-track"><span style="width:100%"></span></div>
     </div>`;
   }
   if (!p.page_count_verified) {
@@ -757,13 +758,13 @@ function renderTranslationLive() {
     const done=Number(p.translated_pages || 0), total=Number(p.pages || 0);
     const verified=Boolean(p.page_count_verified && total>0);
     const legacyComplete=Boolean(isTranslated(p) && verified && done<total);
-    const percent=verified && !legacyComplete ? Math.min(100,Math.round(done/total*100)) : 0;
+    const percent=verified ? (legacyComplete ? 100 : Math.min(100,Math.round(done/total*100))) : 0;
     const progressText=legacyComplete
-      ? 'Translation complete · legacy checkpoint unavailable'
+      ? 'Translation complete · 100% · historical checkpoint unavailable'
       : (verified ? `${done}/${total} pages` : `${done} pages · total unverified`);
-    return `<button type="button" class="live-translation-row ${done===0?'zero':''} ${verified?'':'unverified'} ${legacyComplete?'legacy-complete':''}" data-live-project="${p.id}">
+    return `<button type="button" class="live-translation-row ${done===0 && !legacyComplete?'zero':''} ${verified?'':'unverified'} ${legacyComplete?'legacy-complete':''}" data-live-project="${p.id}">
       <div class="live-translation-copy">${bookTitleMarkup(p,{compact:true})}<strong>${progressText}</strong></div>
-      ${verified && !legacyComplete ? `<div class="live-translation-track"><span style="width:${percent}%"></span></div>` : ''}
+      ${verified ? `<div class="live-translation-track"><span style="width:${percent}%"></span></div>` : ''}
     </button>`;
   }).join('') : '<div class="live-empty">No books are assigned here yet.</div>';
   const feedMarkup=latest.length ? latest.map(a=>{
