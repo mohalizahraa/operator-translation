@@ -138,3 +138,5 @@ jobs:
           rm -rf /tmp/operator-playwright-webkit
           rm -rf node_modules/playwright node_modules/playwright-core node_modules/.bin/playwright
           rm -rf /tmp/project7-visual-qa
+
+# final-visual-trigger-1
