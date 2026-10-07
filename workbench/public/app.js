@@ -1307,9 +1307,9 @@ function renderActivity() {
       const verified=Boolean(project?.page_count_verified && total>0);
       const label=a.action==='translation progress correction' ? 'Progress corrected' : 'Pages translated';
       const amount=verified ? `${done}/${total}` : `${done} · total unverified`;
-      return `<div class="activity-item activity-translation"><time>${when.toLocaleDateString()}</time><div><strong>${label}: ${amount}</strong>${activityBookTitleMarkup(a)}</div><small>${escapeHtml(activityActorGroup(a))} · ${when.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})}</small></div>`;
+      return `<div class="activity-item activity-translation"><time class="activity-date">${when.toLocaleDateString()}</time><div class="activity-main"><strong class="activity-event">${label}: <span class="activity-amount">${amount}</span></strong>${activityBookTitleMarkup(a)}</div><small class="activity-meta">${escapeHtml(activityActorGroup(a))} · ${when.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})}</small></div>`;
     }
-    return `<div class="activity-item"><time>${when.toLocaleDateString()}</time><div><strong>${escapeHtml(a.actor || 'Unknown')}</strong> ${escapeHtml(a.action)}${activityBookTitleMarkup(a)}</div><small>${when.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})}</small></div>`;
+    return `<div class="activity-item"><time class="activity-date">${when.toLocaleDateString()}</time><div class="activity-main"><strong class="activity-event">${escapeHtml(a.actor || 'Unknown')} ${escapeHtml(a.action)}</strong>${activityBookTitleMarkup(a)}</div><small class="activity-meta">${when.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})}</small></div>`;
   }).join('') || '<p class="muted">No activity matches these filters.</p>';
 }
 function render() { renderDashboard(); renderProjects(); renderBoard(); renderTimeline(); renderStats(); renderActivity(); hydrateUploadedCovers(document); }
