@@ -18,7 +18,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          curl -fsS -X POST             -H 'x-workbench-actor: Zahraa'             https://haydari-translation-workbench.pages.dev/api/projects/6/progress-sync             -o /tmp/sync.json
+          curl -fsS -X POST \
+            -H 'x-workbench-actor: Zahraa' \
+            https://haydari-translation-workbench.pages.dev/api/projects/6/progress-sync \
+            -o /tmp/sync.json
           cat /tmp/sync.json
           python3 - <<'PY'
           import json
@@ -27,7 +30,8 @@ jobs:
               raise SystemExit(d['error'])
           print('BOOK6_MARKER_SYNC_OK')
           PY
-      - name: Verify live project reflects marker
+
+      - name: Keep live resume note aligned
         shell: bash
         run: |
           set -euo pipefail
@@ -37,6 +41,45 @@ jobs:
           d=json.load(open('/tmp/readback.json'))
           p=int(d['project']['translated_pages'])
           m=int(d['marker_pages'])
+          total=int(d['marker_total'])
           assert p==m, (p,m)
-          print(f'BOOK6_LIVE_PROGRESS_VERIFIED={p}/{d["marker_total"]}')
+          if p < total:
+              note=(
+                  f"Translation active. Verified physical source-page checkpoint: {p}/{total}. "
+                  f"Continue sequentially from physical source page {p+1}. "
+                  "Website progress tracks each verified manuscript batch in near real time."
+              )
+          else:
+              note=(
+                  f"Translation text complete through physical source page {p}/{total}. "
+                  "Formatting, native-footnote normalization, review, and publication gates remain separate."
+              )
+          json.dump({"notes":note},open('/tmp/project-note.json','w'))
+          print(f'BOOK6_LIVE_PROGRESS_VERIFIED={p}/{total}')
+          PY
+          curl -fsS -X PATCH \
+            -H 'content-type: application/json' \
+            -H 'x-workbench-actor: Zahraa' \
+            --data-binary @/tmp/project-note.json \
+            https://haydari-translation-workbench.pages.dev/api/projects/6 \
+            -o /tmp/project-note-response.json
+          cat /tmp/project-note-response.json
+
+      - name: Verify live project and resume note
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsS https://haydari-translation-workbench.pages.dev/api/projects/6/progress-sync -o /tmp/final-readback.json
+          python3 - <<'PY'
+          import json
+          d=json.load(open('/tmp/final-readback.json'))
+          p=int(d['project']['translated_pages'])
+          m=int(d['marker_pages'])
+          total=int(d['marker_total'])
+          notes=d['project'].get('notes') or ''
+          assert p==m, (p,m)
+          assert f'{p}/{total}' in notes, notes
+          if p < total:
+              assert f'page {p+1}' in notes, notes
+          print(f'BOOK6_LIVE_SITE_VERIFIED={p}/{total}')
           PY
