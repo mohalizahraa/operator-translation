@@ -1,0 +1,56 @@
+name: One-shot Book 6 Correct Progress to 100
+
+on:
+  push:
+    paths:
+      - '.github/workflows/one-shot-book6-correct-progress-100.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  correct:
+    runs-on: [self-hosted, operator-translation, macOS, ARM64]
+    timeout-minutes: 5
+    steps:
+      - name: Correct false 150 checkpoint to verified 100
+        shell: bash
+        run: |
+          set -euo pipefail
+          progress=$(cat <<'JSON'
+          {
+            "translated_pages": 100,
+            "expected_previous_pages": 150,
+            "source_total_pages": 487,
+            "source_pdf_sha256": "210ba1d2de0a91bf10fad1ef19fa7276b00c7764036bf8c1861294426bada0ee",
+            "google_doc_revision": "ANLCKQkIhhMF3B31GUOsuT_oVhFt_yIv3sajouLybikp3ATL4a5xwFGKvMfrJLxTSX4UXzKtaKeHuDwpM99zrphsxLOuweyJZWK_BOOwPqM",
+            "correction": true,
+            "correction_reason": "The 150 marker was discovered immediately after manuscript content corresponding only through source page 95. It was not supported by pages 101-150 in the English target. The false marker was removed; current continuous source-to-target coverage is verified through physical page 100.",
+            "verification_note": "Correction after direct manuscript/source reconciliation: verified continuous translation through physical source page 100; continue sequentially from page 101."
+          }
+          JSON
+          )
+          curl -fsS -X PATCH -H 'content-type: application/json' -H 'x-workbench-actor: Zahraa'             --data "$progress" https://haydari-translation-workbench.pages.dev/api/projects/6/progress
+          printf '\n'
+          project=$(cat <<'JSON'
+          {
+            "status": "in_progress",
+            "notes": "Translation active. Verified physical source-page checkpoint: 100/487 after correcting an unsupported 150 marker. Continue sequentially from physical source page 101. Website progress must track each verified manuscript batch in near real time."
+          }
+          JSON
+          )
+          curl -fsS -X PATCH -H 'content-type: application/json' -H 'x-workbench-actor: Zahraa'             --data "$project" https://haydari-translation-workbench.pages.dev/api/projects/6
+          printf '\n'
+      - name: Verify correction
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsS https://haydari-translation-workbench.pages.dev/api/projects/6/progress-sync -o /tmp/readback.json
+          python3 - <<'PY'
+          import json
+          d=json.load(open('/tmp/readback.json'))
+          assert int(d['project']['translated_pages'])==100, d['project']['translated_pages']
+          assert int(d['marker_pages'])==100, d['marker_pages']
+          assert d['project']['status']=='in_progress', d['project']['status']
+          print('BOOK6_PROGRESS_CORRECTION_100_VERIFIED')
+          PY
