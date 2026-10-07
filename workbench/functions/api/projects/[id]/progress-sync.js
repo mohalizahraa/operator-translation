@@ -83,7 +83,7 @@ async function readMarker(context) {
 
 export async function onRequestGet(context) {
   const result=await readMarker(context);
-  return json(result.data,result.status);
+  return json({...result.data,sync_contract:'verified-marker-v2'},result.status);
 }
 
 export async function onRequestPost(context) {
