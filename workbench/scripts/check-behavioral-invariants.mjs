@@ -9,7 +9,7 @@ function close(actual,expected,epsilon=1e-9){
 }
 
 const source=fs.readFileSync(new URL('../public/model-core.js',import.meta.url),'utf8');
-const {validIsoDate,normalizeProject}=await import('../functions/_lib.js');
+const {validDateRange,validIsoDate,normalizeProject}=await import('../functions/_lib.js');
 const {PDF_AUDIT}=await import('../functions/_pdf_audit.js');
 const context={};
 vm.createContext(context);
@@ -21,6 +21,10 @@ assert(!validIsoDate('2026-02-29'),'Impossible non-leap day must fail.');
 assert(!validIsoDate('2026-13-01'),'Impossible month must fail.');
 assert(!validIsoDate('2026-04-31'),'Impossible day-of-month must fail.');
 assert(validIsoDate(''),'Blank optional date must pass.');
+assert(validDateRange('2026-10-01','2026-10-01'),'Same-day start/deadline must pass.');
+assert(validDateRange('2026-10-01','2026-10-02'),'Start before deadline must pass.');
+assert(validDateRange('', '2026-10-02'),'Missing start date must remain allowed.');
+assert(!validDateRange('2026-10-03','2026-10-02'),'Start after deadline must fail.');
 
 const [auditedId,auditedEvidence]=Object.entries(PDF_AUDIT).find(([,evidence])=>evidence?.status==='available' && evidence?.url && Number(evidence?.physical_pages)>0) || [];
 assert(auditedId && auditedEvidence,'Behavior test requires at least one audited available PDF.');
