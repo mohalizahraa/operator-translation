@@ -22,6 +22,7 @@ const headersSource = await fs.readFile(new URL('public/_headers', root), 'utf8'
 const projectPatchSource = await fs.readFile(new URL('functions/api/projects/[id].js', root), 'utf8');
 const revisionSource = await fs.readFile(new URL('functions/api/revision.js', root), 'utf8');
 const progressSyncSource = await fs.readFile(new URL('functions/api/projects/[id]/progress-sync.js', root), 'utf8');
+const translationSource = await fs.readFile(new URL('functions/_translation.js', root), 'utf8');
 const modelCoreSource = await fs.readFile(new URL('public/model-core.js', root), 'utf8');
 const projectsIndexSource = await fs.readFile(new URL('functions/api/projects/index.js', root), 'utf8');
 
@@ -148,7 +149,12 @@ assert(appSource.includes("cache: options.cache || 'no-store'"), 'Workbench API 
 assert(revisionSource.includes('MAX(id)') && revisionSource.includes('FROM activity'), 'Live revision endpoint is not derived from shared activity state.');
 assert(appSource.includes('const LIVE_MARKER_SYNC_MS = 5000') && appSource.includes('syncVerifiedTranslationMarkers()'), 'Verified Google Doc marker sync is missing from live polling.');
 assert(appSource.includes("/progress-sync\`,{method:'POST'}"), 'Live client does not publish verified marker checkpoints through the same-origin sync route.');
-assert(progressSyncSource.includes("export?format=txt") && progressSyncSource.includes('WBPROGRESS') && progressSyncSource.includes('public-export-sha256:'), 'Progress-sync route does not bind the public Google Doc marker to an exact export identity.');
+assert(
+  translationSource.includes("export?format=txt") &&
+  translationSource.includes('WBPROGRESS') &&
+  progressSyncSource.includes('public-export-sha256:'),
+  'Shared marker reader / progress-sync route does not bind the public Google Doc marker to an exact export identity.'
+);
 assert(progressSyncSource.includes("onRequestPatch as publishProgress"), 'Progress-sync route bypasses the canonical guarded progress checkpoint owner.');
 assert(appSource.includes('function bookTitleMarkup(project') && appSource.includes('function activityBookTitleMarkup(activity)'), 'Whole-site bilingual book-title projection helpers are missing.');
 assert(appSource.includes('live-translation-copy">\${bookTitleMarkup(p,{compact:true})}') && appSource.includes('timeline-label-title">\${bookTitleMarkup(p,{compact:true})}') && appSource.includes('activityBookTitleMarkup(a)'), 'One or more secondary surfaces regressed to Arabic-only book titles.');
