@@ -144,6 +144,15 @@ assert(coverSourcesSource.includes('book-1') && coverSourcesSource.includes('boo
 assert(stylesSource.includes('--type-action:11px') && stylesSource.includes('.english-book-button{font-family:"Inter"'), 'Shared action geometry contract is missing.');
 assert(!stylesSource.includes('.english-book-button{font:inherit}'), 'English Book font inheritance regression remains.');
 assert(indexSource.includes('id="timeline-jump-today"'), 'Timeline Today control is missing.');
+assert(libSource.includes('export function validDateRange(startRaw, dueRaw)'), 'Shared server date-range invariant is missing.');
+assert(projectPatchSource.includes('Start date cannot be after the deadline.') && projectsIndexSource.includes('Start date cannot be after the deadline.'), 'Project create/update routes do not both reject impossible start/deadline ranges.');
+assert(appSource.includes('function validProjectDateRange(start,due)') && appSource.includes('syncProjectDateBounds'), 'Project editor does not prevent impossible date ranges locally.');
+assert(appSource.includes('invalidSchedules') && appSource.includes('start after that deadline'), 'Batch deadline edits can partially apply across impossible schedules.');
+assert(appSource.includes('Matching Unassigned books are shown in Team inbox above.'), 'Board can still contradict a matching Unassigned result in Shared scope.');
+assert(appSource.includes('Matching Unassigned books are shown below.'), 'Timeline can still contradict a matching Unassigned result in Shared scope.');
+assert(translationSource.includes('projectResumeNoteProjection') && translationSource.includes('translationResumeInstruction'), 'Translation context lacks stage-aware/stale-note protections.');
+assert(projectsIndexSource.includes('syncTranslationFocusForProject(context.env.DB,result,actor)'), 'New Translating project creation does not synchronize translation focus.');
+
 // Dashboard pace/truth closure: keep behavior and freshness assertions in the same acceptance owner.
 const appAssetVersion = indexSource.match(/\/app\.js\?v=([^"'&\\s]+)/)?.[1];
 const stylesAssetVersion = indexSource.match(/\/styles\.css\?v=([^"'&\\s]+)/)?.[1];
