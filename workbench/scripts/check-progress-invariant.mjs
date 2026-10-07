@@ -12,6 +12,7 @@ const progress = read('functions/api/projects/[id]/progress.js');
 const app = read('public/app.js');
 const catalog = read('functions/_catalog.js');
 const progressSync = read('functions/api/projects/[id]/progress-sync.js');
+const translation = read('functions/_translation.js');
 
 assert(
   generic.includes("Translation progress is verification-owned. Use the dedicated progress checkpoint endpoint."),
@@ -30,8 +31,8 @@ assert(
   'Progress endpoint must reject unverified physical-page denominators.'
 );
 assert(
-  progressSync.includes('Verified marker sync requires a verified physical-PDF page denominator.'),
-  'Marker sync must reject unverified physical-page denominators.'
+  translation.includes('Verified marker sync requires a verified physical-PDF page denominator.'),
+  'Shared marker reader must reject unverified physical-page denominators.'
 );
 for (const required of ['expected_previous_pages','source_total_pages','source_pdf_sha256','google_doc_revision']) {
   assert(progress.includes(required), `Progress endpoint missing required checkpoint field: ${required}`);
