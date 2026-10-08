@@ -29,7 +29,12 @@ const context={
  state,els,localStorage:{setItem(){}},STATUS:{not_started:'Not Started',in_progress:'Translating',review:'Needs Formatting',completed:'Needs Review',published:'Publish Ready'},
  STATUS_ORDER:['not_started','in_progress','review','completed','published'],
  $:key=>elements[key],
- projectMatchesSearch:p=>true,
+ // Array.filter passes (project, index, array); only a wrapped callback may
+ // use the predicate's default search argument instead of numeric index.
+ projectMatchesSearch:(p,query='')=>{
+   const text=String(query||'').trim().toLowerCase();
+   return !text || String(p.title_en||'').toLowerCase().includes(text);
+ },
  viewScopeMatches:p=>state.viewScope==='Shared' ? p.assignee!=='Unassigned' : p.assignee===state.viewScope || p.assignee==='Both',
  syncViewScopeSwitch(){},
  projectMarkup:p=>'<article data-card="'+p.id+'"></article>',
