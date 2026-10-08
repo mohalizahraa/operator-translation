@@ -1,0 +1,82 @@
+import { createRequire } from 'node:module';
+const require = createRequire(import.meta.url);
+const { webkit } = require('playwright');
+
+const ORIGIN = 'https://haydari-translation-workbench.pages.dev';
+const RELEASE = '20261008-active-render-3';
+const wait = ms => new Promise(resolve=>setTimeout(resolve,ms));
+const assert = (condition, message) => {
+  if (!condition) throw new Error('LIVE WEBKIT: ' + message);
+};
+const releaseCheck = async () => {
+  for (let i=0;i<24;i++) {
+    const response=await fetch(ORIGIN+'/release.json?smoke='+Date.now(),{cache:'no-store'}).catch(()=>null);
+    const data=response?.ok ? await response.json().catch(()=>null) : null;
+    if (data?.release_id===RELEASE) return;
+    await wait(5000);
+  }
+  throw new Error('Expected release '+RELEASE+' not visible in Cloudflare production.');
+};
+await releaseCheck();
+const browser=await webkit.launch({headless:true});
+const failures=[];
+try {
+  for (const [device,width,height,mobile] of [
+    ['desktop',1440,900,false],
+    ['iphone',390,844,true],
+    ['tablet',820,1180,true],
+  ]) {
+    const context=await browser.newContext({viewport:{width,height},isMobile:mobile,hasTouch:mobile,deviceScaleFactor:mobile?2:1});
+    const page=await context.newPage();
+    const errors=[];
+    page.on('pageerror',error=>errors.push(String(error.message||error)));
+    await page.goto(ORIGIN+'/?smoke='+Date.now(),{waitUntil:'domcontentloaded',timeout:60000});
+    await page.waitForFunction(()=>/\/ 176$/.test(document.querySelector('#translation-ratio')?.textContent?.trim()||''),{timeout:45000});
+    console.log(device+' dashboard: '+await page.locator('#translation-ratio').innerText());
+
+    async function view(id) {
+      await page.locator('.nav-item[data-view="'+id+'"]').click();
+      await page.locator('#'+id+'-view').waitFor({state:'visible',timeout:20000});
+    }
+    await view('board');
+    async function expectBoard(scope,expected) {
+      await page.locator('#board-view [data-view-scope="'+scope+'"]').click();
+      await page.waitForFunction(n=>document.querySelectorAll('#board .project-card').length===n,expected,{timeout:25000});
+      const count=await page.locator('#board .project-card').count();
+      assert(count===expected,device+' '+scope+' count '+count+' expected '+expected);
+      const stages=await page.locator('#board .board-head .pill').allTextContents();
+      const total=stages.map(s=>Number(s)||0).reduce((a,b)=>a+b,0);
+      assert(total===expected,device+' '+scope+' sum of status counts '+total+' expected '+expected);
+      console.log(device+' board '+scope+': '+count+' cards, stages '+stages.join(', '));
+    }
+    await expectBoard('Shared',176);
+    const summary=await page.locator('#board-scope-summary').innerText();
+    assert(summary.includes('144 unassigned included'),device+' Shared Board summary missing Unassigned count');
+    await expectBoard('Zahraa',12);
+    await expectBoard('Mohammed',21);
+    await expectBoard('Shared',176);
+
+    if (mobile && width<=720) {
+      const cols=await page.locator('#board .board-col').evaluateAll(nodes=>nodes.map(n=>({status:n.dataset.status,empty:n.dataset.empty,display:getComputedStyle(n).display})));
+      assert(cols.filter(c=>c.empty==='false').every(c=>c.display!=='none'),device+' visible workflow stage hidden');
+      assert(cols.filter(c=>c.empty==='true').every(c=>c.display==='none'),device+' empty mobile All stage rendered');
+      console.log(device+' visible mobile stages: '+cols.filter(c=>c.display!=='none').map(c=>c.status).join(','));
+    }
+    await view('projects');
+    const rows=await page.locator('#projects-list .project-row').count();
+    assert(rows===176,device+' Projects expected 176 rows got '+rows);
+    await view('timeline');
+    assert(await page.locator('#timeline-visual').count()===1,device+' Timeline missing');
+    await view('stats');
+    assert((await page.locator('#stat-translated').innerText()).trim()!=='',device+' Stats missing');
+    await view('activity');
+    const activity=await page.locator('#activity-list .activity-item').count();
+    assert(activity>=700,device+' full Activity chronology missing: '+activity);
+    console.log(device+' projects='+rows+' activity='+activity+' errors='+errors.length);
+    assert(errors.length===0,device+' JavaScript exceptions: '+errors.slice(0,4).join(' | '));
+    await context.close();
+  }
+  console.log('LIVE WORKBENCH WEBKIT SMOKE: PASS');
+} finally {
+  await browser.close();
+}

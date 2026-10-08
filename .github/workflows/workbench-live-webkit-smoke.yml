@@ -1,0 +1,32 @@
+name: Workbench Live WebKit Smoke
+
+on:
+  push:
+    paths:
+      - '.github/workflows/workbench-live-webkit-smoke.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  visual-smoke:
+    runs-on: [self-hosted, operator-translation, macOS, ARM64]
+    timeout-minutes: 18
+    env:
+      PLAYWRIGHT_BROWSERS_PATH: /tmp/operator-workbench-smoke-webkit
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install ephemeral WebKit driver only
+        shell: bash
+        run: |
+          npm install --no-save --no-package-lock --ignore-scripts playwright@1.55.0
+          npx playwright install webkit
+      - name: Verify live desktop, iPhone, and tablet
+        shell: bash
+        run: node workbench/scripts/live-webkit-smoke.mjs
+      - name: Remove ephemeral WebKit installation
+        if: always()
+        shell: bash
+        run: |
+          rm -rf /tmp/operator-workbench-smoke-webkit node_modules/playwright node_modules/playwright-core node_modules/.bin/playwright
