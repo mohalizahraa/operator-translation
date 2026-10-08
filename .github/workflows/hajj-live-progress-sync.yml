@@ -17,6 +17,7 @@ jobs:
     runs-on: [self-hosted, operator-translation, macOS, ARM64]
     timeout-minutes: 6
     steps:
+      - uses: actions/checkout@v4
       - name: Sync verified Google Doc marker for Rites of Hajj
         shell: bash
         run: |
@@ -58,35 +59,53 @@ jobs:
           pages=int(d['project']['translated_pages'])
           total=int(d['marker_total'])
           assert pages < total, 'Review stage separately if source translation completes'
-          with open('workbench/hajj-editorial-status.json',encoding='utf-8') as handle:
-            editorial=json.load(handle)
-          assert int(editorial['project_id']) == 11
-          assert int(editorial['source_total_physical_pages']) == total
-          note=(
-            f"Rites of Ḥajj — Verified physical source pages: {pages}/{total}. "
-            + editorial['draft_coverage'] + " "
-            + editorial['verified_editorial_work'] + " "
-            + editorial['verified_formatting_work'] + " "
-            + editorial['open_gates'] + " "
-            + editorial['verification_state']
-          )
-          if pages < total:
-            note += f" Current next source page: {pages+1}."
+          import re
           previous=(d['project'].get('notes') or '').strip()
-          if previous and not previous.startswith(('Translation in progress. Verified physical source pages:', 'Rites of Ḥajj — Verified physical source pages:')):
-            note += "\\n\\nOther project notes: " + previous
-          json.dump({'notes':note},open('/tmp/hajj-notes.json','w'))
+          marker_text=f"Verified physical source pages: {pages}/{total}"
+          if previous:
+            note=re.sub(r'Verified physical source pages: \\d+/\\d+',marker_text,previous)
+            if marker_text not in note:
+              note=f"Rites of Ḥajj — {marker_text}. " + note
+          else:
+            with open('workbench/hajj-editorial-status.json',encoding='utf-8') as handle:
+              editorial=json.load(handle)
+            assert int(editorial['project_id']) == 11
+            assert int(editorial['source_total_physical_pages']) == total
+            note=(
+              f"Rites of Ḥajj — {marker_text}. "
+              + editorial['draft_coverage'] + " "
+              + editorial['verified_editorial_work'] + " "
+              + editorial['verified_formatting_work'] + " "
+              + editorial['open_gates'] + " "
+              + editorial['verification_state']
+            )
+          if pages < total:
+            note=re.sub(r'(Resume source verification at physical PDF page )\\d+',lambda m:m.group(1)+str(pages+1),note)
+            note=re.sub(r'(Current next source page: )\\d+',lambda m:m.group(1)+str(pages+1),note)
+          else:
+            note=re.sub(r'Resume source verification at physical PDF page \\d+\\.?','',note)
+            note=re.sub(r'Current next source page: \\d+\\.?','',note)
+          if note != previous:
+            with open('/tmp/hajj-notes.json','w') as handle:
+              json.dump({'notes':note},handle)
+            print('HAJJ_STATUS_NOTE_CHANGED')
+          else:
+            print('HAJJ_STATUS_NOTE_ALREADY_CURRENT')
           print('HAJJ_STATUS_NOTE_READY')
           PY
-          curl -fsS --retry 3 -X PATCH -H 'content-type: application/json' \
-            -H 'x-workbench-actor: Zahraa' --data-binary @/tmp/hajj-notes.json \
-            "${base}" -o /tmp/hajj-note-response.json
-          python3 - <<'PY'
+          if [ -s /tmp/hajj-notes.json ]; then
+            curl -fsS --retry 3 -X PATCH -H 'content-type: application/json' \\
+              -H 'x-workbench-actor: Zahraa' --data-binary @/tmp/hajj-notes.json \\
+              "${base}" -o /tmp/hajj-note-response.json
+            python3 - <<'PY'
           import json
           d=json.load(open('/tmp/hajj-note-response.json'))
           assert not d.get('error'),d
           print('HAJJ_NOTE_PATCH_ACCEPTED')
           PY
+          else
+            echo 'HAJJ_NOTE_ALREADY_CURRENT_NO_EXTRA_D1_WRITE'
+          fi
           curl -fsS --retry 3 "${base}/progress-sync" -o /tmp/hajj-final.json
           python3 - <<'PY'
           import json
