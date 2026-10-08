@@ -70,6 +70,40 @@ try {
       console.log(device+' board '+scope+': '+count+' cards, stages '+stages.join(', '));
     }
     await expectBoard('Shared',176);
+    if (!mobile) {
+      const geometry=await page.evaluate(()=>{
+        const wrap=document.querySelector('.wrap');
+        const board=document.querySelector('#board');
+        const backlog=document.querySelector('#board .board-list[data-status="not_started"]');
+        return {
+          width:wrap.getBoundingClientRect().width,
+          boardOverflow:board.scrollWidth-board.clientWidth,
+          listOverflow:backlog.scrollHeight-backlog.clientHeight,
+          overscroll:getComputedStyle(backlog).overscrollBehaviorY,
+        };
+      });
+      console.log('BOARD_DESKTOP_LAYOUT '+JSON.stringify(geometry));
+      assert(geometry.width>1200,'Desktop workspace must use the 1440px viewport, got '+geometry.width);
+      assert(geometry.boardOverflow<5,'Five workflow columns should fit together at 1440px; overflow '+geometry.boardOverflow);
+      assert(geometry.listOverflow>50,'Large backlog must be vertically scrollable');
+      assert(geometry.overscroll==='auto','Board columns must release scroll at boundaries');
+      await page.locator('#board .board-list[data-status="not_started"]').evaluate(el=>{el.scrollTop=el.scrollHeight;});
+      const scrollTop=await page.locator('#board .board-list[data-status="not_started"]').evaluate(el=>el.scrollTop);
+      assert(scrollTop>0,'Backlog vertical scrolling does not work');
+      await page.setViewportSize({width:960,height:900});
+      await page.waitForFunction(()=>document.querySelector('#board-scroll-controls')?.hidden===false,{timeout:4000});
+      const narrow=await page.evaluate(()=>{
+        const board=document.querySelector('#board');
+        return {overflow:board.scrollWidth-board.clientWidth,prev:document.querySelector('#board-scroll-prev').disabled,next:document.querySelector('#board-scroll-next').disabled};
+      });
+      assert(narrow.overflow>100 && narrow.prev && !narrow.next,'Narrow desktop Board horizontal navigation unavailable: '+JSON.stringify(narrow));
+      await page.locator('#board-scroll-next').click();
+      await page.waitForFunction(()=>document.querySelector('#board').scrollLeft>12,{timeout:4000});
+      await page.locator('#board-scroll-prev').click();
+      await page.waitForFunction(()=>document.querySelector('#board').scrollLeft<4,{timeout:4000});
+      await page.setViewportSize({width:1440,height:900});
+      console.log('BOARD_DESKTOP_SCROLL: PASS');
+    }
     const summary=await page.locator('#board-scope-summary').innerText();
     assert(summary.includes('144 unassigned included'),device+' Shared Board summary missing Unassigned count');
     await expectBoard('Zahraa',12);

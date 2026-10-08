@@ -1116,6 +1116,7 @@ function renderBoard() {
     const title=hasSearch ? 'No matching books' : 'No books in this scope';
     const detail=hasSearch ? 'Clear or change the search to see Board cards.' : 'Choose another Board scope to see books.';
     $('board').innerHTML = `<div class="board-empty-state"><strong>${title}</strong><span>${detail}</span></div>`;
+    if (typeof requestAnimationFrame === 'function') requestAnimationFrame(updateBoardScrollControls);
     return;
   }
   $('board').innerHTML = STATUS_ORDER.map(status => {
@@ -1125,6 +1126,26 @@ function renderBoard() {
   }).join('');
   bindProjectClicks($('board'));
   bindBoardDrag();
+  if (typeof requestAnimationFrame === 'function') requestAnimationFrame(updateBoardScrollControls);
+}
+function updateBoardScrollControls() {
+  const board = $('board');
+  const controls = $('board-scroll-controls');
+  if (!board || !controls) return;
+  const desktop = window.matchMedia('(min-width:721px)').matches;
+  const excess = board.scrollWidth - board.clientWidth;
+  controls.hidden = !desktop || excess <= 3 || !board.querySelector('.board-col');
+  const previous = $('board-scroll-prev');
+  const next = $('board-scroll-next');
+  if (previous) previous.disabled = board.scrollLeft <= 3;
+  if (next) next.disabled = board.scrollLeft >= excess - 3;
+}
+function scrollBoardColumns(direction) {
+  const board = $('board');
+  if (!board) return;
+  const colWidth = board.querySelector('.board-col')?.getBoundingClientRect().width || 220;
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+  board.scrollBy({ left: direction * (colWidth + 10), behavior: reducedMotion ? 'instant' : 'smooth' });
 }
 function bindBoardDrag() {
   const board = $('board');
@@ -2103,4 +2124,13 @@ $('english-book-form').addEventListener('submit',saveEnglishBook);
 $('close-dialog').addEventListener('click',()=>els.dialog.close());
 $('cancel-dialog').addEventListener('click',()=>els.dialog.close());
 els.form.addEventListener('submit',saveProject);
+$('board-scroll-prev')?.addEventListener('click',()=>scrollBoardColumns(-1));
+$('board-scroll-next')?.addEventListener('click',()=>scrollBoardColumns(1));
+$('board')?.addEventListener('scroll',updateBoardScrollControls,{passive:true});
+$('board')?.addEventListener('keydown',event=>{
+  if (event.target !== $('board') || !['ArrowLeft','ArrowRight'].includes(event.key)) return;
+  event.preventDefault();
+  scrollBoardColumns(event.key === 'ArrowRight' ? 1 : -1);
+});
+window.addEventListener('resize',updateBoardScrollControls);
 init();

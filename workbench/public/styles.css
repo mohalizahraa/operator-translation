@@ -618,3 +618,25 @@ body,button,input,select,textarea{font-family:var(--font-ui)}
   .header-actions{margin:-10px 0 10px}
   .theme-toggle{min-width:44px;min-height:44px;padding:9px 12px}
 }
+
+/* Fluid desktop work area: preserve reading limits on small screens, use the laptop display. */
+@media (min-width:721px){
+  body{padding-left:clamp(20px,2.4vw,56px);padding-right:clamp(20px,2.4vw,56px)}
+  .wrap{width:100%;max-width:1760px}
+}
+/* Desktop Board: visible wayfinding at narrow widths, native scrolling and no wheel trap. */
+.board{min-width:0;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:thin;scrollbar-color:var(--gold) transparent}
+.board-col{min-width:0}
+.board-list{overscroll-behavior-y:auto;scrollbar-gutter:stable;scrollbar-width:thin;scrollbar-color:var(--gold) transparent}
+.board::-webkit-scrollbar{height:10px}
+.board-list::-webkit-scrollbar{width:9px}
+.board::-webkit-scrollbar-thumb,.board-list::-webkit-scrollbar-thumb{background:var(--gold);border:2px solid var(--paper);border-radius:999px}
+.board-scroll-controls{display:flex;align-items:center;justify-content:flex-end;gap:8px;margin:7px 0 10px}
+.board-scroll-controls[hidden]{display:none!important}
+.board-scroll-hint{font-size:11px;font-weight:500;color:var(--sage)}
+.board-scroll-button{display:inline-flex;align-items:center;justify-content:center;min-width:44px;min-height:44px;padding:6px 13px;font-size:19px;line-height:1}
+.board-scroll-button:disabled{opacity:.35;cursor:not-allowed;box-shadow:none}
+@media(max-width:720px){
+  .board-scroll-controls{display:none!important}
+  .board-list{scrollbar-gutter:auto}
+}

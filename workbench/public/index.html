@@ -16,7 +16,7 @@
         ? saved : (darkSystem ? 'dark' : 'light');
     })();
   </script>
-  <link rel="stylesheet" href="/styles.css?v=20261008-theme-switch-1" />
+  <link rel="stylesheet" href="/styles.css?v=20261008-desktop-fluid-board-scroll-1" />
 </head>
 <body>
   <div class="wrap">
@@ -164,7 +164,12 @@
         </div>
         <div id="board-unassigned" class="board-unassigned" hidden></div>
         <div id="board-status-tabs" class="board-status-tabs" aria-label="Board status view"></div>
-        <div id="board" class="board"></div>
+        <div id="board-scroll-controls" class="board-scroll-controls" aria-label="Board column navigation" hidden>
+          <span class="board-scroll-hint">More columns</span>
+          <button id="board-scroll-prev" class="secondary board-scroll-button" type="button" aria-controls="board" aria-label="Scroll board left" title="Previous columns">←</button>
+          <button id="board-scroll-next" class="secondary board-scroll-button" type="button" aria-controls="board" aria-label="Scroll board right" title="Next columns">→</button>
+        </div>
+        <div id="board" class="board" role="region" aria-label="Workflow board; horizontally scrollable when columns exceed available width" tabindex="0"></div>
       </section>
 
       <section id="timeline-view" class="view">
@@ -289,6 +294,6 @@
 
   <div id="toast" role="status" aria-live="polite"></div>
   <script src="/model-core.js?v=20261006-full-audit-repair"></script>
-  <script type="module" src="/app.js?v=20261008-theme-switch-1"></script>
+  <script type="module" src="/app.js?v=20261008-desktop-fluid-board-scroll-1"></script>
 </body>
 </html>

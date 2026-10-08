@@ -1,6 +1,6 @@
 {
-  "release_id": "20261008-theme-switch-1",
-  "app_version": "20261008-theme-switch-1",
-  "css_version": "20261008-theme-switch-1",
-  "description": "Accessible light/dark theme toggle, pre-paint system/saved selection, semantic surfaces and responsive coverage"
+  "release_id": "20261008-desktop-fluid-board-scroll-1",
+  "app_version": "20261008-desktop-fluid-board-scroll-1",
+  "css_version": "20261008-desktop-fluid-board-scroll-1",
+  "description": "Desktop responsive workspace width; Board horizontal column controls and untrapped vertical scrolling"
 }
