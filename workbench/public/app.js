@@ -54,18 +54,34 @@ async function authenticatedFetch(path, options = {}) {
 }
 
 async function api(path, options = {}) {
-  const response = await fetch(path, {
-    ...options,
-    cache: options.cache || 'no-store',
-    headers: {
-      'content-type': 'application/json',
-      'x-workbench-actor': state.actor,
-      ...(options.headers || {}),
-    },
-  });
-  const data = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(data.error || `Request failed (${response.status})`);
-  return data;
+  // Only idempotent GETs may be repeated: a failed write may already have committed.
+  const canRetry = String(options.method || 'GET').toUpperCase() === 'GET';
+  const retryable = new Set([408,429,500,502,503,504]);
+  for (let attempt=0;;attempt++) {
+    let response;
+    try {
+      response = await fetch(path, {
+        ...options,
+        cache: options.cache || 'no-store',
+        headers: {
+          'content-type': 'application/json',
+          'x-workbench-actor': state.actor,
+          ...(options.headers || {}),
+        },
+      });
+    } catch (error) {
+      if (!canRetry || attempt>=2) throw error;
+      await new Promise(resolve=>setTimeout(resolve,350*(2**attempt)));
+      continue;
+    }
+    const data = await response.json().catch(() => ({}));
+    if (response.ok) return data;
+    if (canRetry && attempt<2 && retryable.has(response.status)) {
+      await new Promise(resolve=>setTimeout(resolve,350*(2**attempt)));
+      continue;
+    }
+    throw new Error(data.error || `Request failed (${response.status})`);
+  }
 }
 
 function syncActorSwitch() {
@@ -1837,7 +1853,22 @@ function setWorkspaceError(message='') {
   if (hasError && $('workspace-error-detail')) $('workspace-error-detail').textContent=message;
 }
 
+let workspaceRecoveryTimer = null;
+let workspaceRecoveryDelayMs = 5000;
+let workspaceLoadInFlight = false;
+
+function scheduleWorkspaceRecovery() {
+  if (workspaceRecoveryTimer || document.hidden) return;
+  workspaceRecoveryTimer = setTimeout(() => {
+    workspaceRecoveryTimer = null;
+    loadWorkspace();
+  }, workspaceRecoveryDelayMs);
+  workspaceRecoveryDelayMs = Math.min(workspaceRecoveryDelayMs * 2, 30000);
+}
+
 async function loadWorkspace() {
+  if (workspaceLoadInFlight) return false;
+  workspaceLoadInFlight = true;
   const retry=$('retry-workspace');
   if (retry) retry.disabled=true;
   try {
@@ -1845,18 +1876,31 @@ async function loadWorkspace() {
     state.pdfAudit = health.pdfs || null;
     await Promise.all([loadCoverMap(),loadSeriesMap()]);
     await loadData();
+    if (workspaceRecoveryTimer) clearTimeout(workspaceRecoveryTimer);
+    workspaceRecoveryTimer=null;
+    workspaceRecoveryDelayMs=5000;
     setWorkspaceError('');
     startLiveSync();
     if (state.pdfAudit?.unchecked) auditPdfs().catch(error => toast(`PDF verification paused: ${error.message}`));
     return true;
   } catch (error) {
+    const firstFailure=!document.body.classList.contains('workspace-data-unavailable');
     setWorkspaceError(`The Workbench could not load live project data: ${error.message}`);
-    toast('Live project data is unavailable');
+    if (firstFailure) toast('Live project data temporarily unavailable; reconnecting');
+    scheduleWorkspaceRecovery();
     return false;
   } finally {
+    workspaceLoadInFlight=false;
     if (retry) retry.disabled=false;
   }
 }
+
+document.addEventListener('visibilitychange',()=>{
+  if (document.hidden || !document.body.classList.contains('workspace-data-unavailable')) return;
+  if (workspaceRecoveryTimer) clearTimeout(workspaceRecoveryTimer);
+  workspaceRecoveryTimer=null;
+  loadWorkspace();
+});
 
 async function init() {
   clearLegacyAccessKey();

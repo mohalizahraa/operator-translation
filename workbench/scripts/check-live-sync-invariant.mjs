@@ -49,4 +49,26 @@ for (const field of ['p.title_en','p.pages','p.notes','p.source_pdf_url','p.pdf_
   requireText(app, field, `shared project render signature includes ${field}`);
 }
 
+
+for (const path of [
+  '../functions/api/health.js',
+  '../functions/api/projects/index.js',
+  '../functions/api/projects/[id].js',
+  '../functions/api/projects/[id]/translation-context.js',
+  '../functions/api/projects/[id]/source-pack.js',
+  '../functions/api/translations/current.js',
+  '../functions/api/cover/[id].js',
+]) {
+  const source=fs.readFileSync(new URL(path,import.meta.url),'utf8');
+  const handler=path.endsWith('/health.js')
+    ? source.split('export async function onRequest(context) {')[1]
+    : source.split('export async function onRequestGet(context) {')[1]?.split(/export async function onRequest\w+\(/)[0];
+  if (!handler || handler.includes('await ensureCatalog(')) {
+    throw new Error(`GET read-purity regression: ${path} invokes database migrations.`);
+  }
+}
+requireText(app,"const canRetry = String(options.method || 'GET').toUpperCase() === 'GET';",'only idempotent GETs may be retried');
+requireText(app,'scheduleWorkspaceRecovery();','automatic recovery after startup 503');
+requireText(app,'workspaceLoadInFlight','single-flight boot recovery');
+
 console.log('Live-sync invariant: PASS');

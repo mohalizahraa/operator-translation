@@ -18,7 +18,6 @@ function validImageMagic(bytes, type) {
 }
 
 export async function onRequestGet(context) {
-  await ensureCatalog(context.env.DB);
   const id = projectId(context);
   if (!id) return json({ error: 'Invalid project id.' }, 400);
 

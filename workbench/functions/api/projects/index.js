@@ -4,7 +4,6 @@ const validStatuses = new Set(['not_started','in_progress','review','completed',
 const validAssignees = new Set(['Zahraa','Mohammed','Brother','Both','Unassigned']);
 
 export async function onRequestGet(context) {
-  await ensureCatalog(context.env.DB);
   const { results } = await context.env.DB.prepare(
     "SELECT p.*, EXISTS(SELECT 1 FROM project_covers c WHERE c.project_id=p.id) AS has_uploaded_cover FROM projects p ORDER BY CASE status WHEN 'in_progress' THEN 0 WHEN 'review' THEN 1 WHEN 'not_started' THEN 2 WHEN 'completed' THEN 3 ELSE 4 END, COALESCE(due_date, '9999-12-31'), id"
   ).all();

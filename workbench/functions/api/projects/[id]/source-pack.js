@@ -24,7 +24,6 @@ function normalizeRoutes(value) {
   });
 }
 export async function onRequestGet(context) {
-  await ensureCatalog(context.env.DB);
   const id=idFrom(context);
   if (!id) return json({error:'Invalid project id.'},400);
   const project=await context.env.DB.prepare('SELECT id FROM projects WHERE id=?').bind(id).first();

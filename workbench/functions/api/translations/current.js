@@ -7,7 +7,6 @@ function assigneeFrom(request, body = null) {
   return TRANSLATORS.has(value) ? value : null;
 }
 export async function onRequestGet(context) {
-  await ensureCatalog(context.env.DB);
   const assignee=assigneeFrom(context.request);
   if (!assignee) return json({error:'assignee must be Zahraa, Mohammed, or Brother.'},400);
   const resolved=await resolveCurrentTranslation(context.env.DB,assignee);

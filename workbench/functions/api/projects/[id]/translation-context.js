@@ -7,7 +7,6 @@ function idFrom(context) {
 }
 
 export async function onRequestGet(context) {
-  await ensureCatalog(context.env.DB);
   const id = idFrom(context);
   if (!id) return json({ error: 'Invalid project id.' }, 400);
   const translation_context = await getTranslationContext(context.env.DB, context.request, id);

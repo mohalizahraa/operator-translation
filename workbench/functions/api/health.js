@@ -1,7 +1,6 @@
-import { ensureCatalog, json } from '../_lib.js';
+import { json } from '../_lib.js';
 
 export async function onRequest(context) {
-  await ensureCatalog(context.env.DB);
   const result = await context.env.DB.prepare('SELECT COUNT(*) AS count FROM projects').first();
   const pdf = await context.env.DB.prepare(
     `SELECT
