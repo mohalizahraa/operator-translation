@@ -2,8 +2,8 @@
   "project_id": 11,
   "source_total_physical_pages": 298,
   "draft_coverage": "The English working draft covers all 399 numbered legal rulings and 13 closing appendix units. This is not source-verified translation completion.",
-  "verified_editorial_work": "Arabic PDF source witness recovered for physical pages 3–30 (not yet certified line by line). Introductory narrations restored from the original; five native Google Docs footnotes created and verified.",
-  "verified_formatting_work": "Amiri 14-point body text with 115% line spacing, first-line indentation and paragraph spacing; 142 headings styled; 15 major headings open on fresh pages; 399 ruling labels and 50 question/answer labels bolded.",
-  "open_gates": "Continue source-to-English collation beginning with physical source page 3; restore omitted full supplications and footnotes; create and refresh a native target-edition table of contents; verify complete quotation/sacred-text treatment, page numbers and rendered pages.",
+  "verified_editorial_work": "Arabic PDF source witnesses recovered for all physical pages 3–298 and source SHA-256 checked; consecutive source-to-English verification is at page 6. Handwritten acknowledgment restored from source page 5; introductory narrations restored and early first-chapter source quotations corrected. 13 native Google Docs footnotes verified.",
+  "verified_formatting_work": "All 1,312 previously inventoried normal body paragraphs use 14-point Amiri with 115% line spacing; first-line indentation and paragraph spacing applied to 1,309 further paragraphs. Sixteen major headings styled to start fresh pages; 399 ruling labels and 50 question/answer labels bolded.",
+  "open_gates": "Continue source-to-English collation at physical page 7 (source witness pages 7–298 available); restore omitted full supplications and original footnotes, including those in the closing appendix; replace the provisional contents with a native target-edition TOC; verify page numbering, quotations, sacred-text treatment, and all final rendered pages. Source witnesses alone are not certifications.",
   "verification_state": "Working draft and partial formatting only; not translation-complete and not publication-ready."
 }
