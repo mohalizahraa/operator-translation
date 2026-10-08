@@ -24,8 +24,9 @@ const coverProxySource = await fs.readFile(new URL('functions/api/official-cover
 const coverSourcesSource = await fs.readFile(new URL('functions/_cover_sources.js', root), 'utf8');
 const stylesSource = await fs.readFile(new URL('public/styles.css', root), 'utf8');
 assert(appSource.includes('class="translation-feed-detail"') && appSource.includes('class="translation-feed-update"') && appSource.includes('class="translation-feed-title"'), 'Recent page updates have lost separate progress-label and bilingual-title containers.');
-assert(stylesSource.includes('grid-template-columns:max-content minmax(0,1fr)') && stylesSource.includes('column-gap:24px') && stylesSource.includes('.translation-feed-item>.translation-feed-detail'), 'Recent page updates require stable desktop title spacing.');
-assert(stylesSource.includes('@media(max-width:920px)') && stylesSource.includes('row-gap:7px'), 'Recent page updates need readable narrow-screen stacking.');
+assert(stylesSource.includes('.translation-feed-item>.translation-feed-detail{') && stylesSource.includes('grid-template-columns:minmax(0,1fr);') && stylesSource.includes('row-gap:10px;'), 'Recent page updates must stack the label above the bilingual title at every width.');
+assert(stylesSource.includes('padding-inline-start:15px;') && stylesSource.includes('border-inline-start:2px solid var(--line)'), 'Recent page update titles need a visible, consistent second-row indentation.');
+assert(!stylesSource.includes('grid-template-columns:max-content minmax(0,1fr)'), 'Previous visually cramped side-by-side feed layout still exists.');
 assert(indexSource.includes('id="board-scroll-controls"') && indexSource.includes('id="board-scroll-prev"') && indexSource.includes('id="board-scroll-next"'), 'Desktop Board scrolling controls are missing.');
 assert(stylesSource.includes('.wrap{width:100%;max-width:1760px}') && stylesSource.includes('.board-list{overscroll-behavior-y:auto'), 'Responsive desktop layout or vertical Board scroll boundary is missing.');
 assert(appSource.includes('function updateBoardScrollControls()') && appSource.includes("addEventListener('scroll',updateBoardScrollControls"), 'Board scrolling controls are not wired.');

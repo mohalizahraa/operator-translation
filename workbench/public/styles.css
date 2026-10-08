@@ -641,23 +641,48 @@ body,button,input,select,textarea{font-family:var(--font-ui)}
   .board-list{scrollbar-gutter:auto}
 }
 
-/* Recent page updates: the event and bilingual book title are independent fields.
-   Keep generous separation on desktop; stack them on narrower viewports. */
+/* Recent page updates: progress and bilingual title must NOT share a line.
+   A numerical gap in adjacent columns looked cramped even when tests passed. */
 .translation-feed-item>.translation-feed-detail{
   display:grid;
-  grid-template-columns:max-content minmax(0,1fr);
-  column-gap:24px;
+  grid-template-columns:minmax(0,1fr);
+  row-gap:10px;
   align-items:start;
   min-width:0;
 }
-.translation-feed-item .translation-feed-update{display:block;align-self:start;white-space:nowrap;line-height:1.5}
-.translation-feed-item .translation-feed-title{min-width:0}
-.translation-feed-title .book-title-pair{display:grid;width:fit-content;max-width:100%;gap:3px;vertical-align:top}
-.translation-feed-title .book-title-ar{white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere}
-.translation-feed-title .book-title-en{white-space:normal;overflow-wrap:anywhere}
-@media(max-width:920px){
-  .translation-feed-item>.translation-feed-detail{
-    grid-template-columns:minmax(0,1fr);
-    row-gap:7px;
-  }
+.translation-feed-item .translation-feed-update{
+  display:block;
+  width:fit-content;
+  max-width:100%;
+  white-space:normal;
+  line-height:1.5;
+}
+.translation-feed-item .translation-feed-title{
+  display:block;
+  min-width:0;
+  max-width:100%;
+  margin-inline-start:0;
+  padding-inline-start:15px;
+  border-inline-start:2px solid var(--line);
+}
+.translation-feed-title .book-title-pair{
+  display:grid;
+  width:fit-content;
+  max-width:100%;
+  gap:3px;
+  vertical-align:top;
+}
+.translation-feed-title .book-title-ar{
+  white-space:normal;
+  overflow:visible;
+  text-overflow:clip;
+  overflow-wrap:anywhere;
+}
+.translation-feed-title .book-title-en{
+  white-space:normal;
+  overflow-wrap:anywhere;
+}
+@media(max-width:720px){
+  .translation-feed-item>.translation-feed-detail{row-gap:9px}
+  .translation-feed-item .translation-feed-title{padding-inline-start:12px}
 }

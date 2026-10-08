@@ -41,22 +41,33 @@ try {
     await page.waitForFunction(()=>/\/ 176$/.test(document.querySelector('#translation-ratio')?.textContent?.trim()||''),{timeout:45000});
     console.log(device+' dashboard: '+await page.locator('#translation-ratio').innerText());
     await page.waitForFunction(()=>document.querySelectorAll('#live-translation-feed .translation-feed-item').length>0,{timeout:30000});
-    const feedSpacing=await page.evaluate(()=>{
-      const detail=document.querySelector('#live-translation-feed .translation-feed-detail');
+    const feedLayout=await page.evaluate(()=>[...document.querySelectorAll('#live-translation-feed .translation-feed-detail')].map(detail=>{
       const action=detail.querySelector('.translation-feed-update').getBoundingClientRect();
       const title=detail.querySelector('.translation-feed-title').getBoundingClientRect();
+      const titlePair=detail.querySelector('.book-title-pair')?.getBoundingClientRect();
+      const css=getComputedStyle(detail);
+      const titleCss=getComputedStyle(detail.querySelector('.translation-feed-title'));
       return {
-        horizontal:title.left-action.right,
         vertical:title.top-action.bottom,
-        actionWidth:action.width,
-        titleWidth:title.width,
+        indent:title.left-action.left,
+        titleFits:title.right<=detail.getBoundingClientRect().right+1,
+        titleHeight:title.height,
+        gridRows:css.gridTemplateRows,
+        columns:css.gridTemplateColumns,
+        titleBorder:titleCss.borderInlineStartWidth,
         hasArabic:!!detail.querySelector('.book-title-ar'),
+        titlePairTop:titlePair?.top,
       };
+    }));
+    assert(feedLayout.length>=5,device+' recent page update rows missing');
+    feedLayout.forEach((row,i)=>{
+      assert(row.vertical>=8,device+' entry '+i+' title remains beside its update or too close: '+JSON.stringify(row));
+      assert(row.indent>=11,device+' entry '+i+' title is not visibly indented: '+JSON.stringify(row));
+      assert(row.titleFits && row.titleHeight>0,device+' entry '+i+' title is clipped: '+JSON.stringify(row));
+      assert(row.hasArabic,device+' entry '+i+' Arabic book title missing');
+      assert(Number.parseFloat(row.titleBorder)>=2,device+' entry '+i+' visual separator missing');
     });
-    if (width>920) assert(feedSpacing.horizontal>=22,device+' update/title desktop spacing collapsed: '+JSON.stringify(feedSpacing));
-    else assert(feedSpacing.vertical>=5,device+' update/title tablet or mobile spacing collapsed: '+JSON.stringify(feedSpacing));
-    assert(feedSpacing.hasArabic,device+' recent update missing Arabic book title');
-    console.log('RECENT_PAGE_UPDATE_SPACING '+device+' '+JSON.stringify(feedSpacing));
+    console.log('RECENT_PAGE_UPDATE_STACK '+device+' '+JSON.stringify(feedLayout.map(({vertical,indent,titleFits})=>({vertical,indent,titleFits}))));
 
     async function view(id) {
       await page.locator('.nav-item[data-view="'+id+'"]').click();
