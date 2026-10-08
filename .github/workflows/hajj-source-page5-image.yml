@@ -1,0 +1,41 @@
+name: Hajj source page 5 visual witness
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/hajj-source-page5-image.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  render:
+    runs-on: [self-hosted, operator-translation, macOS, ARM64]
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Render original acknowledgment page for source-collated translation
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --connect-timeout 30 'https://haydari-translation-workbench.pages.dev/api/pdf/11' -o /tmp/hajj-298-image.pdf
+          cat >/tmp/hajj-page5-image.swift <<'SWIFT'
+          import Foundation
+          import AppKit
+          import PDFKit
+          let d=PDFDocument(url:URL(fileURLWithPath:"/tmp/hajj-298-image.pdf"))!
+          precondition(d.pageCount==298)
+          let p=d.page(at:4)!
+          let img=p.thumbnail(of:NSSize(width:1600,height:2300),for:.mediaBox)
+          let data=img.tiffRepresentation!
+          let rep=NSBitmapImageRep(data:data)!
+          let jpg=rep.representation(using:.jpeg,properties:[.compressionFactor:0.74])!
+          print("HAJJ_PAGE5_IMAGE_START")
+          print(jpg.base64EncodedString())
+          print("HAJJ_PAGE5_IMAGE_END")
+          SWIFT
+          swift /tmp/hajj-page5-image.swift
+      - name: Wipe temporary local material
+        if: always()
+        run: rm -f /tmp/hajj-page5-image.swift /tmp/hajj-298-image.pdf
