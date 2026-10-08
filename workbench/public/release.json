@@ -1,6 +1,6 @@
 {
-  "release_id": "20261008-desktop-fluid-board-scroll-1",
-  "app_version": "20261008-desktop-fluid-board-scroll-1",
-  "css_version": "20261008-desktop-fluid-board-scroll-1",
-  "description": "Desktop responsive workspace width; Board horizontal column controls and untrapped vertical scrolling"
+  "release_id": "20261008-feed-title-spacing-1",
+  "app_version": "20261008-feed-title-spacing-1",
+  "css_version": "20261008-feed-title-spacing-1",
+  "description": "Separate Recent Page Updates action text from bilingual book titles with responsive 24px column gap"
 }

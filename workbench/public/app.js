@@ -845,7 +845,7 @@ function renderTranslationLive() {
     const verified=Boolean(project?.page_count_verified && total>0);
     const when=parseDateTime(a.created_at) || new Date();
     const label=a.action==='translation progress correction' ? 'Corrected to' : 'Advanced to';
-    return `<div class="translation-feed-item"><span class="translation-feed-dot"></span><div><strong>${label} ${verified ? `${done}/${total}` : done} pages</strong>${activityBookTitleMarkup(a)}</div><time>${when.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})}</time></div>`;
+    return `<div class="translation-feed-item"><span class="translation-feed-dot"></span><div class="translation-feed-detail"><strong class="translation-feed-update">${label} ${verified ? `${done}/${total}` : done} pages</strong><div class="translation-feed-title">${activityBookTitleMarkup(a)}</div></div><time>${when.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})}</time></div>`;
   }).join('') : '<div class="live-empty subtle">Page updates will appear here as translation advances.</div>';
   $('live-translation-active').innerHTML=assignedMarkup;
   $('live-translation-feed').innerHTML=feedMarkup;

@@ -640,3 +640,24 @@ body,button,input,select,textarea{font-family:var(--font-ui)}
   .board-scroll-controls{display:none!important}
   .board-list{scrollbar-gutter:auto}
 }
+
+/* Recent page updates: the event and bilingual book title are independent fields.
+   Keep generous separation on desktop; stack them on narrower viewports. */
+.translation-feed-item>.translation-feed-detail{
+  display:grid;
+  grid-template-columns:max-content minmax(0,1fr);
+  column-gap:24px;
+  align-items:start;
+  min-width:0;
+}
+.translation-feed-item .translation-feed-update{display:block;align-self:start;white-space:nowrap;line-height:1.5}
+.translation-feed-item .translation-feed-title{min-width:0}
+.translation-feed-title .book-title-pair{display:grid;width:fit-content;max-width:100%;gap:3px;vertical-align:top}
+.translation-feed-title .book-title-ar{white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere}
+.translation-feed-title .book-title-en{white-space:normal;overflow-wrap:anywhere}
+@media(max-width:920px){
+  .translation-feed-item>.translation-feed-detail{
+    grid-template-columns:minmax(0,1fr);
+    row-gap:7px;
+  }
+}

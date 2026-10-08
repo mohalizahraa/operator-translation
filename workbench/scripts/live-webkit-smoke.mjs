@@ -40,6 +40,23 @@ try {
 
     await page.waitForFunction(()=>/\/ 176$/.test(document.querySelector('#translation-ratio')?.textContent?.trim()||''),{timeout:45000});
     console.log(device+' dashboard: '+await page.locator('#translation-ratio').innerText());
+    await page.waitForFunction(()=>document.querySelectorAll('#live-translation-feed .translation-feed-item').length>0,{timeout:30000});
+    const feedSpacing=await page.evaluate(()=>{
+      const detail=document.querySelector('#live-translation-feed .translation-feed-detail');
+      const action=detail.querySelector('.translation-feed-update').getBoundingClientRect();
+      const title=detail.querySelector('.translation-feed-title').getBoundingClientRect();
+      return {
+        horizontal:title.left-action.right,
+        vertical:title.top-action.bottom,
+        actionWidth:action.width,
+        titleWidth:title.width,
+        hasArabic:!!detail.querySelector('.book-title-ar'),
+      };
+    });
+    if (width>920) assert(feedSpacing.horizontal>=22,device+' update/title desktop spacing collapsed: '+JSON.stringify(feedSpacing));
+    else assert(feedSpacing.vertical>=5,device+' update/title tablet or mobile spacing collapsed: '+JSON.stringify(feedSpacing));
+    assert(feedSpacing.hasArabic,device+' recent update missing Arabic book title');
+    console.log('RECENT_PAGE_UPDATE_SPACING '+device+' '+JSON.stringify(feedSpacing));
 
     async function view(id) {
       await page.locator('.nav-item[data-view="'+id+'"]').click();
