@@ -33,7 +33,7 @@ jobs:
           import Vision
           let path="/tmp/hajj-298.pdf"
           guard let doc=PDFDocument(url:URL(fileURLWithPath:path)) else { fatalError("PDF_OPEN_FAILED") }
-          guard doc.pageCount==298 else { fatalError("SOURCE_PAGE_COUNT_MISMATCH_\\(doc.pageCount)") }
+          guard doc.pageCount==298 else { fatalError("SOURCE_PAGE_COUNT_MISMATCH_\(doc.pageCount)") }
           let out="workbench/handoffs/rites-of-hajj-source-physical-3-30-witness.txt"
           let f=FileManager.default
           try f.createDirectory(atPath:"workbench/handoffs",withIntermediateDirectories:true)
@@ -62,12 +62,12 @@ jobs:
                     if abs(ay-by)>0.012{return ay>by}
                     return $0.boundingBox.midX>$1.boundingBox.midX
                   }.compactMap{$0.topCandidates(1).first?.string}
-                } catch {print("OCR_ERROR_PAGE_\\(n)=\\(error)")}
+                } catch {print("OCR_ERROR_PAGE_\(n)=\(error)")}
               }
-              emit("\n=== PHYSICAL PAGE \\(n) ===\n")
+              emit("\n=== PHYSICAL PAGE \(n) ===\n")
               emit("=== PDFKIT TEXT ===\n"+raw+"\n")
               emit("=== IMAGE OCR ===\n"+lines.joined(separator:"\n")+"\n")
-              print("HAJJ_SOURCE_PAGE_\\(n)_PDFKIT_\\(raw.count)_OCR_\\(lines.count)")
+              print("HAJJ_SOURCE_PAGE_\(n)_PDFKIT_\(raw.count)_OCR_\(lines.count)")
             }
           }
           try? handle.close()
