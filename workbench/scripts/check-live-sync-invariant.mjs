@@ -91,4 +91,10 @@ requireText(app, "void refreshActivityData();", 'Activity refresh is independent
 requireText(app, "(p.status==='in_progress' && (p.assignee===state.actor || p.assignee==='Both'))", 'in-progress auto-sync must not credit a different collaborator');
 requireText(app, 'const active=VIEW_RENDERERS[view];','render only active Workbench view');
 requireText(app, 'if (state.projects.length) render();','refresh view on navigation');
+const progressSyncRead=fs.readFileSync(new URL('../functions/api/projects/[id]/progress-sync.js',import.meta.url),'utf8');
+const markerReader=progressSyncRead.split('async function readMarker(context) {')[1]?.split('export async function onRequestGet')[0];
+if (!markerReader || markerReader.includes('ensureCatalog(')) {
+  throw new Error('High-frequency marker reads must not run D1 schema migrations.');
+}
+requireText(progressSyncRead,"return publishProgress({...context,request});",'new markers use guarded mutation validation');
 console.log('Live-sync invariant: PASS');

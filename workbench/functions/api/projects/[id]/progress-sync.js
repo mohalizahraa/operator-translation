@@ -1,4 +1,4 @@
-import { ensureCatalog, json, normalizeProject } from '../../../_lib.js';
+import { json, normalizeProject } from '../../../_lib.js';
 import { readPublicProgressMarker } from '../../../_translation.js';
 import { onRequestPatch as publishProgress } from './progress.js';
 
@@ -64,7 +64,8 @@ async function bootstrapSourcePdfSha256(project) {
 }
 
 async function readMarker(context) {
-  await ensureCatalog(context.env.DB);
+  // High-frequency read path must remain D1 read-only. Schema preparation
+  // belongs to the guarded mutation path only after a new marker is proven.
   const id=idFrom(context);
   if (!id) return {status:400,data:{error:'Invalid project id.'}};
 
