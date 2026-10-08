@@ -4,20 +4,9 @@ const { webkit } = require('playwright');
 
 const ORIGIN = 'https://haydari-translation-workbench.pages.dev';
 const RELEASE = '20261008-active-render-3';
-const wait = ms => new Promise(resolve=>setTimeout(resolve,ms));
-const assert = (condition, message) => {
+const assert = (condition,message) => {
   if (!condition) throw new Error('LIVE WEBKIT: ' + message);
 };
-const releaseCheck = async () => {
-  for (let i=0;i<24;i++) {
-    const response=await fetch(ORIGIN+'/release.json?smoke='+Date.now(),{cache:'no-store'}).catch(()=>null);
-    const data=response?.ok ? await response.json().catch(()=>null) : null;
-    if (data?.release_id===RELEASE) return;
-    await wait(5000);
-  }
-  throw new Error('Expected release '+RELEASE+' not visible in Cloudflare production.');
-};
-await releaseCheck();
 const browser=await webkit.launch({headless:true});
 const failures=[];
 try {
@@ -31,6 +20,11 @@ try {
     const errors=[];
     page.on('pageerror',error=>errors.push(String(error.message||error)));
     await page.goto(ORIGIN+'/?smoke='+Date.now(),{waitUntil:'domcontentloaded',timeout:60000});
+    // Verify the actual HTML asset reference rather than using Node fetch;
+    // the browser has a different HTTPS trust/network path on the runner.
+    const appAsset=await page.locator('script[src^="/app.js"]').first().getAttribute('src');
+    assert(appAsset?.includes(RELEASE),device+' loaded stale app asset '+appAsset);
+
     await page.waitForFunction(()=>/\/ 176$/.test(document.querySelector('#translation-ratio')?.textContent?.trim()||''),{timeout:45000});
     console.log(device+' dashboard: '+await page.locator('#translation-ratio').innerText());
 
