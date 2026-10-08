@@ -72,12 +72,12 @@ requireText(app,'scheduleWorkspaceRecovery();','automatic recovery after startup
 requireText(app,'workspaceLoadInFlight','single-flight boot recovery');
 
 
-requireText(app, 'let boardUnassignedExpanded = false;', 'persist Team inbox expansion between Board redraws');
-requireText(app, "if (disclosure.open) populate();", 'initialize visible Team inbox cards');
-requireText(app, "grid.dataset.loaded='true';", 'render unassigned cards only when expanded');
-requireText(app, "boardUnassignedExpanded=disclosure.open;", 'preserve user open/closed choice');
-requireText(app, 'data-empty=', 'mark genuinely empty Board stages for mobile projection');
+requireText(app, "state.viewScope === 'Shared' ? matching : matching.filter(viewScopeMatches)",'Shared Board includes all catalogue books');
+requireText(app, 'unassigned included','Unassigned books included in Board totals');
+requireText(app, 'data-empty=', 'mark genuinely empty stages for mobile projection');
 const styles=fs.readFileSync(new URL('../public/styles.css',import.meta.url),'utf8');
-requireText(styles, '.board[data-mobile-all="true"] .board-col[data-empty="true"]{display:none}', 'hide empty statuses from mobile All view');
+requireText(styles, '.board[data-mobile-all="true"] .board-col[data-empty="true"]{display:none}', 'hide empty mobile stages');
+requireText(styles, 'align-items:start;padding-bottom:8px', 'avoid stretching kanban columns');
+requireText(styles, '.board-list>.project-card{flex:none}', 'avoid stretching individual cards');
 
 console.log('Live-sync invariant: PASS');

@@ -22,25 +22,7 @@ const els={search:{value:''}};
 const tabStrip={innerHTML:'',querySelectorAll:()=>[]};
 const board={innerHTML:'',dataset:{}};
 const summary={textContent:''};
-const inbox={
-  hidden:true,
-  markup:'',
-  grid:null,
-  details:null,
-  set innerHTML(value) {
-    if(this.details) this.details.isConnected=false;
-    this.markup=value;
-    this.grid={innerHTML:'',dataset:{}};
-    this.details=value.includes('<details') ? {
-      open:/<details[^>]*\sopen(?:\s|>)/.test(value),
-      isConnected:true,
-      querySelector:()=>this.grid,
-      addEventListener(_name,listener){this.notify=listener;},
-    } : null;
-  },
-  get innerHTML(){return this.markup;},
-  querySelector(){return this.details;},
-};
+const inbox={hidden:false,innerHTML:''};
 const elements={'board-status-tabs':tabStrip,'board-unassigned':inbox,'board':board,'board-scope-summary':summary};
 let bindings=0;
 const context={
@@ -56,37 +38,30 @@ const context={
  bindBoardDrag(){},
 };
 vm.createContext(context);
-vm.runInContext('let boardUnassignedExpanded = false;\n'+implementation,context);
+vm.runInContext(implementation,context);
 const render=()=>vm.runInContext('renderBoard()',context);
 const cards=markup=>(markup.match(/data-card=/g)||[]).length;
 
 render();
-assert(summary.textContent==='32 team books · 144 unassigned','scope counts must reconcile to 176 books');
-assert(board.dataset.mobileAll==='true','All status mode must be reflected for responsive CSS');
-assert(cards(board.innerHTML)===32,'all assigned team books must be projected as cards');
-assert(inbox.hidden===false && inbox.details && !inbox.details.open,'the counted Team inbox must be visible but collapsed by default');
-assert(cards(inbox.grid.innerHTML)===0,'collapsed backlog must not mount 144 invisible cards');
-assert(board.innerHTML.includes('data-empty="true"'),'empty workflow columns need an explicit responsive marker');
-
-inbox.details.open=true;
-inbox.details.notify();
-assert(cards(inbox.grid.innerHTML)===144,'expanding Team inbox must mount the entire backlog');
-
+assert(summary.textContent==='176 books · 144 unassigned included','Shared includes full catalogue');
+assert(cards(board.innerHTML)===176,'Shared renders all 176 books');
+assert(inbox.hidden && !inbox.innerHTML,'no duplicate hidden backlog');
+assert(board.dataset.mobileAll==='true','All status mode remains active');
+assert(board.innerHTML.includes('data-empty="true"'),'empty workflow columns marked');
 render();
-assert(inbox.details.open,'expanded Team inbox must remain expanded after a live-data render');
-assert(cards(inbox.grid.innerHTML)===144,'expanded Team inbox must remain populated after re-render');
-
+assert(cards(board.innerHTML)===176,'live re-render retains all 176 books');
 state.viewScope='Zahraa';
 render();
-assert(summary.textContent.startsWith('12 books'),'Zahraa scope must show 11 direct and one Shared assignment');
-assert(cards(board.innerHTML)===12,'Zahraa scope must include Shared assignments');
-assert(inbox.hidden,'individual view must keep Unassigned outside its assigned scope');
-
+assert(summary.textContent.startsWith('12 books'),'Zahraa shows 11 direct plus Shared book');
+assert(cards(board.innerHTML)===12,'all Zahraa books visible');
+state.viewScope='Mohammed';
+render();
+assert(summary.textContent.startsWith('21 books'),'Mohammed shows 20 direct plus Shared book');
+assert(cards(board.innerHTML)===21,'all Mohammed books visible');
 state.viewScope='Shared';
 context.projectMatchesSearch=p=>p.assignee==='Unassigned';
 render();
-assert(cards(board.innerHTML)===0,'search confined to Team inbox must not invent assigned cards');
-assert(board.innerHTML.includes('No assigned team books match'),'empty assigned search must explain the separate inbox');
-assert(inbox.details.open && cards(inbox.grid.innerHTML)===144,'search matches in Unassigned must automatically open all results');
+assert(cards(board.innerHTML)===144,'search for Unassigned shows all 144 in workflow');
+assert(summary.textContent==='144 books · 144 unassigned included','filtered summary reconciles');
 
 console.log('Workbench Board rendering regression: PASS');

@@ -35,9 +35,6 @@ let markerSyncInFlight = false;
 let markerSyncCursor = 0;
 let lastMarkerSyncAt = 0;
 let liveSyncStarted = false;
-// Keep the Team inbox open across live-data re-renders without creating 144
-// hidden cards on each refresh. Only materialize the cards when visible.
-let boardUnassignedExpanded = false;
 
 const $ = (id) => document.getElementById(id);
 const els = {
@@ -1060,7 +1057,7 @@ async function applyBatch() {
 }
 function renderBoard() {
   const matching = state.projects.filter(projectMatchesSearch);
-  const base = matching.filter(viewScopeMatches);
+  const base = state.viewScope === 'Shared' ? matching : matching.filter(viewScopeMatches);
   const unassigned = state.viewScope === 'Shared' ? matching.filter(p=>p.assignee === 'Unassigned') : [];
   const selectedStatusHasBooks = state.mobileBoardStatus === 'all' || base.some(p=>p.status === state.mobileBoardStatus);
   if (base.length && !selectedStatusHasBooks) {
@@ -1070,7 +1067,7 @@ function renderBoard() {
   syncViewScopeSwitch();
   if ($('board-scope-summary')) {
     $('board-scope-summary').textContent = state.viewScope === 'Shared'
-      ? `${base.length} team books · ${unassigned.length} unassigned`
+      ? `${base.length} books · ${unassigned.length} unassigned included`
       : `${base.length} books · Shared assignments included`;
   }
   const statusTabs=$('board-status-tabs');
@@ -1088,40 +1085,16 @@ function renderBoard() {
       renderBoard();
     }));
   }
+  // Shared includes every book in its workflow column. Do not hide 144 books.
   if ($('board-unassigned')) {
-    $('board-unassigned').hidden = state.viewScope !== 'Shared' || !unassigned.length;
-    const openUnassignedInbox=Boolean(els.search.value.trim()) || !base.length || boardUnassignedExpanded;
-    // The backlog is often much larger than the assigned Board. Do not
-    // instantiate or attach listeners to cards inside a closed disclosure.
-    $('board-unassigned').innerHTML = unassigned.length
-      ? `<details class="board-unassigned-panel unassigned-disclosure" ${openUnassignedInbox?'open':''}><summary class="board-unassigned-head"><span class="unassigned-summary-copy"><span class="panel-eyebrow">Team inbox</span><strong>Unassigned</strong></span><span class="unassigned-summary-meta"><span class="pill">${unassigned.length}</span><span class="disclosure-chevron" aria-hidden="true">⌄</span></span></summary><div class="board-unassigned-grid"></div></details>`
-      : '';
-    const disclosure=$('board-unassigned').querySelector('details');
-    if (disclosure) {
-      const grid=disclosure.querySelector('.board-unassigned-grid');
-      const populate=()=>{
-        if (!grid || grid.dataset.loaded==='true') return;
-        grid.innerHTML=unassigned.map(p=>projectMarkup(p,true)).join('');
-        grid.dataset.loaded='true';
-        bindProjectClicks(grid);
-        hydrateUploadedCovers(grid);
-      };
-      disclosure.addEventListener('toggle',()=>{
-        if (!disclosure.isConnected) return;
-        boardUnassignedExpanded=disclosure.open;
-        if (disclosure.open) populate();
-      });
-      if (disclosure.open) populate();
-    }
+    $('board-unassigned').hidden = true;
+    $('board-unassigned').innerHTML = '';
   }
   $('board').dataset.mobileAll=state.mobileBoardStatus==='all' ? 'true' : 'false';
   if (!base.length) {
     const hasSearch=Boolean(els.search.value.trim());
-    const matchingUnassigned=state.viewScope==='Shared' && unassigned.length>0;
-    const title=matchingUnassigned ? 'No assigned team books match' : (hasSearch ? 'No matching books' : 'No books in this scope');
-    const detail=matchingUnassigned
-      ? 'Matching Unassigned books are shown in Team inbox above.'
-      : (hasSearch ? 'Clear or change the search to see Board cards.' : 'Choose another Board scope to see assigned books.');
+    const title=hasSearch ? 'No matching books' : 'No books in this scope';
+    const detail=hasSearch ? 'Clear or change the search to see Board cards.' : 'Choose another Board scope to see books.';
     $('board').innerHTML = `<div class="board-empty-state"><strong>${title}</strong><span>${detail}</span></div>`;
     return;
   }
