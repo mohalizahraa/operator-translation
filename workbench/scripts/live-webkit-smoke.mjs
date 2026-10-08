@@ -87,6 +87,9 @@ try {
     assert(rows===176,device+' Projects expected 176 rows got '+rows);
     await view('timeline');
     assert(await page.locator('#timeline-visual').count()===1,device+' Timeline missing');
+    const timelineUnassigned=await page.locator('#timeline-unassigned .timeline-unassigned-card').count();
+    assert(timelineUnassigned===144,device+' Timeline must retain all 144 Unassigned book records, got '+timelineUnassigned);
+    console.log(device+' Timeline Unassigned='+timelineUnassigned);
     await view('stats');
     assert((await page.locator('#stat-translated').innerText()).trim()!=='',device+' Stats missing');
     await view('activity');
