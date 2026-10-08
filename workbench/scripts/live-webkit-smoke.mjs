@@ -76,6 +76,15 @@ try {
     await expectBoard('Mohammed',21);
     await expectBoard('Shared',176);
 
+    // Search must filter by typed text, not the positional index supplied by
+    // Array.filter(callback). Clear search and prove all books return.
+    const search=page.locator('#search');
+    await search.fill('zzz-no-such-book-search-regression');
+    await page.waitForFunction(()=>document.querySelectorAll('#board .project-card').length===0 && document.querySelector('#board')?.textContent?.includes('No matching books'),{timeout:12000});
+    await search.fill('');
+    await page.waitForFunction(()=>document.querySelectorAll('#board .project-card').length===176,{timeout:12000});
+    console.log(device+' Board search clear: all 176 cards restored');
+
     if (mobile && width<=720) {
       const cols=await page.locator('#board .board-col').evaluateAll(nodes=>nodes.map(n=>({status:n.dataset.status,empty:n.dataset.empty,display:getComputedStyle(n).display})));
       assert(cols.filter(c=>c.empty==='false').every(c=>c.display!=='none'),device+' visible workflow stage hidden');
