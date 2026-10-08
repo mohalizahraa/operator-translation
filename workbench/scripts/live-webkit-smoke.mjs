@@ -113,7 +113,7 @@ try {
   {
     const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,deviceScaleFactor:2});
     const page=await context.newPage();
-    await page.route(/\\/api\\/(revision|activity)(?:\\?|$)/,route=>route.fulfill({
+    await page.route(/\/api\/(revision|activity)(?:\?|$)/,route=>route.fulfill({
       status:503,
       contentType:'application/json',
       body:JSON.stringify({error:'Simulated optional read outage'}),
