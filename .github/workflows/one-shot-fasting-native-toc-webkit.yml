@@ -1,0 +1,39 @@
+name: One-shot Fasting Native TOC WebKit
+on:
+  push:
+    paths:
+      - '.github/workflows/one-shot-fasting-native-toc-webkit.yml'
+permissions:
+  contents: read
+concurrency:
+  group: fasting-native-toc-webkit
+  cancel-in-progress: false
+jobs:
+  native-toc:
+    runs-on: [self-hosted, operator-translation, macOS, ARM64]
+    timeout-minutes: 15
+    env:
+      DOC_URL: https://docs.google.com/document/d/1AWIyWa5nGXmmGXfM9YqxnggeaKInLt0z9D2hD6mmz9k/edit
+      TOC_ACTION: insert
+      TOC_REFRESH_ANCHOR: THE LEGISLATION OF FASTING
+      CONTENTS_LABEL: Contents
+      TOC_VARIANT: dots-page-numbers
+      PLAYWRIGHT_BROWSERS_PATH: /tmp/operator-playwright-webkit
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate TOC editor driver
+        run: node --check scripts/fasting-native-toc-webkit.mjs
+      - name: Install ephemeral WebKit driver
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install webkit
+      - name: Insert native TOC through the Google Docs editor
+        run: node scripts/fasting-native-toc-webkit.mjs
+      - name: Remove ephemeral browser payload
+        if: always()
+        run: |
+          rm -rf /tmp/operator-playwright-webkit
+          rm -rf node_modules/playwright node_modules/playwright-core node_modules/.bin/playwright
