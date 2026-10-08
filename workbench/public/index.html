@@ -6,10 +6,27 @@
   <meta name="robots" content="noindex,nofollow,noarchive" />
   <title>Haydari Translation Workbench</title>
   <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=EB+Garamond:ital,wght@0,400;0,600;1,400;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css?v=20261008-active-render-3" />
+  <script>
+    // Apply the saved or device theme before styles paint to avoid a light-mode flash.
+    (() => {
+      let saved = null;
+      try { saved = localStorage.getItem('haydariTheme'); } catch {}
+      const darkSystem = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      document.documentElement.dataset.theme = saved === 'light' || saved === 'dark'
+        ? saved : (darkSystem ? 'dark' : 'light');
+    })();
+  </script>
+  <link rel="stylesheet" href="/styles.css?v=20261008-theme-switch-1" />
 </head>
 <body>
   <div class="wrap">
+    <div class="header-actions">
+      <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Switch to dark mode" title="Switch to dark mode">
+        <svg class="theme-icon theme-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.2 15.4A8.4 8.4 0 0 1 8.6 3.8 8.5 8.5 0 1 0 20.2 15.4Z"/></svg>
+        <svg class="theme-icon theme-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42M17.65 6.35l1.42-1.42"/></svg>
+        <span id="theme-toggle-label">Dark mode</span>
+      </button>
+    </div>
     <header class="archive-header">
       <h1>Haydari Translation Workbench<span class="ar">مشروع ترجمة كتب السيد كمال الحيدري</span></h1>
       <div class="sub">Shared translation projects, deadlines, completion, and publication</div>
@@ -272,6 +289,6 @@
 
   <div id="toast" role="status" aria-live="polite"></div>
   <script src="/model-core.js?v=20261006-full-audit-repair"></script>
-  <script type="module" src="/app.js?v=20261008-revision-fallback-1"></script>
+  <script type="module" src="/app.js?v=20261008-theme-switch-1"></script>
 </body>
 </html>

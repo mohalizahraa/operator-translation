@@ -17,10 +17,14 @@ const [catalogSource, coverMap, pdfAudit, seriesMap, appSource, indexSource] = a
 const release=JSON.parse(await fs.readFile(new URL('public/release.json',root),'utf8'));
 assert(indexSource.includes('/app.js?v='+release.app_version),'Production JS asset version and release marker drifted.');
 assert(indexSource.includes('/styles.css?v='+release.css_version),'Production CSS asset version and release marker drifted.');
+assert(indexSource.includes('id="theme-toggle"') && indexSource.includes("localStorage.getItem('haydariTheme')") && indexSource.includes("prefers-color-scheme: dark"), 'Theme toggle or flash-free saved/system initial state is missing.');
+assert(appSource.includes("localStorage.setItem('haydariTheme', next)") && appSource.includes('syncThemeToggle()'), 'Theme switcher or local persistence is missing.');
 const libSource = await fs.readFile(new URL('functions/_lib.js', root), 'utf8');
 const coverProxySource = await fs.readFile(new URL('functions/api/official-cover/[id].js', root), 'utf8');
 const coverSourcesSource = await fs.readFile(new URL('functions/_cover_sources.js', root), 'utf8');
 const stylesSource = await fs.readFile(new URL('public/styles.css', root), 'utf8');
+assert(stylesSource.includes(':root[data-theme="dark"]') && stylesSource.includes('--paper-rgb:36,48,43') && stylesSource.includes('.theme-toggle'), 'Dark token coverage and accessible switch styling are missing.');
+assert(!/rgba\\((?:247,245,239|154,131,95|38,49,45|89,104,97|109,67,71),/.test(stylesSource), 'Hardcoded light-theme surface colors remain outside theme tokens.');
 const headersSource = await fs.readFile(new URL('public/_headers', root), 'utf8');
 const projectPatchSource = await fs.readFile(new URL('functions/api/projects/[id].js', root), 'utf8');
 const revisionSource = await fs.readFile(new URL('functions/api/revision.js', root), 'utf8');

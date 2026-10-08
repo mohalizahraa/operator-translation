@@ -1,3 +1,20 @@
+// Theme is presentation-only: switching must not mutate shared Workbench data.
+const themeToggle = document.getElementById('theme-toggle');
+function syncThemeToggle() {
+  if (!themeToggle) return;
+  const dark = document.documentElement.dataset.theme === 'dark';
+  const label = dark ? 'Switch to light mode' : 'Switch to dark mode';
+  themeToggle.setAttribute('aria-label', label);
+  themeToggle.title = label;
+  document.getElementById('theme-toggle-label').textContent = dark ? 'Light mode' : 'Dark mode';
+}
+themeToggle?.addEventListener('click', () => {
+  const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+  document.documentElement.dataset.theme = next;
+  try { localStorage.setItem('haydariTheme', next); } catch {}
+  syncThemeToggle();
+});
+syncThemeToggle();
 const WorkbenchCore=globalThis.WorkbenchCore;
 if (!WorkbenchCore) throw new Error('Workbench calculation core did not load.');
 
