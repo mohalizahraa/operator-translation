@@ -373,6 +373,8 @@ body.workspace-data-unavailable #app{display:none}
   .board{display:block!important;grid-template-columns:none!important;overflow:visible!important}
   .board .board-col{display:none;width:100%;min-height:240px}
   .board .board-col.mobile-active{display:block}
+  /* All means all populated stages; empty columns remain available on desktop. */
+  .board[data-mobile-all="true"] .board-col[data-empty="true"]{display:none}
   .compact-quick-controls{grid-template-columns:1fr}
   .activity-type-filter select{font-size:16px}
 }

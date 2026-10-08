@@ -71,4 +71,13 @@ requireText(app,"const canRetry = String(options.method || 'GET').toUpperCase() 
 requireText(app,'scheduleWorkspaceRecovery();','automatic recovery after startup 503');
 requireText(app,'workspaceLoadInFlight','single-flight boot recovery');
 
+
+requireText(app, 'let boardUnassignedExpanded = false;', 'persist Team inbox expansion between Board redraws');
+requireText(app, "if (disclosure.open) populate();", 'initialize visible Team inbox cards');
+requireText(app, "grid.dataset.loaded='true';", 'render unassigned cards only when expanded');
+requireText(app, "boardUnassignedExpanded=disclosure.open;", 'preserve user open/closed choice');
+requireText(app, 'data-empty=', 'mark genuinely empty Board stages for mobile projection');
+const styles=fs.readFileSync(new URL('../public/styles.css',import.meta.url),'utf8');
+requireText(styles, '.board[data-mobile-all="true"] .board-col[data-empty="true"]{display:none}', 'hide empty statuses from mobile All view');
+
 console.log('Live-sync invariant: PASS');
