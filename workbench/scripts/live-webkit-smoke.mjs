@@ -20,6 +20,12 @@ try {
     const page=await context.newPage();
     const errors=[];
     page.on('pageerror',error=>errors.push(String(error.message||error)));
+    page.on('response',async response=>{
+      if (new URL(response.url()).pathname !== '/api/projects') return;
+      const data=await response.json().catch(()=>null);
+      console.log('API_PROJECTS '+device+' status='+response.status()+' count='+(data?.projects?.length ?? '?'));
+    });
+
     // Deployments are asynchronous. Wait for Cloudflare to serve the asset
     // version in the checked-out release manifest, rather than hard-coding an
     // obsolete release or treating a deployment-in-flight as a UI failure.
@@ -44,6 +50,10 @@ try {
       await page.locator('#board-view [data-view-scope="'+scope+'"]').click();
       const initial=await page.evaluate(()=>({
         totalCards:document.querySelectorAll('#board .project-card').length,
+        searchValue:document.querySelector('#search')?.value,
+        projectCount:document.querySelector('#project-count')?.textContent,
+        translationRatio:document.querySelector('#translation-ratio')?.textContent,
+
         columns:[...document.querySelectorAll('#board .board-col')].map(x=>({status:x.dataset.status,cards:x.querySelectorAll('.project-card').length})),
         summary:document.querySelector('#board-scope-summary')?.textContent,
         boardText:document.querySelector('#board')?.textContent?.slice(0,350),
