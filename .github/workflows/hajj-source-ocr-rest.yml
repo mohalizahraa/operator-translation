@@ -1,0 +1,112 @@
+name: Hajj source witness OCR 31-298
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/hajj-source-ocr-rest.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  recover:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { from: 31, to: 120 }
+          - { from: 121, to: 210 }
+          - { from: 211, to: 298 }
+    runs-on: [self-hosted, operator-translation, macOS, ARM64]
+    timeout-minutes: 70
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: OCR and PDFKit extraction from canonical Hajj source
+        shell: bash
+        env:
+          FROM_PHYSICAL: ${{ matrix.from }}
+          TO_PHYSICAL: ${{ matrix.to }}
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --connect-timeout 30 'https://haydari-translation-workbench.pages.dev/api/pdf/11' -o /tmp/hajj-298-rest.pdf
+          head -c 5 /tmp/hajj-298-rest.pdf | grep -q '%PDF-'
+          sha=$(shasum -a 256 /tmp/hajj-298-rest.pdf | awk '{print $1}')
+          [ "$sha" = '5e0a7395a4a439e493d647d95a2d58680880b27bc5e5043a16392c9b992c3c04' ]
+          mkdir -p workbench/handoffs
+          OUT="workbench/handoffs/rites-of-hajj-source-physical-$FROM_PHYSICAL-$TO_PHYSICAL-witness.txt"
+          export OUT SOURCE_SHA256="$sha"
+          cat >/tmp/hajj-ocr-rest.swift <<'SWIFT'
+          import Foundation
+          import PDFKit
+          import AppKit
+          import Vision
+          let env=ProcessInfo.processInfo.environment
+          let first=Int(env["FROM_PHYSICAL"]!)!
+          let last=Int(env["TO_PHYSICAL"]!)!
+          let path="/tmp/hajj-298-rest.pdf"
+          guard let d=PDFDocument(url:URL(fileURLWithPath:path)),d.pageCount==298 else {fatalError("BAD_SOURCE")}
+          let out=env["OUT"]!
+          FileManager.default.createFile(atPath:out,contents:nil)
+          let f=FileHandle(forWritingAtPath:out)!
+          func emit(_ s:String){if let data=s.data(using:.utf8){try? f.write(contentsOf:data)}}
+          emit("SOURCE_SHA256=" + env["SOURCE_SHA256"]! + "\nSOURCE_PAGE_COUNT=298\n")
+          for n in first...last {
+            autoreleasepool {
+              guard let p=d.page(at:n-1) else { return }
+              let raw=p.string ?? ""
+              let img=p.thumbnail(of:NSSize(width:2000,height:2900),for:.mediaBox)
+              var lines=[String]()
+              if let cg=img.cgImage(forProposedRect:nil,context:nil,hints:nil) {
+                let req=VNRecognizeTextRequest()
+                req.recognitionLevel = .accurate
+                req.usesLanguageCorrection = true
+                let supported=(try? req.supportedRecognitionLanguages()) ?? []
+                if supported.contains("ar-SA") {req.recognitionLanguages=["ar-SA"]}
+                else if supported.contains("ar"){req.recognitionLanguages=["ar"]}
+                do {
+                  try VNImageRequestHandler(cgImage:cg,options:[:]).perform([req])
+                  lines=(req.results ?? []).sorted {
+                    let ay=$0.boundingBox.midY,by=$1.boundingBox.midY
+                    if abs(ay-by)>0.012{return ay>by}
+                    return $0.boundingBox.midX>$1.boundingBox.midX
+                  }.compactMap{$0.topCandidates(1).first?.string}
+                } catch {print("HAJJ_VISION_ERROR_PAGE_\(n)=\(error)")}
+              }
+              emit("\n=== PHYSICAL PAGE \(n) ===\n=== PDFKIT TEXT ===\n")
+              emit(raw + "\n=== IMAGE OCR ===\n")
+              emit(lines.joined(separator:"\n") + "\n")
+              if n%10==0 || n==first || n==last {print("HAJJ_WITNESS_PAGE_\(n)_OCR_LINES_\(lines.count)")}
+            }
+          }
+          try? f.close()
+          SWIFT
+          swift /tmp/hajj-ocr-rest.swift
+          grep -q "^=== PHYSICAL PAGE $TO_PHYSICAL ===$" "$OUT"
+          git fetch origin main
+          publish_dir="/tmp/hajj-witness-$GITHUB_RUN_ID-$FROM_PHYSICAL"
+          git worktree add --detach "$publish_dir" origin/main
+          mkdir -p "$publish_dir/workbench/handoffs"
+          cp "$OUT" "$publish_dir/$OUT"
+          (
+            cd "$publish_dir"
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add "workbench/handoffs/rites-of-hajj-source-physical-$FROM_PHYSICAL-$TO_PHYSICAL-witness.txt"
+            git commit -m "Workbench: recover Hajj Arabic physical source pages $FROM_PHYSICAL-$TO_PHYSICAL"
+            for attempt in 1 2 3 4; do
+              git fetch origin main
+              git rebase origin/main
+              if git push origin HEAD:main; then exit 0; fi
+              sleep 2
+            done
+            exit 1
+          )
+          git worktree remove --force "$publish_dir"
+      - name: Wipe temporary runner material
+        if: always()
+        run: |
+          rm -f /tmp/hajj-298-rest.pdf /tmp/hajj-ocr-rest.swift
