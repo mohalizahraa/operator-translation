@@ -60,9 +60,13 @@ jobs:
           note=(f"Translation in progress. Verified physical source pages: {pages}/{total}. "
             "Working English draft contains 399 numbered legal rulings and 13 concluding appendix units, "
             "but numerous supplications and source comparisons remain explicitly unverified. "
-            "Formatting in progress: Amiri typography applied across all 1,312 normal body paragraphs "
-            "and 142 actual headings standardized; full native-footnote, native-TOC, pagination, "
-            "source collation, and final rendered quality checks remain open. "
+            "Formatting in progress: Amiri typography across all 1,312 prior normal body paragraphs; "
+            "143 actual headings standardized; 399 Ruling and 50 Question/Answer labels emphasized; "
+            "the omitted handwritten acknowledgment restored as a marked working translation; "
+            "five native source footnotes and the introductory narrations restored; "
+            "the first chapter's source quotations corrected. "
+            "Full remaining source-page collation, handwritten acknowledgment final check, "
+            "native TOC, remaining footnotes, pagination, and rendered QA remain open. "
             f"Resume source verification at physical PDF page {pages+1}. "
             "Do not advance further without source-to-English verification.")
           json.dump({'notes':note},open('/tmp/hajj-notes.json','w'))
