@@ -82,7 +82,12 @@ requireText(styles, '.board-list>.project-card{flex:none}', 'avoid stretching in
 
 const activityApi=fs.readFileSync(new URL('../functions/api/activity.js',import.meta.url),'utf8');
 requireText(activityApi,"projection === 'ui'",'compact Activity payload option');
-requireText(activityApi,"THEN a.before_json ELSE NULL", 'retain progress evidence but omit unused update snapshots');
+for (const field of ['status','translated_pages','pages']) {
+  requireText(activityApi, "json_extract(a.before_json, '$." + field + "')", 'retain historical before '+field);
+  requireText(activityApi, "json_extract(a.after_json, '$." + field + "')", 'retain historical after '+field);
+}
+requireText(activityApi, "const [activity, paceEvents]", 'archival Activity route remains full fidelity');
+requireText(app, "void refreshActivityData();", 'Activity refresh is independent of project load');
 requireText(app, 'const active=VIEW_RENDERERS[view];','render only active Workbench view');
 requireText(app, 'if (state.projects.length) render();','refresh view on navigation');
 console.log('Live-sync invariant: PASS');
