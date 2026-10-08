@@ -41,7 +41,16 @@ try {
     await view('board');
     async function expectBoard(scope,expected) {
       await page.locator('#board-view [data-view-scope="'+scope+'"]').click();
-      await page.waitForFunction(n=>document.querySelectorAll('#board .project-card').length===n,expected,{timeout:25000});
+      const initial=await page.evaluate(()=>({
+        totalCards:document.querySelectorAll('#board .project-card').length,
+        columns:[...document.querySelectorAll('#board .board-col')].map(x=>({status:x.dataset.status,cards:x.querySelectorAll('.project-card').length})),
+        summary:document.querySelector('#board-scope-summary')?.textContent,
+        boardText:document.querySelector('#board')?.textContent?.slice(0,350),
+        view:document.querySelector('#board-view')?.className,
+        error:document.querySelector('#workspace-error-detail')?.textContent,
+      }));
+      console.log('BOARD_DIAG '+device+' '+scope+' '+JSON.stringify(initial)+' jsErrors='+JSON.stringify(errors));
+      await page.waitForFunction(n=>document.querySelectorAll('#board .project-card').length===n,expected,{timeout:12000});
       const count=await page.locator('#board .project-card').count();
       assert(count===expected,device+' '+scope+' count '+count+' expected '+expected);
       const stages=await page.locator('#board .board-head .pill').allTextContents();

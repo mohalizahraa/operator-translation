@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - '.github/workflows/workbench-live-webkit-smoke.yml'
+      - 'workbench/scripts/live-webkit-smoke.mjs'
   workflow_dispatch:
 
 permissions:
