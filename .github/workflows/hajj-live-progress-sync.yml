@@ -6,6 +6,7 @@ on:
     paths:
       - '.github/workflows/hajj-live-progress-sync.yml'
       - 'workbench/hajj-progress-sync-trigger.txt'
+      - 'workbench/hajj-editorial-status.json'
   workflow_dispatch:
 
 permissions:
@@ -57,18 +58,23 @@ jobs:
           pages=int(d['project']['translated_pages'])
           total=int(d['marker_total'])
           assert pages < total, 'Review stage separately if source translation completes'
-          note=(f"Translation in progress. Verified physical source pages: {pages}/{total}. "
-            "Working English draft contains 399 numbered legal rulings and 13 concluding appendix units, "
-            "but numerous supplications and source comparisons remain explicitly unverified. "
-            "Formatting in progress: Amiri typography across all 1,312 prior normal body paragraphs; "
-            "143 actual headings standardized; 399 Ruling and 50 Question/Answer labels emphasized; "
-            "the omitted handwritten acknowledgment restored as a marked working translation; "
-            "five native source footnotes and the introductory narrations restored; "
-            "the first chapter's source quotations corrected. "
-            "Full remaining source-page collation, handwritten acknowledgment final check, "
-            "native TOC, remaining footnotes, pagination, and rendered QA remain open. "
-            f"Resume source verification at physical PDF page {pages+1}. "
-            "Do not advance further without source-to-English verification.")
+          with open('workbench/hajj-editorial-status.json',encoding='utf-8') as handle:
+            editorial=json.load(handle)
+          assert int(editorial['project_id']) == 11
+          assert int(editorial['source_total_physical_pages']) == total
+          note=(
+            f"Rites of Ḥajj — Verified physical source pages: {pages}/{total}. "
+            + editorial['draft_coverage'] + " "
+            + editorial['verified_editorial_work'] + " "
+            + editorial['verified_formatting_work'] + " "
+            + editorial['open_gates'] + " "
+            + editorial['verification_state']
+          )
+          if pages < total:
+            note += f" Current next source page: {pages+1}."
+          previous=(d['project'].get('notes') or '').strip()
+          if previous and not previous.startswith(('Translation in progress. Verified physical source pages:', 'Rites of Ḥajj — Verified physical source pages:')):
+            note += "\\n\\nOther project notes: " + previous
           json.dump({'notes':note},open('/tmp/hajj-notes.json','w'))
           print('HAJJ_STATUS_NOTE_READY')
           PY
