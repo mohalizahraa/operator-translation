@@ -30,6 +30,8 @@ const modelCoreSource = await fs.readFile(new URL('public/model-core.js', root),
 const projectsIndexSource = await fs.readFile(new URL('functions/api/projects/index.js', root), 'utf8');
 
 
+assert(!appSource.includes('state.projects.filter(projectMatchesSearch)'), 'Board/Timeline must not pass optional-argument search predicate directly to Array.filter.');
+assert((appSource.match(/state\\.projects\\.filter\\(p=>projectMatchesSearch\\(p\\)\\)/g)||[]).length===2, 'Board and Timeline must explicitly pass only the project into search.');
 const marker = 'export const BOOK_CATALOG = ';
 const markerIndex = catalogSource.indexOf(marker);
 assert(markerIndex >= 0, 'BOOK_CATALOG export was not found.');
