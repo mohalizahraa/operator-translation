@@ -17,6 +17,7 @@ try {
     ['tablet',820,1180,true],
   ]) {
     const context=await browser.newContext({viewport:{width,height},isMobile:mobile,hasTouch:mobile,deviceScaleFactor:mobile?2:1});
+    await context.addInitScript(()=>{try{localStorage.setItem('haydariTheme','light')}catch{}});
     const page=await context.newPage();
     const errors=[];
     page.on('pageerror',error=>errors.push(String(error.message||error)));
@@ -40,6 +41,53 @@ try {
 
     await page.waitForFunction(()=>/\/ 176$/.test(document.querySelector('#translation-ratio')?.textContent?.trim()||''),{timeout:45000});
     console.log(device+' dashboard: '+await page.locator('#translation-ratio').innerText());
+    // Verify palette equivalence in the rendered page, not only CSS source.
+    const getPalette=()=>page.evaluate(()=>{
+      const c=getComputedStyle(document.documentElement);
+      const t=k=>c.getPropertyValue('--'+k).trim();
+      const computed=selector=>{
+        const s=getComputedStyle(document.querySelector(selector));
+        return {fg:s.color,bg:s.backgroundColor};
+      };
+      return {mode:document.documentElement.dataset.theme,
+        parchment:t('parchment'),paper:t('paper'),ink:t('ink'),
+        wine:t('oxblood'),wineFill:t('oxblood-fill'),gold:t('gold'),sage:t('sage'),
+        status:['not-started','translating','formatting','review','ready'].map(x=>t('status-'+x)),
+        button:computed('#new-project'),activeNav:computed('.nav-item.active')};
+    });
+    const light=await getPalette();
+    assert(light.mode==='light',device+' light palette did not initialize');
+    await page.locator('#theme-toggle').click();
+    const dark=await getPalette();
+    assert(dark.mode==='dark',device+' dark palette did not activate');
+    assert(await page.evaluate(()=>localStorage.getItem('haydariTheme'))==='dark',device+' theme preference was not saved');
+    const rgb=value=>value.startsWith('#')?[1,3,5].map(i=>parseInt(value.slice(i,i+2),16)):(value.match(/[0-9]+/g)||[]).slice(0,3).map(Number);
+    const luminosity=value=>rgb(value).map(x=>x/255).map(x=>x<=.04045?x/12.92:((x+.055)/1.055)**2.4).reduce((s,n,i)=>s+n*[.2126,.7152,.0722][i],0);
+    const contrast=(a,b)=>{const x=luminosity(a),y=luminosity(b);return (Math.max(x,y)+.05)/(Math.min(x,y)+.05)};
+    const hue=value=>{
+      const [r,g,b]=rgb(value).map(x=>x/255);
+      const max=Math.max(r,g,b),min=Math.min(r,g,b),d=max-min;
+      if(d===0)return 0;
+      return ((((max===r?(g-b)/d%6:max===g?(b-r)/d+2:(r-g)/d+4)*60)%360)+360)%360;
+    };
+    for(const role of ['wine','gold','sage']){
+      const delta=Math.abs(hue(light[role])-hue(dark[role]));
+      assert(Math.min(delta,360-delta)<23,device+' '+role+' hue differs between modes');
+      assert(contrast(dark[role],dark.paper)>=4.5,device+' '+role+' text lacks contrast');
+    }
+    assert(luminosity(dark.parchment)<luminosity(light.parchment),device+' dark background not darker than light');
+    assert(contrast(dark.ink,dark.paper)>=7,device+' text contrast too low');
+    for(const element of ['button','activeNav'])assert(contrast(dark[element].fg,dark[element].bg)>=4.5,device+' '+element+' lacks sufficient contrast');
+    assert(dark.button.bg===dark.activeNav.bg,device+' dark action backgrounds not coordinated');
+    for(const color of dark.status)assert(contrast('#FFF9EF',color)>=4.5,device+' status bar contrast too low: '+color);
+    console.log('THEME_PARITY '+device+' '+JSON.stringify({
+      light:{paper:light.paper,wine:light.wine,gold:light.gold,sage:light.sage},
+      dark:{paper:dark.paper,wine:dark.wine,gold:dark.gold,sage:dark.sage,wineFill:dark.wineFill},
+      contrast:{text:contrast(dark.ink,dark.paper).toFixed(2),wine:contrast(dark.wine,dark.paper).toFixed(2),button:contrast(dark.button.fg,dark.button.bg).toFixed(2)}
+    }));
+    await page.locator('#theme-toggle').click();
+    assert((await getPalette()).mode==='light',device+' light palette not restored');
+
     await page.waitForFunction(()=>document.querySelectorAll('#live-translation-feed .translation-feed-item').length>0,{timeout:30000});
     const feedLayout=await page.evaluate(()=>[...document.querySelectorAll('#live-translation-feed .translation-feed-detail')].map(detail=>{
       const action=detail.querySelector('.translation-feed-update').getBoundingClientRect();

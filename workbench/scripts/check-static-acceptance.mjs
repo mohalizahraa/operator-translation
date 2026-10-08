@@ -30,7 +30,9 @@ assert(!stylesSource.includes('grid-template-columns:max-content minmax(0,1fr)')
 assert(indexSource.includes('id="board-scroll-controls"') && indexSource.includes('id="board-scroll-prev"') && indexSource.includes('id="board-scroll-next"'), 'Desktop Board scrolling controls are missing.');
 assert(stylesSource.includes('.wrap{width:100%;max-width:1760px}') && stylesSource.includes('.board-list{overscroll-behavior-y:auto'), 'Responsive desktop layout or vertical Board scroll boundary is missing.');
 assert(appSource.includes('function updateBoardScrollControls()') && appSource.includes("addEventListener('scroll',updateBoardScrollControls"), 'Board scrolling controls are not wired.');
-assert(stylesSource.includes(':root[data-theme="dark"]') && stylesSource.includes('--paper-rgb:36,48,43') && stylesSource.includes('.theme-toggle'), 'Dark token coverage and accessible switch styling are missing.');
+assert(stylesSource.includes(':root[data-theme="dark"]') && stylesSource.includes('--paper-rgb:45,50,46') && stylesSource.includes('.theme-toggle'), 'Dark token coverage and accessible switch styling are missing.');
+assert(stylesSource.includes('--oxblood-fill:var(--oxblood);') && stylesSource.includes('--oxblood-fill:#805357;') && stylesSource.includes('.nav-item.active{background:var(--oxblood-fill)') && stylesSource.includes('.primary{min-height:40px;padding:8px 14px;border:1px solid var(--oxblood-fill)'), 'Semantic wine text vs. wine button fills missing.');
+assert(stylesSource.includes('--oxblood:#BA9194;') && stylesSource.includes('--gold:#BBA584;') && stylesSource.includes('--sage:#ACBBB1;'), 'Coherent dark palette role colors drifted.');
 assert(!['rgba(247,245,239,','rgba(154,131,95,','rgba(38,49,45,','rgba(89,104,97,','rgba(109,67,71,'].some(fragment => stylesSource.includes(fragment)), 'Hardcoded light-theme surface colors remain outside theme tokens.');
 const headersSource = await fs.readFile(new URL('public/_headers', root), 'utf8');
 const projectPatchSource = await fs.readFile(new URL('functions/api/projects/[id].js', root), 'utf8');
