@@ -80,4 +80,9 @@ requireText(styles, '.board[data-mobile-all="true"] .board-col[data-empty="true"
 requireText(styles, 'align-items:start;padding-bottom:8px', 'avoid stretching kanban columns');
 requireText(styles, '.board-list>.project-card{flex:none}', 'avoid stretching individual cards');
 
+const activityApi=fs.readFileSync(new URL('../functions/api/activity.js',import.meta.url),'utf8');
+requireText(activityApi,"projection === 'ui'",'compact Activity payload option');
+requireText(activityApi,"THEN a.before_json ELSE NULL", 'retain progress evidence but omit unused update snapshots');
+requireText(app, 'const active=VIEW_RENDERERS[view];','render only active Workbench view');
+requireText(app, 'if (state.projects.length) render();','refresh view on navigation');
 console.log('Live-sync invariant: PASS');

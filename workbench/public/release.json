@@ -1,6 +1,6 @@
 {
-  "release_id": "20261008-board-complete-2",
-  "app_version": "20261008-board-complete-2",
-  "css_version": "20261008-board-complete-2",
-  "description": "All catalogue books visible in Shared Board; scrolling desktop columns; mobile status filtering"
+  "release_id": "20261008-active-render-3",
+  "app_version": "20261008-active-render-3",
+  "css_version": "20261008-active-render-3",
+  "description": "Shared Board full catalogue, active-view rendering, compact lossless Activity timeline"
 }

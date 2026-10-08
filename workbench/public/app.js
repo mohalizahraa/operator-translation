@@ -1401,7 +1401,16 @@ function renderActivity() {
     return `<div class="activity-item"><time class="activity-date">${when.toLocaleDateString()}</time><div class="activity-main"><strong class="activity-event">${escapeHtml(a.actor || 'Unknown')} ${escapeHtml(a.action)}</strong>${activityBookTitleMarkup(a)}</div><small class="activity-meta">${when.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})}</small></div>`;
   }).join('') || '<p class="muted">No activity matches these filters.</p>';
 }
-function render() { renderDashboard(); renderProjects(); renderBoard(); renderTimeline(); renderStats(); renderActivity(); hydrateUploadedCovers(document); }
+const VIEW_RENDERERS = {dashboard:renderDashboard,projects:renderProjects,board:renderBoard,timeline:renderTimeline,stats:renderStats,activity:renderActivity};
+function render() {
+  // Do not rebuild six large DOM trees on every live revision.
+  // Inactive views are rendered from the latest state when entered.
+  const view=state.view;
+  const active=VIEW_RENDERERS[view];
+  if (!active) throw new Error('Unknown Workbench view: '+view);
+  active();
+  hydrateUploadedCovers($(`${view}-view`));
+}
 
 function setView(view) {
   state.view = view;
@@ -1415,6 +1424,7 @@ function setView(view) {
   });
   els.title.textContent = ({dashboard:'Dashboard',projects:'Projects',board:'Board',timeline:'Timeline',stats:'Stats',activity:'Activity'})[view];
   els.search.hidden=!['projects','board','timeline'].includes(view);
+  if (state.projects.length) render();
 }
 
 function openProject(id) {
@@ -1699,7 +1709,7 @@ async function fetchSharedData() {
   // the full payload, the next cheap revision poll may cause one redundant
   // refresh, but it cannot hide a newer mutation behind a newer token.
   const revision=await fetchLiveRevision();
-  const [projects, activity] = await Promise.all([api('/api/projects'), api('/api/activity')]);
+  const [projects, activity] = await Promise.all([api('/api/projects'), api('/api/activity?projection=ui')]);
   const nextProjects=projects.projects || [];
   const nextActivity=activity.activity || [];
   const nextPaceEvents=activity.pace_events || nextActivity.filter(a=>['translation progress','translation progress correction'].includes(a.action));

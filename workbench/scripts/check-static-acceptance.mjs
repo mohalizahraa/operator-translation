@@ -200,7 +200,9 @@ assert(indexSource.includes('value="__mine__">My assignments'), 'My assignments 
 assert(appSource.includes("if ($('filter-assignee')?.value === '__mine__') renderProjects();"), 'Actor changes do not refresh My assignments filtering.');
 assert(indexSource.includes('id="timeline-visual"') && indexSource.includes('id="timeline-unscheduled"'), 'Real timeline surface is missing.');
 assert(appSource.includes('function timelineMonths(minDay,maxDay)') && appSource.includes('timeline-bar'), 'Time-axis renderer is missing.');
-assert(appSource.includes('function render() { renderDashboard(); renderProjects(); renderBoard(); renderTimeline(); renderStats();'), 'Central render no longer refreshes Stats.');
+assert(appSource.includes('const VIEW_RENDERERS = {dashboard:renderDashboard,projects:renderProjects,board:renderBoard,timeline:renderTimeline,stats:renderStats,activity:renderActivity}'), 'Every Workbench view must have an active renderer.');
+assert(appSource.includes('if (state.projects.length) render();'), 'Switching views must render their latest shared data.');
+assert(appSource.includes("api('/api/activity?projection=ui')"), 'Client must request compact Activity projection.');
 assert(appSource.includes("els.dialog.close(); await loadData();"), 'Project save does not reload live state after mutation.');
 assert(indexSource.includes('id="group-projects"'), 'Series grouping control is missing.');
 assert(appSource.includes('function seriesGroupedMarkup(list)'), 'Series grouping renderer is missing.');
