@@ -49,7 +49,7 @@ try {
       const titleCss=getComputedStyle(detail.querySelector('.translation-feed-title'));
       return {
         vertical:title.top-action.bottom,
-        indent:title.left-action.left,
+        indent:(titlePair?.left??title.left)-action.left,
         titleFits:title.right<=detail.getBoundingClientRect().right+1,
         titleHeight:title.height,
         gridRows:css.gridTemplateRows,
