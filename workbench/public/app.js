@@ -1059,7 +1059,7 @@ async function applyBatch() {
   }
 }
 function renderBoard() {
-  const matching = state.projects.filter(projectMatchesSearch);
+  const matching = state.projects.filter(p=>projectMatchesSearch(p));
   const base = state.viewScope === 'Shared' ? matching : matching.filter(viewScopeMatches);
   const unassigned = state.viewScope === 'Shared' ? matching.filter(p=>p.assignee === 'Unassigned') : [];
   const selectedStatusHasBooks = state.mobileBoardStatus === 'all' || base.some(p=>p.status === state.mobileBoardStatus);
@@ -1177,7 +1177,7 @@ function timelineMonths(minDay,maxDay) {
   return segments;
 }
 function renderTimeline() {
-  const matching=state.projects.filter(projectMatchesSearch);
+  const matching=state.projects.filter(p=>projectMatchesSearch(p));
   const scoped=matching.filter(viewScopeMatches);
   const dated=scoped.filter(p=>p.start_date || p.due_date);
   const unscheduled=scoped.filter(p=>!p.start_date && !p.due_date && !isPublishReady(p));
