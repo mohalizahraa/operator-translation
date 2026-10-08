@@ -1,6 +1,6 @@
 {
-  "release_id": "20261008-active-render-3",
-  "app_version": "20261008-active-render-3",
+  "release_id": "20261008-independent-project-load-1",
+  "app_version": "20261008-independent-project-load-1",
   "css_version": "20261008-active-render-3",
-  "description": "Shared Board full catalogue, active-view rendering, compact lossless Activity timeline"
+  "description": "Board and Projects load independently of Activity; small but complete history projection"
 }

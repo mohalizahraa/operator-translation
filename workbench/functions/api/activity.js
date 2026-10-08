@@ -3,15 +3,21 @@ import { json } from '../_lib.js';
 export async function onRequestGet(context) {
   const projection = new URL(context.request.url).searchParams.get('projection');
   if (projection === 'ui') {
-    // Preserve the complete event list for Activity, but omit snapshots that
-    // its cards never display. Only translation page deltas need historical
-    // before/after evidence for pace and progress corrections.
+    // Return the complete event list with only the three historical fields
+    // used by pace, correction, and completion-transition reconstruction.
+    // The default archival API continues returning full immutable snapshots.
     const { results } = await context.env.DB.prepare(
       `SELECT a.id, a.project_id, a.actor, a.action, a.created_at, p.title_ar,
-              CASE WHEN a.action IN ('translation progress','translation progress correction')
-                   THEN a.before_json ELSE NULL END AS before_json,
-              CASE WHEN a.action IN ('translation progress','translation progress correction')
-                   THEN a.after_json ELSE NULL END AS after_json
+              CASE WHEN json_valid(a.before_json) THEN json_object(
+                'status', json_extract(a.before_json, '$.status'),
+                'translated_pages', json_extract(a.before_json, '$.translated_pages'),
+                'pages', json_extract(a.before_json, '$.pages')
+              ) ELSE NULL END AS before_json,
+              CASE WHEN json_valid(a.after_json) THEN json_object(
+                'status', json_extract(a.after_json, '$.status'),
+                'translated_pages', json_extract(a.after_json, '$.translated_pages'),
+                'pages', json_extract(a.after_json, '$.pages')
+              ) ELSE NULL END AS after_json
          FROM activity a LEFT JOIN projects p ON p.id=a.project_id
         ORDER BY a.created_at DESC, a.id DESC`
     ).all();

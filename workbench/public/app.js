@@ -23,7 +23,7 @@ const savedViewScope = localStorage.getItem('haydariViewScope') || localStorage.
 const savedMobileBoardStatus = localStorage.getItem('haydariBoardStatus');
 const savedActivityActor = localStorage.getItem('haydariActivityActor');
 const savedActivityType = localStorage.getItem('haydariActivityType');
-const state = { projects: [], activity: [], paceEvents: [], liveSignature: '', liveRevision: null, pdfAudit: null, coverMap: {}, seriesMap: {groups:{},books:{}}, coverObjectUrls: new Map(), coverLoads: new Map(), selectedIds: new Set(), view: 'dashboard', actor: ['Zahraa', 'Mohammed'].includes(savedActor) ? savedActor : 'Zahraa', projectSort: SORT_VALUES.includes(savedProjectSort) ? savedProjectSort : 'updated', projectGrouping: savedProjectGrouping === 'series' ? 'series' : 'none', viewScope: VIEW_SCOPES.includes(savedViewScope) ? savedViewScope : 'Shared', mobileBoardStatus: MOBILE_BOARD_STATUSES.includes(savedMobileBoardStatus) ? savedMobileBoardStatus : 'all', activityActorFilter: ACTIVITY_ACTORS.includes(savedActivityActor) ? savedActivityActor : 'all', activityTypeFilter: ACTIVITY_TYPES.includes(savedActivityType) ? savedActivityType : 'all', pendingWorkOnLink: null };
+const state = { projects: [], activity: [], paceEvents: [], liveSignature: '', liveRevision: null, pdfAudit: null, coverMap: {}, seriesMap: {groups:{},books:{}}, coverObjectUrls: new Map(), coverLoads: new Map(), selectedIds: new Set(), view: 'dashboard', actor: ['Zahraa', 'Mohammed'].includes(savedActor) ? savedActor : 'Zahraa', projectSort: SORT_VALUES.includes(savedProjectSort) ? savedProjectSort : 'updated', projectGrouping: savedProjectGrouping === 'series' ? 'series' : 'none', viewScope: VIEW_SCOPES.includes(savedViewScope) ? savedViewScope : 'Shared', mobileBoardStatus: MOBILE_BOARD_STATUSES.includes(savedMobileBoardStatus) ? savedMobileBoardStatus : 'all', activityActorFilter: ACTIVITY_ACTORS.includes(savedActivityActor) ? savedActivityActor : 'all', activityTypeFilter: ACTIVITY_TYPES.includes(savedActivityType) ? savedActivityType : 'all', pendingWorkOnLink: null, activityLoaded:false, activityError:null };
 const LIVE_REVISION_MS = 2000;
 const LIVE_REVISION_RETRY_MS = 1000;
 const LIVE_MARKER_SYNC_MS = 5000;
@@ -35,6 +35,9 @@ let markerSyncInFlight = false;
 let markerSyncCursor = 0;
 let lastMarkerSyncAt = 0;
 let liveSyncStarted = false;
+let activitySyncInFlight = false;
+let activityRefreshPending = false;
+let activityRetryTimer = null;
 
 const $ = (id) => document.getElementById(id);
 const els = {
@@ -1380,6 +1383,13 @@ function syncActivityFilters() {
 
 function renderActivity() {
   syncActivityFilters();
+  if (!state.activityLoaded) {
+    if ($('activity-filter-summary')) $('activity-filter-summary').textContent='History loading';
+    $('activity-list').textContent=state.activityError
+      ? 'Activity history is temporarily unavailable. Retrying without blocking books.'
+      : 'Loading complete activity history…';
+    return;
+  }
   const filtered=state.activity.filter(a=>{
     const actorMatch=state.activityActorFilter === 'all' || activityActorGroup(a) === state.activityActorFilter;
     const type=['translation progress','translation progress correction'].includes(a.action) ? 'translation' : 'project';
@@ -1705,32 +1715,69 @@ async function fetchLiveRevision() {
 }
 
 async function fetchSharedData() {
-  // Read the revision token first. If a mutation lands between this read and
-  // the full payload, the next cheap revision poll may cause one redundant
-  // refresh, but it cannot hide a newer mutation behind a newer token.
+  // Read the revision before the project payload so concurrent mutations
+  // will always be found again by the next revision poll. Project cards MUST
+  // NOT depend on the larger, independently fallible Activity history query.
   const revision=await fetchLiveRevision();
-  const [projects, activity] = await Promise.all([api('/api/projects'), api('/api/activity?projection=ui')]);
-  const nextProjects=projects.projects || [];
-  const nextActivity=activity.activity || [];
-  const nextPaceEvents=activity.pace_events || nextActivity.filter(a=>['translation progress','translation progress correction'].includes(a.action));
-  return {projects:nextProjects,activity:nextActivity,paceEvents:nextPaceEvents,revision};
+  const projects=await api('/api/projects');
+  return {projects:projects.projects || [],revision};
 }
 
 function applySharedData(next,{force=false}={}) {
-  const signature=sharedDataSignature(next.projects,next.activity,next.paceEvents);
+  const signature=sharedDataSignature(next.projects,state.activity,state.paceEvents);
   const changed=force || signature!==state.liveSignature;
   state.projects=next.projects;
-  state.activity=next.activity;
-  state.paceEvents=next.paceEvents;
   state.liveRevision=String(next.revision ?? state.liveRevision ?? '');
   state.liveSignature=signature;
   if (changed) render();
   return changed;
 }
 
+async function refreshActivityData() {
+  if (activitySyncInFlight) {
+    activityRefreshPending=true;
+    return;
+  }
+  activitySyncInFlight=true;
+  const revisionAtStart=state.liveRevision;
+  try {
+    const payload=await api('/api/activity?projection=ui');
+    const nextActivity=payload.activity || [];
+    const nextPaceEvents=payload.pace_events || nextActivity.filter(a=>['translation progress','translation progress correction'].includes(a.action));
+    const signature=sharedDataSignature(state.projects,nextActivity,nextPaceEvents);
+    const changed=!state.activityLoaded || signature!==state.liveSignature;
+    state.activity=nextActivity;
+    state.paceEvents=nextPaceEvents;
+    state.activityLoaded=true;
+    state.activityError=null;
+    state.liveSignature=signature;
+    if (activityRetryTimer) clearTimeout(activityRetryTimer);
+    activityRetryTimer=null;
+    if (changed) render();
+  } catch (error) {
+    state.activityError=error?.message || 'Activity history unavailable';
+    if (state.view==='activity') renderActivity();
+    // The full event history is recoverable independently of project data.
+    if (!activityRetryTimer) {
+      activityRetryTimer=setTimeout(()=>{
+        activityRetryTimer=null;
+        void refreshActivityData();
+      },10000);
+    }
+  } finally {
+    activitySyncInFlight=false;
+    if (revisionAtStart!==state.liveRevision) activityRefreshPending=true;
+    if (activityRefreshPending) {
+      activityRefreshPending=false;
+      void refreshActivityData();
+    }
+  }
+}
+
 async function loadData() {
   const next=await fetchSharedData();
   applySharedData(next,{force:true});
+  void refreshActivityData();
 }
 
 async function syncSharedData({allowHidden=false}={}) {
@@ -1739,6 +1786,7 @@ async function syncSharedData({allowHidden=false}={}) {
   try {
     const next=await fetchSharedData();
     applySharedData(next);
+    void refreshActivityData();
     return true;
   } catch {
     return false;
