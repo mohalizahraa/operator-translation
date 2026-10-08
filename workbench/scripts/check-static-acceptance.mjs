@@ -151,9 +151,9 @@ assert(libSource.includes('export function validDateRange(startRaw, dueRaw)'), '
 assert(projectPatchSource.includes('Start date cannot be after the deadline.') && projectsIndexSource.includes('Start date cannot be after the deadline.'), 'Project create/update routes do not both reject impossible start/deadline ranges.');
 assert(appSource.includes('function validProjectDateRange(start,due)') && appSource.includes('syncProjectDateBounds'), 'Project editor does not prevent impossible date ranges locally.');
 assert(appSource.includes('invalidSchedules') && appSource.includes('start after that deadline'), 'Batch deadline edits can partially apply across impossible schedules.');
-assert(appSource.includes('Matching Unassigned books are shown in Team inbox above.'), 'Board can still contradict a matching Unassigned result in Shared scope.');
+assert(appSource.includes("state.viewScope === 'Shared' ? matching : matching.filter(viewScopeMatches)"), 'Shared Board must display Unassigned books directly alongside assigned books.');
 assert(appSource.includes('Matching Unassigned books are shown below.'), 'Timeline can still contradict a matching Unassigned result in Shared scope.');
-assert(appSource.includes('openUnassignedInbox') && appSource.includes('openUnassignedSchedule') && appSource.includes('unassigned-disclosure'), 'Large Shared Unassigned collections are not collapsed/search-aware.');
+assert(appSource.includes('openUnassignedSchedule') && appSource.includes('unassigned-disclosure'), 'Timeline Unassigned schedule must remain search-aware and collapsible.');
 assert(stylesSource.includes('.unassigned-disclosure>summary') && stylesSource.includes('.disclosure-chevron'), 'Unassigned disclosure lacks intentional accessible styling.');
 assert(translationSource.includes('projectResumeNoteProjection') && translationSource.includes('translationResumeInstruction'), 'Translation context lacks stage-aware/stale-note protections.');
 assert(projectsIndexSource.includes('syncTranslationFocusForProject(context.env.DB,result,actor)'), 'New Translating project creation does not synchronize translation focus.');
