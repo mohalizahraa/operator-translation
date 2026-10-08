@@ -108,6 +108,23 @@ try {
     assert(errors.length===0,device+' JavaScript exceptions: '+errors.slice(0,4).join(' | '));
     await context.close();
   }
+  // Verify degraded dependencies do not prevent books from rendering. No
+  // mutations: only intercept read-only revision and Activity requests.
+  {
+    const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,deviceScaleFactor:2});
+    const page=await context.newPage();
+    await page.route(/\\/api\\/(revision|activity)(?:\\?|$)/,route=>route.fulfill({
+      status:503,
+      contentType:'application/json',
+      body:JSON.stringify({error:'Simulated optional read outage'}),
+    }));
+    await page.goto(ORIGIN+'/?resilience='+Date.now(),{waitUntil:'domcontentloaded',timeout:60000});
+    await page.waitForFunction(()=>document.querySelector('#translation-ratio')?.textContent?.trim().endsWith('/ 176'),{timeout:45000});
+    await page.locator('.nav-item[data-view="board"]').click();
+    await page.waitForFunction(()=>document.querySelectorAll('#board .project-card').length===176,{timeout:20000});
+    console.log('iphone degraded revision/Activity: 176 Board cards still rendered');
+    await context.close();
+  }
   console.log('LIVE WORKBENCH WEBKIT SMOKE: PASS');
 } finally {
   await browser.close();

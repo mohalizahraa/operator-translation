@@ -22,6 +22,10 @@ vm.runInContext(body,context);
 const result=await vm.runInContext('fetchSharedData()',context);
 if(result.projects.length!==1 || result.revision!=='revision-42')throw new Error('Healthy project data failed to load.');
 if(activityCalls!==0)throw new Error('Activity still blocks initial project load.');
+context.fetchLiveRevision=async()=>{throw new Error('Simulated revision 503');};
+const degraded=await vm.runInContext('fetchSharedData()',context);
+if(degraded.projects.length!==1 || degraded.revision!==null)throw new Error('Revision outage still hides healthy project data.');
+
 if(!app.includes('void refreshActivityData();'))throw new Error('Independent Activity refresh is not scheduled.');
 if(!app.includes('state.activityLoaded=true;'))throw new Error('Activity state is never marked loaded.');
 const activity=fs.readFileSync(new URL('../functions/api/activity.js',import.meta.url),'utf8');

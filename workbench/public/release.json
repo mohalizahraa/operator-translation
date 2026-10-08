@@ -1,6 +1,6 @@
 {
-  "release_id": "20261008-search-callback-2",
-  "app_version": "20261008-search-callback-2",
+  "release_id": "20261008-revision-fallback-1",
+  "app_version": "20261008-revision-fallback-1",
   "css_version": "20261008-active-render-3",
-  "description": "Fix Board and Timeline search predicate index leak; preserve compact Activity and verified progress"
+  "description": "Read-only Board survives revision or Activity endpoint outage; full 176-book mobile rendering"
 }

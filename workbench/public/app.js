@@ -1718,7 +1718,13 @@ async function fetchSharedData() {
   // Read the revision before the project payload so concurrent mutations
   // will always be found again by the next revision poll. Project cards MUST
   // NOT depend on the larger, independently fallible Activity history query.
-  const revision=await fetchLiveRevision();
+  let revision=null;
+  try {
+    revision=await fetchLiveRevision();
+  } catch {
+    // A transient revision-token failure must not hide healthy book records.
+    // The next successful poll will reconcile the unknown/old token.
+  }
   const projects=await api('/api/projects');
   return {projects:projects.projects || [],revision};
 }
