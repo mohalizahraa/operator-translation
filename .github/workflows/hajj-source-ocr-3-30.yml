@@ -1,0 +1,88 @@
+name: Hajj source witness OCR pilot 3-30
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/hajj-source-ocr-3-30.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  source:
+    runs-on: [self-hosted, operator-translation, macOS, ARM64]
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Read 28 physical source pages using PDFKit and Arabic Vision
+        shell: bash
+        env:
+          SOURCE_URL: https://haydari-translation-workbench.pages.dev/api/pdf/11
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --connect-timeout 30 "$SOURCE_URL" -o /tmp/hajj-298.pdf
+          head -c 5 /tmp/hajj-298.pdf | grep -q '%PDF-'
+          cat > /tmp/hajj-ocr-pilot.swift <<'SWIFT'
+          import Foundation
+          import PDFKit
+          import AppKit
+          import Vision
+          let path="/tmp/hajj-298.pdf"
+          guard let doc=PDFDocument(url:URL(fileURLWithPath:path)) else { fatalError("PDF_OPEN_FAILED") }
+          guard doc.pageCount==298 else { fatalError("SOURCE_PAGE_COUNT_MISMATCH_\\(doc.pageCount)") }
+          let out="workbench/handoffs/rites-of-hajj-source-physical-3-30-witness.txt"
+          let f=FileManager.default
+          try f.createDirectory(atPath:"workbench/handoffs",withIntermediateDirectories:true)
+          f.createFile(atPath:out,contents:nil)
+          let handle=FileHandle(forWritingAtPath:out)!
+          func emit(_ s:String){if let b=s.data(using:.utf8){try? handle.write(contentsOf:b)}}
+          emit("SOURCE_PAGE_COUNT=298\nOCR_METHOD=PDFKit+macOS-Vision\n")
+          for n in 3...30 {
+            autoreleasepool {
+              guard let p=doc.page(at:n-1) else {return}
+              let raw=p.string ?? ""
+              let img=p.thumbnail(of:NSSize(width:2200,height:3200),for:.mediaBox)
+              let cg=img.cgImage(forProposedRect:nil,context:nil,hints:nil)
+              var lines:[String]=[]
+              if let cg=cg {
+                let req=VNRecognizeTextRequest()
+                req.recognitionLevel = .accurate
+                req.usesLanguageCorrection = true
+                let supported=(try? req.supportedRecognitionLanguages()) ?? []
+                if supported.contains("ar-SA") {req.recognitionLanguages=["ar-SA"]}
+                else if supported.contains("ar") {req.recognitionLanguages=["ar"]}
+                do {
+                  try VNImageRequestHandler(cgImage:cg,options:[:]).perform([req])
+                  lines=(req.results ?? []).sorted { 
+                    let ay=$0.boundingBox.midY,by=$1.boundingBox.midY
+                    if abs(ay-by)>0.012{return ay>by}
+                    return $0.boundingBox.midX>$1.boundingBox.midX
+                  }.compactMap{$0.topCandidates(1).first?.string}
+                } catch {print("OCR_ERROR_PAGE_\\(n)=\\(error)")}
+              }
+              emit("\n=== PHYSICAL PAGE \\(n) ===\n")
+              emit("=== PDFKIT TEXT ===\n"+raw+"\n")
+              emit("=== IMAGE OCR ===\n"+lines.joined(separator:"\n")+"\n")
+              print("HAJJ_SOURCE_PAGE_\\(n)_PDFKIT_\\(raw.count)_OCR_\\(lines.count)")
+            }
+          }
+          try? handle.close()
+          SWIFT
+          swift /tmp/hajj-ocr-pilot.swift
+          sha=$(shasum -a 256 /tmp/hajj-298.pdf | awk '{print $1}')
+          printf 'SOURCE_SHA256=%s\n' "$sha" >> workbench/handoffs/rites-of-hajj-source-physical-3-30-witness.txt
+          [ "$sha" = "5e0a7395a4a439e493d647d95a2d58680880b27bc5e5043a16392c9b992c3c04" ]
+          grep -q '^=== PHYSICAL PAGE 30 ===$' workbench/handoffs/rites-of-hajj-source-physical-3-30-witness.txt
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add workbench/handoffs/rites-of-hajj-source-physical-3-30-witness.txt
+          git commit -m "Workbench: recover Arabic Hajj source physical pages 3-30"
+          git pull --rebase origin main
+          git push origin HEAD:main
+      - name: Delete temporary local material
+        if: always()
+        run: rm -f /tmp/hajj-298.pdf /tmp/hajj-ocr-pilot.swift
