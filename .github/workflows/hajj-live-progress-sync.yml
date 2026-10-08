@@ -63,7 +63,7 @@ jobs:
           previous=(d['project'].get('notes') or '').strip()
           marker_text=f"Verified physical source pages: {pages}/{total}"
           if previous:
-            note=re.sub(r'Verified physical source pages: \\d+/\\d+',marker_text,previous)
+            note=re.sub(r'Verified physical source pages: \d+/\d+',marker_text,previous)
             if marker_text not in note:
               note=f"Rites of Ḥajj — {marker_text}. " + note
           else:
@@ -80,11 +80,11 @@ jobs:
               + editorial['verification_state']
             )
           if pages < total:
-            note=re.sub(r'(Resume source verification at physical PDF page )\\d+',lambda m:m.group(1)+str(pages+1),note)
-            note=re.sub(r'(Current next source page: )\\d+',lambda m:m.group(1)+str(pages+1),note)
+            note=re.sub(r'(Resume source verification at physical PDF page )\d+',lambda m:m.group(1)+str(pages+1),note)
+            note=re.sub(r'(Current next source page: )\d+',lambda m:m.group(1)+str(pages+1),note)
           else:
-            note=re.sub(r'Resume source verification at physical PDF page \\d+\\.?','',note)
-            note=re.sub(r'Current next source page: \\d+\\.?','',note)
+            note=re.sub(r'Resume source verification at physical PDF page \d+\.?','',note)
+            note=re.sub(r'Current next source page: \d+\.?','',note)
           if note != previous:
             with open('/tmp/hajj-notes.json','w') as handle:
               json.dump({'notes':note},handle)
