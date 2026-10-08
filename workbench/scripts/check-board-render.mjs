@@ -78,7 +78,7 @@ assert(cards(inbox.grid.innerHTML)===144,'expanded Team inbox must remain popula
 
 state.viewScope='Zahraa';
 render();
-assert(summary.textContent.startsWith('11 books'),'Zahraa scope must show her 11 direct assignments');
+assert(summary.textContent.startsWith('12 books'),'Zahraa scope must show 11 direct and one Shared assignment');
 assert(cards(board.innerHTML)===12,'Zahraa scope must include Shared assignments');
 assert(inbox.hidden,'individual view must keep Unassigned outside its assigned scope');
 
