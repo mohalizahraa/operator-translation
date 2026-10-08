@@ -29,3 +29,18 @@ Resume at physical page 31. English draft coverage of 399 numbered rulings and 1
 - Physical pp. 166–169 (ʿArafah): removed the placeholder and replaced summarized source material with complete English wording of the Muʿāwiyah ibn ʿAmmār narrative, the prescribed supplications, the ʿAbd Allāh ibn Jundab account, and the sunset and after-sunset prayers; cited Wasāʾil al-Shīʿah vol. 10 pp. 13, 20, 31 in native footnotes.
 - Physical pp. 174–175 (al-Muzdalifah): removed the placeholder and restored the complete narration of the standing, Jamʿ and dawn invocations, all-night worship report, and seventy-pebble instructions from the original with an al-Kāfī vol. 4 p. 469 native footnote.
 - Nonconsecutive restoration work **does not** advance the sequential website verified-source counter. Extended closing devotional appendix pp. 233–298 still requires line-by-line collation against this exact edition.
+
+## Further targeted restoration completed in English manuscript (not sequentially certified)
+
+- PDF pp. 39–40, ruling 28: corrected reversed **time-limited vs unrestricted** deputy-Hajj contract cases, preserving the requirement to serve this-year obligations first and the future-performance test for unrestricted contracts.
+- PDF p. 43, ruling 38: restored the explicit reward **10,000 dirhams** and removed the uncertainty note.
+- PDF p. 50, ruling 58: restored ʿAlī ibn al-Ḥusayn's actual statement to Isḥāq ibn ʿAmmār, including the alternative transmitted ending.
+- PDF p. 63, ruling 82: replaced an ambiguous estate-third summary with the rule requiring the heirs to devote the designated third to charitable deeds where another pilgrim volunteers.
+- PDF p. 72, rulings 98–99: corrected narrator from Abū Ḥamzah al-Thumālī to **ʿAlī ibn Abī Ḥamzah** and supplied the full report. Corrected return-to-Mecca exception from “before the end of the same lunar month” to **before one month has elapsed since the previous pilgrimage**.
+- PDF pp. 97–99: restored full washing supplication, the complete multi-part iḥrām invocation, wearing-garments prayer, two fully articulated recommended talbiyahs; corrected **first prayer unit al-Fātiḥah + al-Ikhlāṣ; second al-Fātiḥah + al-Kāfirūn**; restored missing body-grooming and purification prerequisites.
+- PDF p. 100: restored source footnote covering a woman's lustful looking at a man in the shared iḥrām prohibitions.
+- PDF p. 162, ruling 284: restored the original prayer for departure to ʿArafāt.
+- PDF pp. 179–181, rulings 308–309: replaced generalized stoning-and-sacrifice summaries with specified source distances and ritual method; full 7 conditions for hady, distinction between night stoning and night slaughter, and required repeats after deliberate omission of sacrifice.
+- PDF pp. 182–185, rulings 314, 319 and 320: replaced unsafe indeterminacy with exact lost-animal alternatives, all seven distinct fasting arrangements, and the original condition about acquiring the offering after three days of fasting.
+
+All text modifications have been made in the linked Google Doc. These targeted passages still need a final whole-page comparison, formal source-footnote inventory, layout review, and proofing in context. No sequential progress credit has been given beyond physical page 30.
