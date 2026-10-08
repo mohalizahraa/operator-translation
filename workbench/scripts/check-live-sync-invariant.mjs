@@ -88,6 +88,7 @@ for (const field of ['status','translated_pages','pages']) {
 }
 requireText(activityApi, "const [activity, paceEvents]", 'archival Activity route remains full fidelity');
 requireText(app, "void refreshActivityData();", 'Activity refresh is independent of project load');
+requireText(app, "(p.status==='in_progress' && (p.assignee===state.actor || p.assignee==='Both'))", 'in-progress auto-sync must not credit a different collaborator');
 requireText(app, 'const active=VIEW_RENDERERS[view];','render only active Workbench view');
 requireText(app, 'if (state.projects.length) render();','refresh view on navigation');
 console.log('Live-sync invariant: PASS');

@@ -1806,7 +1806,7 @@ async function syncVerifiedTranslationMarkers() {
       p.google_doc_url &&
       p.page_count_verified &&
       (
-        p.status==='in_progress' ||
+        (p.status==='in_progress' && (p.assignee===state.actor || p.assignee==='Both')) ||
         (p.status==='not_started' && (p.assignee===state.actor || p.assignee==='Both'))
       )
     )
