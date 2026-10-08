@@ -24,7 +24,7 @@ const coverProxySource = await fs.readFile(new URL('functions/api/official-cover
 const coverSourcesSource = await fs.readFile(new URL('functions/_cover_sources.js', root), 'utf8');
 const stylesSource = await fs.readFile(new URL('public/styles.css', root), 'utf8');
 assert(stylesSource.includes(':root[data-theme="dark"]') && stylesSource.includes('--paper-rgb:36,48,43') && stylesSource.includes('.theme-toggle'), 'Dark token coverage and accessible switch styling are missing.');
-assert(!/rgba\\((?:247,245,239|154,131,95|38,49,45|89,104,97|109,67,71),/.test(stylesSource), 'Hardcoded light-theme surface colors remain outside theme tokens.');
+assert(!['rgba(247,245,239,','rgba(154,131,95,','rgba(38,49,45,','rgba(89,104,97,','rgba(109,67,71,'].some(fragment => stylesSource.includes(fragment)), 'Hardcoded light-theme surface colors remain outside theme tokens.');
 const headersSource = await fs.readFile(new URL('public/_headers', root), 'utf8');
 const projectPatchSource = await fs.readFile(new URL('functions/api/projects/[id].js', root), 'utf8');
 const revisionSource = await fs.readFile(new URL('functions/api/revision.js', root), 'utf8');
