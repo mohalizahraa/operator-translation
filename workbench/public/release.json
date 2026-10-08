@@ -1,6 +1,6 @@
 {
-  "release_id": "20261008-marker-scope-1",
-  "app_version": "20261008-marker-scope-1",
+  "release_id": "20261008-search-callback-2",
+  "app_version": "20261008-search-callback-2",
   "css_version": "20261008-active-render-3",
-  "description": "Board project-first loading; complete compact history; collaborator-scoped automatic marker checks"
+  "description": "Fix Board and Timeline search predicate index leak; preserve compact Activity and verified progress"
 }
