@@ -14,6 +14,9 @@ const [catalogSource, coverMap, pdfAudit, seriesMap, appSource, indexSource] = a
   fs.readFile(new URL('public/app.js', root), 'utf8'),
   fs.readFile(new URL('public/index.html', root), 'utf8'),
 ]);
+const release=JSON.parse(await fs.readFile(new URL('public/release.json',root),'utf8'));
+assert(indexSource.includes('/app.js?v='+release.app_version),'Production JS asset version and release marker drifted.');
+assert(indexSource.includes('/styles.css?v='+release.css_version),'Production CSS asset version and release marker drifted.');
 const libSource = await fs.readFile(new URL('functions/_lib.js', root), 'utf8');
 const coverProxySource = await fs.readFile(new URL('functions/api/official-cover/[id].js', root), 'utf8');
 const coverSourcesSource = await fs.readFile(new URL('functions/_cover_sources.js', root), 'utf8');
