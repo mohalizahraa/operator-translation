@@ -1,9 +1,10 @@
 import { createRequire } from 'node:module';
+import { readFileSync } from 'node:fs';
 const require = createRequire(import.meta.url);
 const { webkit } = require('playwright');
 
 const ORIGIN = 'https://haydari-translation-workbench.pages.dev';
-const RELEASE = '20261008-active-render-3';
+const RELEASE = JSON.parse(readFileSync(new URL('../public/release.json',import.meta.url),'utf8')).app_version;
 const assert = (condition,message) => {
   if (!condition) throw new Error('LIVE WEBKIT: ' + message);
 };
@@ -19,11 +20,17 @@ try {
     const page=await context.newPage();
     const errors=[];
     page.on('pageerror',error=>errors.push(String(error.message||error)));
-    await page.goto(ORIGIN+'/?smoke='+Date.now(),{waitUntil:'domcontentloaded',timeout:60000});
-    // Verify the actual HTML asset reference rather than using Node fetch;
-    // the browser has a different HTTPS trust/network path on the runner.
-    const appAsset=await page.locator('script[src^="/app.js"]').first().getAttribute('src');
-    assert(appAsset?.includes(RELEASE),device+' loaded stale app asset '+appAsset);
+    // Deployments are asynchronous. Wait for Cloudflare to serve the asset
+    // version in the checked-out release manifest, rather than hard-coding an
+    // obsolete release or treating a deployment-in-flight as a UI failure.
+    let appAsset='';
+    for (let attempt=0; attempt<14; attempt++) {
+      await page.goto(ORIGIN+'/?smoke='+Date.now(),{waitUntil:'domcontentloaded',timeout:60000});
+      appAsset=await page.locator('script[src^="/app.js"]').first().getAttribute('src');
+      if (appAsset?.includes(RELEASE)) break;
+      if (attempt<13) await page.waitForTimeout(10000);
+    }
+    assert(appAsset?.includes(RELEASE),device+' loaded stale app asset '+appAsset+'; expected '+RELEASE);
 
     await page.waitForFunction(()=>/\/ 176$/.test(document.querySelector('#translation-ratio')?.textContent?.trim()||''),{timeout:45000});
     console.log(device+' dashboard: '+await page.locator('#translation-ratio').innerText());
