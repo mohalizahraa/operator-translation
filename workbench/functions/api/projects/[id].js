@@ -65,7 +65,13 @@ export async function onRequestPatch(context) {
       if(!whole)return json({error:'Whole-book rendered/TOC/publication QA receipt is required before Needs Review.',code:'whole_book_qa_required'},409);
     }
     if(before.status==='completed' && body.status==='published'){
-      return json({error:'Publish Ready requires a separately verified human reviewer attestation tied to the exact final manuscript. This attestation route is not yet configured.',code:'human_review_attestation_required'},409);
+      const qa=await context.env.DB.prepare(`SELECT source_pdf_sha256,google_doc_revision FROM translation_quality_evidence
+        WHERE project_id=? AND from_page=1 AND to_page=? ORDER BY id DESC LIMIT 1`)
+        .bind(id,Number(before.pages||0)).first();
+      const attestation=qa?await context.env.DB.prepare(`SELECT id FROM translation_human_review_attestations
+        WHERE project_id=? AND source_pdf_sha256=? AND google_doc_revision=? ORDER BY id DESC LIMIT 1`)
+        .bind(id,qa.source_pdf_sha256,qa.google_doc_revision).first():null;
+      if(!attestation)return json({error:'Publish Ready requires a reviewer-only credential-backed human attestation tied to this exact post-QA manuscript.',code:'human_review_attestation_required'},409);
     }
   }
   if (body.published === true && (before.status !== 'published' || (body.status !== undefined && body.status !== 'published'))) {
