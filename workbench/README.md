@@ -4,6 +4,10 @@
 
 Internal collaborative work manager for translating Sayyid Kamal al-Haydari's books. This is intentionally separate from the public archive/publication surface.
 
+## Editor access and verifiable QA deployment boundary
+
+[Security and quality activation](SECURITY-AND-QUALITY-ROLLOUT.md) owns the live rollout contract for the shared editor capability, per-book Questions Docs, exact-revision source-coverage QA receipts, and stricter progress/review gates. Current repository code cannot certify that the Cloudflare editor secret is set or that the real manuscript runner is emitting verified evidence. The existing unauthenticated legacy mutation mode must be considered **unprotected** until live API denials are observed; see `GET /api/health` for the deployed `write_protection` and `quality_gate` states. The agent router `AGENTS.md` → `workbench/AGENTS.md` routes through that deployment contract when applicable.
+
 ## Book-processing workflow
 
 [TRANSLATION-WORKFLOW.md](TRANSLATION-WORKFLOW.md) owns the approved project execution plan: prepare once, reuse verified source text, let Mac OCR feed Windows translation in coherent batches, complete each batch's applicable review/formatting/verification, then immediately synchronize and read back its Workbench checkpoint. Keep one writer per final manuscript; finish with whole-book QA. This is a measured starting plan, not a benchmark-proven fastest configuration or a runner-routing change. The scoped [agent instructions](AGENTS.md) route book work through it; the current Operator profiles and this README's progress/status contract remain governing.
