@@ -1,6 +1,6 @@
 {
-  "release_id": "20261009-editorial-workflow-1",
-  "app_version": "20261009-editorial-workflow-1",
+  "release_id": "20261009-integrity-revision-1",
+  "app_version": "20261009-integrity-revision-1",
   "css_version": "20261009-book-titles-right-1",
-  "description": "Per-book translation questions, QA receipts, separate review attestation, and staged editor-key protection"
+  "description": "Live manuscript revision guards, transactional editorial history and per-book integrity report"
 }
