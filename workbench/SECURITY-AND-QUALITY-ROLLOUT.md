@@ -28,12 +28,19 @@ For stronger individual accountability or restricted Google Doc access, use a se
 - A source-damaged page cannot be counted VERIFIED merely by adding a marker. Corrections require coherent source-version reconciliation. Questions/doc decisions must survive restart and an edit must be applied to a specified target revision before it is considered applied.
 - In strict mode, a book cannot reach Publish Ready from Needs Review until a separately verified human-review attestation is implemented; the present transition deliberately blocks instead of impersonating the human reviewer.
 
+## Human review — explicit, distinct authority
+
+- Configure **both** `WORKBENCH_EDITOR_KEY` and a different, equally strong `WORKBENCH_REVIEWER_KEY` as Cloudflare secrets. The reviewer key must never be available to the autonomous translation runner. The keys are separate capabilities, **not proof of a person's real-world identity**; a truly identity-verified workflow would require trustworthy individual authentication.
+- While a book is **Needs Review**, a collaborator selects **Confirm human review**, personally reviews the entire final manuscript, and submits the reviewer-only credential. The request carries `reviewer_name`, `source_pdf_sha256`, and `google_doc_revision` taken from a full-book QA receipt; the server rejects a missing/mismatched receipt or any blocking translation question not yet applied.
+- `POST /api/projects/:id/human-review` records a distinct, revision-bound declaration. `GET` lists attestation metadata; no reviewer secret is logged or stored. The strict Publish Ready transition requires a matching attestation on the latest whole-book QA candidate. An AI cannot legitimately assert that a human read a book, regardless of whether the system records a credential-backed declaration.
+- A later revision of the final manuscript requires new source-aligned QA and another review attestation. This is enforced by comparing manuscript revisions rather than accepting a historical `Needs Review` status.
+
 ## Next integration work
 
 1. Provision the production write secret without exposing it. Confirm protected mutation and stable collaborator access.
 2. Grant the authorized document writer permission to create one Google Doc per book and sync the question ledger; no unattended Google Doc creation is claimed yet.
 3. Have the translation runner emit real, independently checked Arabic source-unit maps and QA receipts at each checkpoint; only then activate strict QA for all affected books.
-4. Implement reviewer-attestation endpoint with trustworthy role/identity proof before enabling strict Publish Ready; exercise stage transitions, correct/incorrect source hashes, stale revisions, concurrent updates, source damage and revoked Doc permissions.
+4. Provision and independently verify the separate human-reviewer credential, then exercise real stage transitions, source hash/revision changes, conflicting questions, concurrent edits and revoked document access. For stronger identity assurance, add verified individual authentication rather than treating shared-key possession as personal identity.
 5. Use actual reviewer-validated Arabic passages and independent model outputs to establish translation-quality calibration, not only illustrative short examples.
 
 **Verification boundary:** CI tests module syntax, safeguards, generated provenance and deterministic preflight logic. Live protection/quality mode requires separate production deployment/readback, credentials, real documents and observed runner behavior.
