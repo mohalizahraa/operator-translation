@@ -71,4 +71,9 @@ const history=core.completionHistory([
 assert(history.baseline===2,'History baseline must reconcile immutable transitions to current translated count.');
 assert(history.dayDeltas['2026-09-05']===-1,'Workflow rewind must remain visible in completion history.');
 
+const {assessTranslationEvidence}=await import('../functions/_translation.js');
+const quality={source_hash:'source-sha',target_revision:'rev1',units:[{id:'u1',source_page:1,target_anchor:'p1',status:'VERIFIED'}],checks:Object.fromEntries(['independent_critic','ambiguity_review','terminology_review','batch_formatting','full_render','native_toc','publication_review','regression'].map(k=>[k,{status:'PASS',target_revision:'rev1',evidence_ref:k}]))};
+assert(assessTranslationEvidence(quality,true).ready,'Complete evidence report should pass preflight.');
+assert(!assessTranslationEvidence({...quality,units:[{...quality.units[0],status:'PARTIAL'}]},true).ready,'Partial source coverage must fail preflight.');
+assert(!assessTranslationEvidence({...quality,checks:{...quality.checks,independent_critic:{status:'PASS',target_revision:'stale',evidence_ref:'critic'}}},true).ready,'Stale critic evidence must fail preflight.');
 console.log('Workbench behavioral invariants: PASS');
