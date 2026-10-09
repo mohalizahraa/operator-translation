@@ -295,12 +295,22 @@ export function assessTranslationEvidence(report, wholeBook=false) {
   if (!text(report?.target_revision)) blockers.push('missing manuscript revision');
   const units=Array.isArray(report?.units)?report.units:[];
   if (!units.length) blockers.push('empty source-unit denominator');
+  const from=Number(report?.from_page), to=Number(report?.to_page), total=Number(report?.source_total_pages);
+  if (!Number.isInteger(from)||from<1||!Number.isInteger(to)||to<from||
+      !Number.isInteger(total)||total<to) blockers.push('invalid declared physical-page range');
+  if (wholeBook && (from!==1||to!==total)) blockers.push('whole-book claim must span every physical source page');
+
   const ids=new Set();
   for (const unit of units) {
     if (!text(unit.id)||ids.has(unit.id)) blockers.push('missing or duplicate source-unit id');
     if (text(unit.id)) ids.add(unit.id);
     if (!Number.isInteger(unit.source_page)||unit.source_page<1) blockers.push('source unit lacks physical page');
     if (!text(unit.target_anchor)||unit.status!=='VERIFIED') blockers.push('source unit not verified against English target');
+  }
+  if(Number.isInteger(from)&&Number.isInteger(to)&&from>0&&to>=from){
+    const pages=new Set(units.filter(u=>Number.isInteger(u.source_page)).map(u=>u.source_page));
+    for(let n=from;n<=to;n++)if(!pages.has(n)) blockers.push('source page '+n+' has no accounted-for unit, including verified blank-page exceptions');
+    if(units.some(u=>u.source_page<from||u.source_page>to))blockers.push('source unit outside declared physical-page range');
   }
   const required=['independent_critic','ambiguity_review','terminology_review','batch_formatting'];
   if (wholeBook) required.push('full_render','native_toc','publication_review','regression');
