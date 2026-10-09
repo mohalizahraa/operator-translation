@@ -19,8 +19,8 @@ Internal collaborative work manager for translating Sayyid Kamal al-Haydari's bo
 ## Product contract
 
 - One shared workspace and database for Zahraa + Mohammed (Brother).
-- No account/login/password UI.
-- The deployed Workbench URL opens the shared workspace directly; there is no private-link/capability-key gate.
+- No per-person account or sign-in flow is required to **read** the shared Workbench. When Cloudflare editor protection is activated, the first edit prompts for a **shared editor capability key**, kept only for that tab session; human manuscript approval requires a **separate reviewer-only key**. This is a deliberately small access-control step, not verified collaborator identity.
+- The deployed Workbench URL opens the workspace directly. An unlisted URL is not an authorization boundary; edit access must not be described as private or protected until Cloudflare secrets and actual denial tests pass.
 - Either collaborator may edit or reassign any project. Assignee is organizational metadata, not an ACL.
 - Device identity is selected as `Zahraa` or `Mohammed` under the explicit **Editing as** control. It is used for mutation/activity attribution **and** to personalize the Dashboard's **My assigned projects** surface; `Both` assignments appear for either collaborator.
 - Board and Timeline share one independent, locally remembered collaboration viewing scope: **Zahraa / Mohammed / Shared**. Individual scopes show that person's assignments plus `Both`; Shared shows Zahraa + Mohammed + `Both` and keeps `Unassigned` work visibly distinct rather than silently dropping it. Because the catalogue can contain a large Unassigned backlog, Timeline exposes it as a counted disclosure collapsed by default; Board shows it directly in status columns; a matching search (or an otherwise empty assigned scope) automatically opens it so relevant Unassigned results never appear hidden. Changing viewing scope never changes actor identity or assignment.
