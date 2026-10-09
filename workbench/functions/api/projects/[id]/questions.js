@@ -1,5 +1,5 @@
 import {actorFromRequest,ensureCatalog,json,recordActivity,normalizeGoogleDocUrl,verifyGoogleDocLinkAccess} from '../../../_lib.js';
-import {requireEditorCapability} from '../../../_write_auth.js';
+import {requireEditorCapability,requireHumanReviewerCapability} from '../../../_write_auth.js';
 
 const idFrom=context=>{const n=Number(context.params.id);return Number.isInteger(n)&&n>0?n:null;};
 const phrase=(v,max=4000)=>typeof v==='string'?v.trim().slice(0,max):'';
@@ -74,6 +74,12 @@ export async function onRequestPatch(context){
   }
   const key=phrase(body.question_key,200);
   if(!validKey(key)||!statuses.has(body.status))return json({error:'Provide valid question key and status.'},400);
+  // The automated editor may capture/apply a decision, but cannot invent the
+  // human review answer. A reviewer-only secret is required for a judgment.
+  if(body.status==='answered'||body.status==='unresolved'){
+    const reviewer=await requireHumanReviewerCapability(context);
+    if(!reviewer.ok)return json({error:reviewer.error},reviewer.status);
+  }
   const old=await context.env.DB.prepare('SELECT * FROM translation_questions WHERE project_id=? AND question_key=?').bind(id,key).first();
   if(!old)return json({error:'Question not found.'},404);
   const answer=phrase(body.reviewer_answer,10000);
@@ -82,6 +88,9 @@ export async function onRequestPatch(context){
   if(body.status==='applied'&&(!old.reviewer_answer&&!answer||!applied))return json({error:'Applied questions require the prior reviewer decision and a target revision anchor.'},400);
   if(old.status==='applied'&&body.status!=='applied')return json({error:'Applied decisions are immutable; capture a new question/revision to supersede.'},409);
   if(body.status==='applied'&&old.status==='unresolved')return json({error:'A question must be answered before marking it applied.'},409);
+  if(body.status==='applied' && answer && answer!==old.reviewer_answer){
+    return json({error:'The automated manuscript writer cannot replace the human reviewer answer during application.'},409);
+  }
   const actor=actorFromRequest(context.request);
   const updated=await context.env.DB.prepare(`UPDATE translation_questions SET
       status=?, reviewer_answer=CASE WHEN ?<>'' THEN ? ELSE reviewer_answer END,
