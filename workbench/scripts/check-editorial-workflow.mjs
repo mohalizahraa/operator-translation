@@ -5,6 +5,8 @@ const file=p=>fs.readFileSync(new URL(p,import.meta.url),'utf8');
 const schema=file('../schema.sql'),migration=file('../functions/_lib.js');
 const questions=file('../functions/api/projects/[id]/questions.js');
 const humanReview=file('../functions/api/projects/[id]/human-review.js');
+const integrity=file('../functions/api/projects/[id]/integrity.js');
+const translator=file('../functions/_translation.js');
 const quality=file('../functions/api/projects/[id]/quality.js');
 const progress=file('../functions/api/projects/[id]/progress.js');
 const project=file('../functions/api/projects/[id].js');
@@ -42,4 +44,14 @@ assert(app.includes("sessionStorage.getItem('workbench-editor-key')"),'Editor ke
 assert(middleware.includes('WORKBENCH_EDITOR_KEY'),'Security policy must cover API mutations');
 assert(health.includes('UNPROTECTED_LEGACY')&&health.includes('LEGACY_MARKER_ONLY'),'Do not claim security and QA are enabled by mere code presence');
 assert(revision.includes('FROM activity'),'Question/QA writes must be visible through activity revision');
+assert(humanReview.includes('verifyLiveEnglishDocumentRevision'),'Human review requires live Google Doc revision check');
+assert(project.includes('verifyLiveEnglishDocumentRevision'),'Publish Ready requires live Google Doc revision check');
+assert(translator.includes("stale_manuscript_revision")&&translator.includes("unverifiable_revision"),'Stale or unverifiable manuscript must fail closed');
+for(const route of [questions,quality,humanReview]){
+  assert(route.includes('context.env.DB.batch(['),'Editorial mutation and history must be transactional');
+}
+assert(questions.includes('AND status=?'),'Question state updates must be compare-and-swap');
+assert(integrity.includes('blocking_open')&&integrity.includes('verifyLiveEnglishDocumentRevision'),'Book integrity must show blocking questions and live stale manuscript checks');
+assert(app.includes('data-view-integrity'),'Integrity UI must expose book-level readback');
+
 console.log('Workbench editorial workflow routing and quality/security contracts: PASS (static checks; production flags not proven).');
