@@ -286,6 +286,17 @@ function questionsDocLinkMarkup(p) {
     ? `<button class="mini-link secondary-link" type="button" data-open-questions="${p.id}">Questions</button>`
     : `<button class="mini-link secondary-link" type="button" data-link-questions="${p.id}">Questions · link</button>`;
 }
+// Integrity dialog lifetime is independent of repeated project-card rendering.
+document.getElementById('close-integrity-dialog')?.addEventListener('click',()=>{
+  document.getElementById('integrity-dialog')?.close();
+});
+document.getElementById('dismiss-integrity-dialog')?.addEventListener('click',()=>{
+  document.getElementById('integrity-dialog')?.close();
+});
+
+function integrityMarkup(p) {
+  return `<button class="mini-link secondary-link" type="button" data-view-integrity="${p.id}">Integrity</button>`;
+}
 function humanReviewMarkup(p) {
   return p.status==='completed'
     ? `<button class="mini-link secondary-link" type="button" data-human-review="${p.id}">Confirm human review</button>`
@@ -458,6 +469,7 @@ function projectMarkup(p, compact=false, selectable=false) {
         ${googleDocLinkMarkup(p)}
         ${questionsDocLinkMarkup(p)}
         ${humanReviewMarkup(p)}
+        ${integrityMarkup(p)}
       </div>
       ${quickControlsMarkup(p,true)}
     </article>`;
@@ -485,6 +497,7 @@ function projectMarkup(p, compact=false, selectable=false) {
         ${googleDocLinkMarkup(p)}
         ${questionsDocLinkMarkup(p)}
         ${humanReviewMarkup(p)}
+        ${integrityMarkup(p)}
       </div>
     </div>
     <div class="project-side">
@@ -550,6 +563,32 @@ async function startWorkOnBook(id) {
 }
 
 function bindQuickActions(root=document) {
+  root.querySelectorAll('[data-view-integrity]').forEach(button=>button.addEventListener('click',async event=>{
+    event.stopPropagation();
+    const id=Number(button.dataset.viewIntegrity);
+    const dialog=$('integrity-dialog');
+    $('integrity-dialog-title').textContent='Book integrity';
+    $('integrity-dialog-body').textContent='Checking source, editorial and live manuscript evidence…';
+    dialog.showModal();
+    try{
+      const r=await api(`/api/projects/${id}/integrity?verify_live=1`);
+      $('integrity-dialog-title').textContent=r.book_title||'Book integrity';
+      const line=(label,value)=>`<div class="activity-item"><strong>${escapeHtml(label)}</strong><span>${escapeHtml(String(value))}</span></div>`;
+      const warnings=(r.warnings||[]).map(item=>`<li>${escapeHtml(item)}</li>`).join('');
+      $('integrity-dialog-body').innerHTML=[
+        line('Arabic PDF verified',r.source?.page_count_verified?'Yes':'Not verified'),
+        line('Recorded source pages',`${r.source?.current_checkpoint_pages||0} / ${r.source?.physical_pages||'?'}`),
+        line('QA evidence coverage',`${r.evidence?.covered_pages||0} / ${r.evidence?.total_pages||'?'} pages (submitted proof only)`),
+        line('Whole-book QA',r.evidence?.whole_book_receipt?'Receipt exists':'Not recorded'),
+        line('Unresolved questions',r.questions?.unresolved??'Unavailable'),
+        line('Blocking questions',r.questions?.blocking_open??'Unavailable'),
+        line('Human review',r.review?.status||'Not checked'),
+        line('Workbench write protection',r.deployment?.editor_protection||'Unknown'),
+        line('Strict QA gate',r.deployment?.qa_gate||'Unknown'),
+        warnings?`<div class="panel"><strong>Outstanding issues</strong><ul>${warnings}</ul></div>`:'<p>No additional issues flagged by these metadata checks. This is not Arabic translation certification.</p>'
+      ].join('');
+    }catch(error){$('integrity-dialog-body').textContent=error.message||'Integrity report unavailable.';}
+  }));
   root.querySelectorAll('[data-human-review]').forEach(button=>button.addEventListener('click',async event=>{
     event.stopPropagation();
     const id=Number(button.dataset.humanReview);
@@ -865,6 +904,7 @@ function assignedProjectMarkup(p) {
         ${googleDocLinkMarkup(p)}
         ${questionsDocLinkMarkup(p)}
         ${humanReviewMarkup(p)}
+        ${integrityMarkup(p)}
         ${p.pdf_available ? `<a class="mini-link pdf" href="/api/pdf/${p.id}" target="_blank" rel="noopener">Arabic PDF</a>` : ''}
       </div>
     </div>
