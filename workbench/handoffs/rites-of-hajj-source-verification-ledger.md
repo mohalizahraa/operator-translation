@@ -2,9 +2,9 @@
 
 Project 11, source 298 pages; SHA-256: 5e0a7395a4a439e493d647d95a2d58680880b27bc5e5043a16392c9b992c3c04.
 
-Consecutive source-certified: pages 1–60. Title and bibliographical front matter: 1–2. Blank PDF pages: 3–4. Handwritten Arabic acknowledgment compared to English text: 5. Blank PDF page: 6.
+Consecutive source-certified: pages 1–70. Title and bibliographical front matter: 1–2. Blank PDF pages: 3–4. Handwritten Arabic acknowledgment compared to English text: 5. Blank PDF page: 6.
 
-Resume at physical page 61. English draft coverage of 399 numbered rulings and 13 appendix units is not proof of translation verification. Arabic source witnesses for physical pages 3–298 are in workbench/handoffs/rites-of-hajj-source-physical-*-witness.txt. Workbench source counter must count only verified original pages. Full Arabic-English audit, all devotional texts, footnotes, table of contents, and rendered layout remain open.
+Resume at physical page 71. English draft coverage of 399 numbered rulings and 13 appendix units is not proof of translation verification. Arabic source witnesses for physical pages 3–298 are in workbench/handoffs/rites-of-hajj-source-physical-*-witness.txt. Workbench source counter must count only verified original pages. Full Arabic-English audit, all devotional texts, footnotes, table of contents, and rendered layout remain open.
 
 ## Physical pages 7–18 checked against English Google Doc
 
@@ -12,7 +12,7 @@ Resume at physical page 61. English draft coverage of 399 numbered rulings and 1
 - Page 12: Corrected a source-fidelity error in the English TOC: the entry about Hajj on behalf of a living person had been incorrectly rendered as a person acting on their own behalf. Also removed an unsupported 'Another' before Imam Ali ibn al-Husayn's Arafah supplication.
 - Page 14: blank source page, verified.
 - Pages 15–18: full Arabic preface text (invocation, method, editorial choices, practical recommendations, omission of obsolete cases, newly arising questions, concluding prayer, author/date) checked against English preface paragraphs 138–157. No omitted preface paragraph identified in this batch.
-- Physical pages 61–298 still unverified. No publication-ready claim; prayers, notes, TOC, and rendered QA remain open.
+- Physical pages 71–298 still unverified. No publication-ready claim; prayers, notes, TOC, and rendered QA remain open.
 
 ## Physical pages 19–30 checked against the authoritative PDF
 
@@ -55,6 +55,13 @@ Resume at physical page 61. English draft coverage of 399 numbered rulings and 1
 - Physical pp. 55–56: sponsored Hajj rulings 61–67 compared against the Arabic. Corrected ruling 61: accepting sponsorship establishes ability only if **not incompatible with the recipient's social/religious standing**, whereas the former English wrongly said standing made no difference.
 - Physical pp. 57–58: original sponsored-Hajj rulings 67–72 compared against English. Corrected ruling 69's post-iḥrām withdrawal rule: sponsor owes minimum costs for completing pilgrimage even if sponsor refuses, not that the recipient must temporarily advance personal money.
 - No new remaining content omissions identified in the 61–68, 70–72 sequence; all four corrected legal passages were read back from the live English Google Doc, and marker advanced to `⟦WBPROGRESS:11:60:298⟧`. D1 site sync requires separate readback.
+
+## Physical pages 61–70 checked (2026-10-08)
+
+- Physical pp. 61–65, the Ḥajj bequest section rulings 73–91, source-collated against aligned PDFKit+image-OCR and the live English manuscript. Corrected major reversals in ruling 77 (money belonging to deceased and held by another must be turned over to heirs), 81 (admitting heir must initially pay **whole** pilgrimage expense if the inherited share can cover it, then seek recovery), 83 (negligent executor must pay personally, and independent heir uncertainty about whether mandatory Ḥajj was performed), and 87 (expenses can be reclaimed from heirs' already distributed shares). Restored original directions concerning testamentary instructions in ruling 75 and underage/mentally incapacitated heirs in ruling 78.
+- Physical pp. 66 and 68 blank in PDFKit and image-OCR. Page 67: chapter heading for ʿUmrah and its kinds present.
+- Physical pp. 69–70: ʿUmrah introduction and rulings 92–97 through the starting shared rite list compared. Restored ruling 93's missing *affirmative* obligation for standalone ʿUmrah when able even without ability for Ḥajj, subject to the special combined Ḥajj al-tamattuʿ exception. Corrected ruling 94 to say independent ʿUmrah **is obligatory** for the stated ifrād/qirān deputy scenario, not merely “may be obligatory.”
+- All repaired source sections were read back from the original linked English manuscript. The verified document marker advanced to `⟦WBPROGRESS:11:70:298⟧`; website D1 still requires independent checkpoint readback. Next source physical page: 71.
 
 ## Nonconsecutive fidelity restorations elsewhere in the manuscript
 
