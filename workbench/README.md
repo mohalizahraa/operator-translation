@@ -12,6 +12,10 @@ Internal collaborative work manager for translating Sayyid Kamal al-Haydari's bo
 
 [TRANSLATION-WORKFLOW.md](TRANSLATION-WORKFLOW.md) owns the approved project execution plan: prepare once, reuse verified source text, let Mac OCR feed Windows translation in coherent batches, complete each batch's applicable review/formatting/verification, then immediately synchronize and read back its Workbench checkpoint. Keep one writer per final manuscript; finish with whole-book QA. This is a measured starting plan, not a benchmark-proven fastest configuration or a runner-routing change. The scoped [agent instructions](AGENTS.md) route book work through it; the current Operator profiles and this README's progress/status contract remain governing.
 
+## Engine-first implementation (backend staging only)
+
+The initial translation engine code is at [engine/README.md](engine/README.md), with a source-bound, resumable/idempotent batch-staging API and isolated tests. It is **not** a finished translator, source/OCR proof system, manuscript writer, or Workbench progress-publisher. No browser or native interface format has been selected. Model integration, verified PDF-to-unit alignment, independent real-source critique, native formatting, target readback and production QA/checkpoints remain deliberately open.
+
 ## Windows GPU translation runner safety
 
 **Automatic one-at-a-time GPU rule:** Mohammed's two Windows self-hosted translation runners share one RTX 4070. Every GPU-heavy OCR/model command must use the machine-wide exclusive PowerShell lock described in [GPU scheduling](runner/GPU-SCHEDULING.md). The scoped [Codex instructions](AGENTS.md) make this rule mandatory during Windows translation work. The Windows acceptance suite checks future GPU workflow definitions and uses two child processes to verify that jobs cannot overlap. Lightweight CPU-only Workbench jobs may run in parallel. Mac-only PDFKit/Vision jobs remain on macOS. Do not bypass the guard to make benchmarks look faster.
