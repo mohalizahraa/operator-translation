@@ -146,6 +146,9 @@ export async function stageTranslationBatch({ manifest, pdfPath, outputDir, tran
     if (prior !== body) fail('existing staged artifact differs or is incomplete');
     reused = true;
   }
+  const stagedInfo = await stat(path);
+  if (!stagedInfo.isFile() || (stagedInfo.mode & 0o077))
+    fail('staged artifact must be a private regular file (0600)');
   const readback = await readFile(path, 'utf8');
   if (createHash('sha256').update(readback).digest('hex') !== digest)
     fail('staged artifact readback hash mismatch');
