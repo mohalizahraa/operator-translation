@@ -45,6 +45,12 @@ If any applicable gate is open, failed, untested, or blocked, do not call the ed
 **Per-batch independent critique (2026-10-09):** A separate Arabic-visible comparison pass must challenge omissions, doctrinal shifts, negation, numbers, pronouns, source questions and notes; record its source-unit coverage, findings and exact target revision. Watchdog anomalies prompt investigation, not automatic error claims. Source maps, scoped terminology decisions, questions, formatting proof and regression outcomes must remain attributable to the tested manuscript revision. These gates supplement rather than replace the edition-wide rules below.
 
 
+### 8.3 Calibrate uncertainty detection independently of question volume
+
+Maintain a representative, source-verified **challenge set** for the active scholarly Arabic-to-English profile: polysemous technical terms across legal/theological contexts, source/OCR damage, hard pronoun/negation/number dependencies, quotations/footnotes and ordinary passages with no true ambiguity. Each case records the exact source passage, context, expected issue category and reviewer-vetted disposition; include negative controls so indiscriminate questioning fails as well as silent omission.
+
+For each material translator prompt/model/profile change, have the candidate translator analyze these cases *without seeing the answers*. Compare its **issue identification recall and precision, fidelity/source coverage, correct abstention on illegible text, and useful question quality** against a frozen earlier baseline. Track misses and false positives by category and passage, not only aggregate totals or number of questions raised. A deterministic scoring harness and sample fixtures establish evaluation plumbing only; **they do not establish real translator quality** until the actual engine's outputs have been scored against reviewer-validated Arabic source cases. Prevent the same model's self-graded output from being mistaken for independent human calibration.
+
 ## 9. Use exact work-state language
 
 Distinguish at least:

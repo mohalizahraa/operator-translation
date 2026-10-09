@@ -119,6 +119,14 @@ A bilingual presentation is a separate edition mode. Do not infer bilingual rete
 
 Machine translation or another bulk translation engine may be used as a drafting aid only when the resulting text remains traceable to the correct source unit and receives the same terminology, fidelity, and publication-QA review as any other draft. It is not semantic authority and does not relax the English-edition acceptance gates.
 
+### 4.1 Translation decisions as accumulating evidence, not automatic glossary canon
+
+Each source-verified correction, reviewer-resolved Arabic ambiguity, rejected rendering, context-specific interpretation and terminology decision may sharpen later translation work. Preserve a **book-scoped, source-anchored decision** with exact Arabic, competing English renderings, semantic scope, rationale/evidence, reviewer attribution, target manuscript revision, and applicability limits. Compare it with earlier decisions before reuse. Promote a term or rule to the shared house glossary only when its broader generality is warranted; retain context-dependent alternatives where distinct Arabic senses or disciplines legitimately diverge.
+
+When later books provide stronger evidence, reconcile old rule vs new evidence vs scoped synthesis; retest only affected target passages and representative historical examples. Preserve meaningful decision history rather than silently rewriting older editions or applying every past choice universally. A growing archive of questions or preferred phrases is **not by itself** a quality improvement. A sequence of zero captured ambiguities is a challenge-review trigger, not proof either of perfection or of neglect.
+
+For each processed source-page batch, perform a genuine ambiguity-discovery pass; record open questions with stable IDs, exact quotations/anchors and proposed provisional wording for the per-book Questions Google Doc and durable Workbench ledger. Do not interrupt for nonblocking questions, invent ambiguity to meet a quota, or mark source-damaged passages verified. Questions and answered decisions remain distinct from machine-authored suggestions and actual human judgment.
+
 ## Translation/editorial overlays — versioned and scope-bound
 
 Recurring user/project conventions should be preserved as **named, versioned overlays** instead of being silently promoted into universal Arabic-translation law. An overlay may specialize terminology, honorifics, quotation characters, transliteration density, explanatory-note policy, or prose style; it may not weaken source fidelity, completeness, provenance, or release evidence.

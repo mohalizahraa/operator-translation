@@ -303,6 +303,16 @@ Use trees/graphs/sequences/tables only when their structure reflects the actual 
 
 For persistent documentation/corpus reconciliation, chronology, source authority, reconstruction tests, and semantic knowledge compression, load `03-KNOWLEDGE-AND-DOCS.md` and `profiles/reconciliation.md` rather than duplicating those procedures here.
 
+### 6.1 Evidence compounding — refine the model, not the archive
+
+**Standing founder principle (2026-10-09):** Later, materially relevant information can expose relationships, distinctions, counterexamples, changing assumptions, and stronger abstractions that an earlier DMSC pass could not yet earn. Treat a previously coherent synthesis as a **versioned, revisable best-supported model**, not a final compression immune to newly available evidence.
+
+For each material new source, correction, application, or decision: identify exactly which propositions/dependencies it bears on; compare it against the strongest existing model and surviving historical evidence; test whether it **supports, qualifies, separates, contradicts, generalizes, or leaves open** the prior understanding; then update only the affected canonical owner and downstream conclusions. Preserve significant old/new/synthesis lineage, counterevidence and reconstruction-critical examples. Re-run the affected DMSC cone to the floor; do not reflexively reopen unaffected closed work.
+
+**More evidence increases potential insight, not automatic correctness.** Duplicated, low-quality, derivative, or irrelevant volume cannot be counted as independent corroboration or used to manufacture novelty. Retain/retrieve only evidence whose provenance and diagnostic value justify its cost; aggressively consolidate genuine redundancy without flattening significant edge cases. Prefer increased explanatory/predictive/reconstruction quality to raw document length, number of categories, or frequency of re-summarization.
+
+The stopping rule remains saturation under the **current** evidence and declared scope. Material new evidence may earn a new pass later; it does not retroactively make the earlier bounded floor dishonest, nor imply that endless accumulation is always worthwhile.
+
 ## 7. Recurse to the floor; stop at saturation
 
 > **DMSC means: recurse until you hit the floor.**
