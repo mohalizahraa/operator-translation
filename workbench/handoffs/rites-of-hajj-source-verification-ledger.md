@@ -2,9 +2,9 @@
 
 Project 11, source 298 pages; SHA-256: 5e0a7395a4a439e493d647d95a2d58680880b27bc5e5043a16392c9b992c3c04.
 
-Consecutive source-certified: pages 1–210. Title and bibliographical front matter: 1–2. Blank PDF pages: 3–4. Handwritten Arabic acknowledgment compared to English text: 5. Blank PDF page: 6.
+Consecutive source-certified: pages 1–230. Title and bibliographical front matter: 1–2. Blank PDF pages: 3–4. Handwritten Arabic acknowledgment compared to English text: 5. Blank PDF page: 6.
 
-Resume at physical page 211. English draft coverage of 399 numbered rulings and 13 appendix units is not proof of translation verification. Arabic source witnesses for physical pages 3–298 are in workbench/handoffs/rites-of-hajj-source-physical-*-witness.txt. Workbench source counter must count only verified original pages. Full Arabic-English audit, all devotional texts, footnotes, table of contents, and rendered layout remain open.
+Resume at physical page 231. English draft coverage of 399 numbered rulings and 13 appendix units is not proof of translation verification. Arabic source witnesses for physical pages 3–298 are in workbench/handoffs/rites-of-hajj-source-physical-*-witness.txt. Workbench source counter must count only verified original pages. Full Arabic-English audit, all devotional texts, footnotes, table of contents, and rendered layout remain open.
 
 ## Physical pages 7–18 checked against English Google Doc
 
@@ -12,7 +12,7 @@ Resume at physical page 211. English draft coverage of 399 numbered rulings and 
 - Page 12: Corrected a source-fidelity error in the English TOC: the entry about Hajj on behalf of a living person had been incorrectly rendered as a person acting on their own behalf. Also removed an unsupported 'Another' before Imam Ali ibn al-Husayn's Arafah supplication.
 - Page 14: blank source page, verified.
 - Pages 15–18: full Arabic preface text (invocation, method, editorial choices, practical recommendations, omission of obsolete cases, newly arising questions, concluding prayer, author/date) checked against English preface paragraphs 138–157. No omitted preface paragraph identified in this batch.
-- Physical pages 211–298 still unverified. No publication-ready claim; prayers, notes, TOC, and rendered QA remain open.
+- Physical pages 231–298 still unverified. No publication-ready claim; prayers, notes, TOC, and rendered QA remain open.
 
 ## Physical pages 19–30 checked against the authoritative PDF
 
@@ -131,6 +131,14 @@ Resume at physical page 211. English draft coverage of 399 numbered rulings and 
 - Physical p. 203 Chapter Nine title; p. 204 blank. Physical pp. 205–207: full *al-maṣdūd* scenarios in ruling 367 and 368–369, exact nesting of obstructed sites and rites vs deputation compared. Replaced loose and uncertain prior English summary with source-complete distinct alternatives for blocked Masjid rites and Minā rites, including three branches for inability to obtain deputies for stoning and slaughter and the following-year residual obligations. Removed the source-check-required placeholder because this source unit was actually checked; formatting/secondary proofreading remains open.
 - Physical pp. 208–209: illness-blocked *al-maḥṣūr* cases in ruling 367 and rulings 370–372 checked; restored distinction that illness preventing **ʿUmrat al-tamattuʿ** allows release from women restriction, unlike illness preventing independent ʿUmrah or Ḥajj; source's **fourth case** of illness preventing both standings and conversion to independent ʿUmrah was previously omitted and has been added in full.
 - Physical p. 210 blank as witnessed by both PDFKit and image OCR. Eight source passages plus removal of prior unresolved-source warning read back in live Doc. Physical source marker now `⟦WBPROGRESS:11:210:298⟧`; D1 sync and edition formatting remain separate open acceptance gates. Next page 211.
+
+## Physical pages 211–230 checked (2026-10-08)
+
+- Physical p. 211 Chapter Ten title; p. 212 blank. Physical pp. 213–222: all deputation law and contract rulings 373–395 checked against Arabic; corrected ruling 381's strict requirement that a living, still-capable pilgrim go **personally with another's assistance**, rather than send a deputy; corrected rule 387's **loss of fee** when hired deputy fails to perform the mandatory following-year Ḥajj after pre-Mashʿar intercourse, and 393's omitted permission to hire **two deputies for one obligatory Ḥajj with rajāʾ intention**. Rule 394 now accurately distinguishes recommended multiple delegations without misrepresenting one obligatory Ḥajj as replacing several. Source spans and fee differences for deputy's death and ifrād conversion compared.
+- Physical p. 223 Chapter Eleven title; p. 224 blank. Physical p. 225: ruling 396's **exact count and division of ten daily/nightly recommended ṭawāfs (3+3+2+2)** restored, alongside Zamzam supplication; old duplicated abstract bullet list removed.
+- Physical pp. 225–227: source-specific complete ziyārah texts of Khadījah al-Kubrā, Abū Ṭālib, ʿAbd al-Muṭṭalib and Āminah bint Wahb checked against original images. Old English had mistakenly inserted a lengthy alternative (non-source) Khadījah recension before the authentic shorter source version and invented several non-source phrases in ʿAbd al-Muṭṭalib's visitation. Recovered exact author-printed Khadījah recital and reconstructed the full **authentic ʿAbd al-Muṭṭalib source text**, removing redundant fabricated alternative lines, non-source translation body paragraphs and four misleading parallel-witness editorial tags from the publication text. Earlier prior witness comparisons preserved by Git/Docs history; the published edition should include only the actual source.
+- Physical pp. 228–230: Ḥajj conclusion recommendations for Medina, primary quoted narrations, al-Baqīʿ, Fāṭimah's grave, Ghadīr, Uḥud, Qubāʾ and other landmarks collated. Old English had only summarized the source's explicit Prophetic sayings and Imam ʿAlī's directions; restored their actual **quoted English wording** and named source references. Removed obsolete note asking to check original pp. 228–230.
+- Native footnoting of embedded Qurʾānic quotations and full rendered typography still open. Google Doc source repairs were read back. Verified source marker advanced to `⟦WBPROGRESS:11:230:298⟧`; D1 site sync/readback separately required. Physical p. 231 resumes long source appendix supplications. **Original pages 231–298 remain source-unverified and include long prayers.**
 
 ## Nonconsecutive fidelity restorations elsewhere in the manuscript
 
