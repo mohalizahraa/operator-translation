@@ -71,6 +71,19 @@ export async function onRequestPatch(context) {
     return json({ error: 'google_doc_revision is required so the checkpoint is tied to an exact verified target state (native Docs revision or public-export-sha256 identity).' }, 400);
   }
 
+  // Strict acceptance is opt-in until the editor key and end-to-end QA writer
+  // are provisioned. A bare WBPROGRESS marker never satisfies this gate.
+  const strictQa=context.env?.WORKBENCH_REQUIRE_QA_EVIDENCE==='1';
+  let qaReceipt=null;
+  if(strictQa && translatedPages>expectedPrevious){
+    qaReceipt=await context.env.DB.prepare(`SELECT id FROM translation_quality_evidence
+      WHERE project_id=? AND from_page=? AND to_page=? AND source_pdf_sha256=? AND google_doc_revision=?`)
+      .bind(id,expectedPrevious+1,translatedPages,sourcePdfSha256,googleDocRevision).first();
+    if(!qaReceipt){
+      return json({error:'Translation quality receipt required for this exact source-page range, PDF hash and manuscript revision. A progress marker alone is insufficient.',code:'qa_receipt_required'},409);
+    }
+  }
+
   const latest = await context.env.DB.prepare(
     'SELECT source_pdf_sha256 FROM translation_progress_checkpoints WHERE project_id = ? ORDER BY id DESC LIMIT 1'
   ).bind(id).first();
@@ -155,5 +168,5 @@ export async function onRequestPatch(context) {
   ).bind(id, now).first();
 
   await syncTranslationFocusForProject(context.env.DB, after, actor);
-  return json({ project: normalizeProject(after), checkpoint });
+  return json({ project: normalizeProject(after), checkpoint, qa_preflight_receipt_id:qaReceipt?.id||null, qa_gate_enforced:strictQa });
 }
