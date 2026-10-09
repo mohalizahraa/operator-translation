@@ -19,6 +19,8 @@ for(const owner of [schema,migration]){
 }
 assert(questions.includes('requireEditorCapability'),'Questions writes must be authorized');
 assert(questions.includes('question_key'),'Questions require stable idempotency keys');
+assert(questions.includes('requireHumanReviewerCapability'),'Question answers must be reviewer-only, not automatically forged by editor');
+assert(questions.includes('The automated manuscript writer cannot replace the human reviewer answer'),'Applying questions cannot rewrite reviewer decisions');
 assert(questions.includes('translation_question_events'),'Questions preserve decision history');
 assert(questions.includes('recordActivity'),'Questions must advance shared revision token');
 assert(quality.includes('assessTranslationEvidence'),'QA receipts require deterministic preflight');
