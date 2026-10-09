@@ -1,0 +1,114 @@
+{
+  "schema": "translator-ambiguity-calibration-v1",
+  "status": "illustrative seed fixtures; not human-validated research gold",
+  "privacy": "artificial short examples; no copyrighted source content",
+  "scoring_policy": "tooling smoke test only until a human verifies canonical passages and baseline",
+  "cases": [
+    {
+      "id": "hajj-tamattu",
+      "arabic": "حج التمتع من أقسام الحج.",
+      "context": "A manual describing the classifications of pilgrimage rites.",
+      "expected_flags": [
+        "technical_polysemy"
+      ],
+      "ask_reviewer": false,
+      "block_source": false,
+      "expected_focus": "tamattu here refers to the Hajj pilgrimage category, not temporary marriage"
+    },
+    {
+      "id": "marriage-mutaa",
+      "arabic": "وقع البحث في حكم نكاح المتعة.",
+      "context": "A discussion of marriage jurisprudence, not pilgrimage.",
+      "expected_flags": [
+        "technical_polysemy"
+      ],
+      "ask_reviewer": false,
+      "block_source": false,
+      "expected_focus": "mutʿah here refers to temporary marriage, not Hajj"
+    },
+    {
+      "id": "forged-hadith",
+      "arabic": "لا يجوز الاعتماد على الأحاديث الموضوعة.",
+      "context": "Hadith authentication and fabricated reports.",
+      "expected_flags": [
+        "technical_polysemy"
+      ],
+      "ask_reviewer": false,
+      "block_source": false,
+      "expected_focus": "mawḍūʿa means fabricated/forged reports"
+    },
+    {
+      "id": "hadith-topics",
+      "arabic": "تتعدد موضوعات علم الحديث.",
+      "context": "Survey of subject areas in hadith studies.",
+      "expected_flags": [
+        "technical_polysemy"
+      ],
+      "ask_reviewer": false,
+      "block_source": false,
+      "expected_focus": "mawḍūʿāt here means topics, not forged hadith"
+    },
+    {
+      "id": "pronoun-uncertainty",
+      "arabic": "قال زيد لعمرو إنه أخطأ.",
+      "context": "No preceding sentence clarifies whether Zayd or Amr is the one said to have erred.",
+      "expected_flags": [
+        "referent_ambiguity"
+      ],
+      "ask_reviewer": true,
+      "block_source": false,
+      "expected_focus": "identify uncertainty about the antecedent rather than assigning it without evidence"
+    },
+    {
+      "id": "negation-scope",
+      "arabic": "عدم ثبوت الدليل لا يدل على ثبوت العدم.",
+      "context": "Epistemological argument distinguishing lack of evidence from evidence of absence.",
+      "expected_flags": [
+        "logical_scope"
+      ],
+      "ask_reviewer": false,
+      "block_source": false,
+      "expected_focus": "preserve both negations and direction of inference"
+    },
+    {
+      "id": "damaged-source",
+      "arabic": "إن الحكم [نص غير مقروء] في هذا الموضع.",
+      "context": "The bracketed region represents visibly illegible source text; no verified same-edition witness is available.",
+      "expected_flags": [
+        "source_damage"
+      ],
+      "ask_reviewer": true,
+      "block_source": true,
+      "expected_focus": "stop source-verified progress, seek authoritative witness; never fill damaged words by fluency"
+    },
+    {
+      "id": "honorific-attribution",
+      "arabic": "قال الإمام ثم نقل الراوي النص عنه.",
+      "context": "The sentence is a paraphrase with attribution, not a verbatim matn citation.",
+      "expected_flags": [],
+      "ask_reviewer": false,
+      "block_source": false,
+      "expected_focus": "no fabricated ambiguity; preserve attributed speech correctly"
+    },
+    {
+      "id": "plain-control",
+      "arabic": "يتناول هذا الفصل المبادئ الأساسية.",
+      "context": "A clear opening line of an academic book.",
+      "expected_flags": [],
+      "ask_reviewer": false,
+      "block_source": false,
+      "expected_focus": "no forced question for an unambiguous statement"
+    },
+    {
+      "id": "fiqh-aam",
+      "arabic": "بحث الأصوليون دلالة العام على أفراده.",
+      "context": "Uṣūl al-fiqh discussion of general expressions and their members.",
+      "expected_flags": [
+        "technical_polysemy"
+      ],
+      "ask_reviewer": false,
+      "block_source": false,
+      "expected_focus": "al-ʿāmm denotes a general expression/term here, not a year"
+    }
+  ]
+}
