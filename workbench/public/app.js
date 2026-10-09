@@ -286,6 +286,11 @@ function questionsDocLinkMarkup(p) {
     ? `<button class="mini-link secondary-link" type="button" data-open-questions="${p.id}">Questions</button>`
     : `<button class="mini-link secondary-link" type="button" data-link-questions="${p.id}">Questions · link</button>`;
 }
+function humanReviewMarkup(p) {
+  return p.status==='completed'
+    ? `<button class="mini-link secondary-link" type="button" data-human-review="${p.id}">Confirm human review</button>`
+    : '';
+}
 async function setProjectDeadline(id, value) {
   const project=state.projects.find(p=>p.id===id);
   const current=project?.due_date || '';
@@ -452,6 +457,7 @@ function projectMarkup(p, compact=false, selectable=false) {
         ${p.pdf_available ? `<a class="mini-link pdf" href="/api/pdf/${p.id}" target="_blank" rel="noopener">Arabic PDF</a>` : ''}
         ${googleDocLinkMarkup(p)}
         ${questionsDocLinkMarkup(p)}
+        ${humanReviewMarkup(p)}
       </div>
       ${quickControlsMarkup(p,true)}
     </article>`;
@@ -478,6 +484,7 @@ function projectMarkup(p, compact=false, selectable=false) {
         ${p.pdf_available ? `<a class="mini-link pdf" href="/api/pdf/${p.id}" target="_blank" rel="noopener">Arabic PDF</a>` : (p.pdf_missing ? '<span class="pill pdf-missing">PDF missing</span>' : '<span class="pill">PDF checking…</span>')}
         ${googleDocLinkMarkup(p)}
         ${questionsDocLinkMarkup(p)}
+        ${humanReviewMarkup(p)}
       </div>
     </div>
     <div class="project-side">
@@ -543,6 +550,30 @@ async function startWorkOnBook(id) {
 }
 
 function bindQuickActions(root=document) {
+  root.querySelectorAll('[data-human-review]').forEach(button=>button.addEventListener('click',async event=>{
+    event.stopPropagation();
+    const id=Number(button.dataset.humanReview);
+    const project=state.projects.find(p=>Number(p.id)===id);
+    if(!project||project.status!=='completed')return;
+    if(!['Zahraa','Mohammed'].includes(state.actor)){toast('Choose your reviewer identity first.');return;}
+    try{
+      const data=await api(`/api/projects/${id}/quality`);
+      const receipt=(data.receipts||[]).slice().reverse().find(r=>r.from_page===1&&r.to_page===Number(project.pages));
+      if(!receipt){toast('Whole-book revision-bound QA evidence is required before human approval.');return;}
+      const declared=window.confirm(`Only confirm after PERSONALLY reading and reviewing the complete final English manuscript against the source, including unresolved questions.\n\nBook: ${project.title_en||project.title_ar}\nRevision: ${receipt.google_doc_revision}\n\nHave you personally completed this review?`);
+      if(!declared)return;
+      const reviewerKey=window.prompt('Enter your separate HUMAN reviewer key. This must not be shared with the translation automation.');
+      if(!reviewerKey)return;
+      await api(`/api/projects/${id}/human-review`,{
+        method:'POST',
+        headers:{'x-workbench-reviewer-key':reviewerKey},
+        body:JSON.stringify({approved:true,declared_scope:'entire final manuscript',reviewer_name:state.actor,
+          google_doc_revision:receipt.google_doc_revision,source_pdf_sha256:receipt.source_pdf_sha256})
+      });
+      toast('Human review attested for this specific manuscript revision. Publish Ready is now eligible if all gates pass.');
+      await loadData();
+    }catch(error){toast(error.message);}
+  }));
   root.querySelectorAll('[data-open-questions]').forEach(button=>button.addEventListener('click',event=>{
     event.stopPropagation();
     const project=state.projects.find(p=>p.id===Number(button.dataset.openQuestions));
@@ -833,6 +864,7 @@ function assignedProjectMarkup(p) {
         ${workOnBookMarkup(p)}
         ${googleDocLinkMarkup(p)}
         ${questionsDocLinkMarkup(p)}
+        ${humanReviewMarkup(p)}
         ${p.pdf_available ? `<a class="mini-link pdf" href="/api/pdf/${p.id}" target="_blank" rel="noopener">Arabic PDF</a>` : ''}
       </div>
     </div>
