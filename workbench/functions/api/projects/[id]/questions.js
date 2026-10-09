@@ -13,9 +13,12 @@ async function listQuestions(db,id) {
 }
 export async function onRequestGet(context){
   const id=idFrom(context);if(!id)return json({error:'Invalid project id.'},400);
-  const project=await projectFor(context.env.DB,id);
+  let project;
+  try{project=await context.env.DB.prepare('SELECT * FROM projects WHERE id=?').bind(id).first();}
+  catch{return json({error:'Workbench project schema is unavailable.',code:'schema_pending'},503);}
   if(!project)return json({error:'Project not found.'},404);
-  return json({project_id:id,questions_doc_url:project.questions_doc_url||null,questions:await listQuestions(context.env.DB,id)});
+  try{return json({project_id:id,questions_doc_url:project.questions_doc_url||null,questions:await listQuestions(context.env.DB,id)});}
+  catch{return json({error:'Question ledger has not been migrated; a guarded mutation/deployment migration is needed.',code:'schema_pending'},503);}
 }
 export async function onRequestPost(context){
   const auth=await requireEditorCapability(context);
