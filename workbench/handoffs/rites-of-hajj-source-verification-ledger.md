@@ -2,9 +2,9 @@
 
 Project 11, source 298 pages; SHA-256: 5e0a7395a4a439e493d647d95a2d58680880b27bc5e5043a16392c9b992c3c04.
 
-Consecutive source-certified: pages 1–150. Title and bibliographical front matter: 1–2. Blank PDF pages: 3–4. Handwritten Arabic acknowledgment compared to English text: 5. Blank PDF page: 6.
+Consecutive source-certified: pages 1–170. Title and bibliographical front matter: 1–2. Blank PDF pages: 3–4. Handwritten Arabic acknowledgment compared to English text: 5. Blank PDF page: 6.
 
-Resume at physical page 151. English draft coverage of 399 numbered rulings and 13 appendix units is not proof of translation verification. Arabic source witnesses for physical pages 3–298 are in workbench/handoffs/rites-of-hajj-source-physical-*-witness.txt. Workbench source counter must count only verified original pages. Full Arabic-English audit, all devotional texts, footnotes, table of contents, and rendered layout remain open.
+Resume at physical page 171. English draft coverage of 399 numbered rulings and 13 appendix units is not proof of translation verification. Arabic source witnesses for physical pages 3–298 are in workbench/handoffs/rites-of-hajj-source-physical-*-witness.txt. Workbench source counter must count only verified original pages. Full Arabic-English audit, all devotional texts, footnotes, table of contents, and rendered layout remain open.
 
 ## Physical pages 7–18 checked against English Google Doc
 
@@ -12,7 +12,7 @@ Resume at physical page 151. English draft coverage of 399 numbered rulings and 
 - Page 12: Corrected a source-fidelity error in the English TOC: the entry about Hajj on behalf of a living person had been incorrectly rendered as a person acting on their own behalf. Also removed an unsupported 'Another' before Imam Ali ibn al-Husayn's Arafah supplication.
 - Page 14: blank source page, verified.
 - Pages 15–18: full Arabic preface text (invocation, method, editorial choices, practical recommendations, omission of obsolete cases, newly arising questions, concluding prayer, author/date) checked against English preface paragraphs 138–157. No omitted preface paragraph identified in this batch.
-- Physical pages 151–298 still unverified. No publication-ready claim; prayers, notes, TOC, and rendered QA remain open.
+- Physical pages 171–298 still unverified. No publication-ready claim; prayers, notes, TOC, and rendered QA remain open.
 
 ## Physical pages 19–30 checked against the authoritative PDF
 
@@ -99,6 +99,18 @@ Resume at physical page 151. English draft coverage of 399 numbered rulings and 
 - Physical pp. 144–146: complete long prescribed prayers and site-specific ṭawāf etiquettes as well as the quoted Qurʾān 2:201 text compared with existing full English blocks. Verse migration into native footnote remains part of first full formatting pass, not yet done.
 - Physical pp. 147–150: ṭawāf prayer rulings 249–254 and saʿy rulings 255–263; corrected omitted explicit invalidating **riyāʾ** condition in 255. On original p. 150 ruling 260's answer uses the term ‘ṭawāf’ while the question concerns saʿy on upper corridor; retained semantically correct topic in English and registered this printed source-language anomaly for editorial checking.
 - Seven substantive replacement paragraphs read back from Google Doc. Verified marker advanced to `⟦WBPROGRESS:11:150:298⟧`; site D1 requires distinct sync/readback. Next physical source page 151.
+
+## Physical pages 151–170 checked (2026-10-08)
+
+- Physical pp. 151–153: Saʿy rulings 263–272 (direction/lanes, permitted pauses, delayed saʿy, deputation, mistaken circuit counts, doubt, purification) compared to original. Corrected **ruling 267** from a collapsed two-case English account to three distinct source outcomes for recognizing a mistaken round-trip count (at/before seven, after seven, after fourteen). Corrected ruling 269's **seven-versus-nine** doubt at Marwah; old English incorrectly said seven versus eight. Restored source's mandatory rajāʾ intention for repeated ṭawāf when saʿy wrongly delayed to next day (265).
+- Physical pp. 154–155: full recommended Ṣafā recitations, counted glorifications, Imam ʿAlī supplication, narration from Imam al-Ṣādiq and recommended jogging between markers compared against existing unabridged English prayer blocks.
+- Physical pp. 156–157: rulings 273–279 on taqṣīr and exiting iḥrām checked. Restored sheep expiation for shaving even through ignorance/forgetfulness (274), and repaired **ruling 278's reversed validity**: other pilgrim's taqṣīr *is valid* even when performed before the operator completes personal taqṣīr (though prohibited).
+- Physical pp. 158 and 160 blank; p. 159 Part Two, Rites of Ḥajj, heading present in draft.
+- Physical pp. 161–163: iḥrām for Ḥajj and prayer shortening, rulings 280–286. Corrected exact required iḥrām timing in ruling 280: **before noon** on ninth Dhū al-Ḥijjah, not vaguely before standing is missed. Reviewed Arafat travel and Mecca-expanded-city nuances as author-specific jurisprudence.
+- Physical pp. 164–166: standing at ʿArafāt, boundaries, deliberate/accidental early departure, lunar crescent unity, rulings 287–295. Restored ruling 294's striking original position that pilgrims may accept authorities' lunar-date declaration **even with contrary knowledge**, not just when their legal school differs.
+- Physical pp. 167–169: full extended ʿArafah supplications, exhortations, narrations, and original references to appended full Duʿāʾ al-Ḥusayn and Zayn al-ʿĀbidīn compared with draft; native footnotes for Qurʾān text still open.
+- Physical p. 170: Muzdalifah rules 296–298, original name Jamʿ and approximately 10 km location restored in ruling 296, essential dawn-sunrise window checked. Eight changed paragraphs were read back; no formatting or native TOC certification implied.
+- Doc marker updated to `⟦WBPROGRESS:11:170:298⟧`; site D1 must be separately synchronized and read back. Next source page: 171.
 
 ## Nonconsecutive fidelity restorations elsewhere in the manuscript
 
