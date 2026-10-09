@@ -133,3 +133,18 @@ CREATE TABLE IF NOT EXISTS translation_question_events (
   FOREIGN KEY(question_id) REFERENCES translation_questions(id) ON DELETE CASCADE
 );
 CREATE INDEX IF NOT EXISTS idx_question_events_question ON translation_question_events(question_id,id);
+
+CREATE TABLE IF NOT EXISTS translation_quality_evidence (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  project_id INTEGER NOT NULL,
+  from_page INTEGER NOT NULL,
+  to_page INTEGER NOT NULL,
+  source_pdf_sha256 TEXT NOT NULL,
+  google_doc_revision TEXT NOT NULL,
+  report_json TEXT NOT NULL,
+  recorded_by TEXT NOT NULL,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(project_id,from_page,to_page,source_pdf_sha256,google_doc_revision),
+  FOREIGN KEY(project_id) REFERENCES projects(id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_quality_evidence_project ON translation_quality_evidence(project_id,to_page);
