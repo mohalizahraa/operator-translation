@@ -1,0 +1,53 @@
+name: Translator uncertainty calibration pilot
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/translator-uncertainty-calibration.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: translator-uncertainty-calibration
+  cancel-in-progress: false
+
+jobs:
+  calibrate:
+    runs-on: [self-hosted, operator-translation, macOS, ARM64]
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run non-billable ChatGPT-authenticated Codex ambiguity pilot, no persistent sessions
+        shell: bash
+        run: |
+          set -euo pipefail
+          CODEX="/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex"
+          test -x "$CODEX"
+          "$CODEX" exec --help | grep -q -- '--ephemeral'
+          "$CODEX" exec --help | grep -q -- '--output-schema'
+          scratch="$(mktemp -d "${RUNNER_TEMP}/translation-calibration.XXXXXX")"
+          trap 'rm -rf "$scratch"' EXIT
+          node workbench/scripts/translator-calibration-input.mjs "$scratch/prompt.txt" "$scratch/schema.json"
+          # Change working directory to a scratch-only workspace. The model cannot read the fixtures' gold labels.
+          cd "$scratch"
+          # No API key: use existing ChatGPT account authentication or fail safely.
+          env -u OPENAI_API_KEY -u CODEX_API_KEY "$CODEX" exec \
+            --ephemeral --sandbox read-only --skip-git-repo-check \
+            --output-schema "$scratch/schema.json" \
+            --output-last-message "$scratch/model-response.json" - \
+            < "$scratch/prompt.txt" > "$scratch/stdout.log" 2> "$scratch/stderr.log" || {
+              echo "Codex pilot failed or ChatGPT authentication unavailable. No paid API fallback permitted."
+              tail -n 15 "$scratch/stderr.log"
+              exit 1
+            }
+          node - "$scratch/model-response.json" "$scratch/predictions.json" <<'NODE'
+          const fs=require('fs');
+          const response=JSON.parse(fs.readFileSync(process.argv[2],'utf8'));
+          if(!Array.isArray(response.predictions))throw Error('Model did not provide a predictions array');
+          fs.writeFileSync(process.argv[3],JSON.stringify(response.predictions));
+          NODE
+          node "$GITHUB_WORKSPACE/workbench/scripts/translator-calibration.mjs" --predictions "$scratch/predictions.json"
+          echo "This is a diagnostic illustrative-fixture run, NOT a human-reviewed scholarly quality certificate."
