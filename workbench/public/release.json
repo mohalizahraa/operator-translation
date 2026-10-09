@@ -1,6 +1,6 @@
 {
-  "release_id": "20261009-book-titles-right-1",
-  "app_version": "20261008-feed-title-spacing-1",
+  "release_id": "20261009-editorial-workflow-1",
+  "app_version": "20261009-editorial-workflow-1",
   "css_version": "20261009-book-titles-right-1",
-  "description": "Dashboard progress metadata left; Arabic and English book titles right-aligned with responsive spacing"
+  "description": "Per-book translation questions, QA receipts, separate review attestation, and staged editor-key protection"
 }
