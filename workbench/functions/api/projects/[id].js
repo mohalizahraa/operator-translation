@@ -1,5 +1,5 @@
 import { actorFromRequest, ensureCatalog, json, normalizeGoogleDocUrl, normalizeHttpUrl, normalizeProject, recordActivity, validDateRange, validIsoDate, verifyGoogleDocLinkAccess } from '../../_lib.js';
-import { syncTranslationFocusForProject } from '../../_translation.js';
+import { syncTranslationFocusForProject,verifyLiveEnglishDocumentRevision } from '../../_translation.js';
 
 const fields = new Set([
   'title_ar','title_en','assignee','status','source_url','source_pdf_url','google_doc_url','cover_url',
@@ -72,7 +72,20 @@ export async function onRequestPatch(context) {
         WHERE project_id=? AND source_pdf_sha256=? AND google_doc_revision=? ORDER BY id DESC LIMIT 1`)
         .bind(id,qa.source_pdf_sha256,qa.google_doc_revision).first():null;
       if(!attestation)return json({error:'Publish Ready requires a reviewer-only credential-backed human attestation tied to this exact post-QA manuscript.',code:'human_review_attestation_required'},409);
+      const liveRevision=await verifyLiveEnglishDocumentRevision(before,qa.google_doc_revision);
+      if(!liveRevision.ok)return json({error:liveRevision.reason,code:liveRevision.code},409);
     }
+  }
+  if(context.env?.WORKBENCH_REQUIRE_QA_EVIDENCE==='1' && body.published===true && !before.published_at){
+    const qa=await context.env.DB.prepare(`SELECT q.source_pdf_sha256,q.google_doc_revision
+      FROM translation_quality_evidence q JOIN translation_human_review_attestations h
+      ON h.project_id=q.project_id AND h.source_pdf_sha256=q.source_pdf_sha256
+      AND h.google_doc_revision=q.google_doc_revision
+      WHERE q.project_id=? AND q.from_page=1 AND q.to_page=? ORDER BY q.id DESC LIMIT 1`)
+      .bind(id,Number(before.pages||0)).first();
+    if(!qa)return json({error:'Current whole-book QA and reviewer attestation are required before publication.',code:'publication_review_stale'},409);
+    const live=await verifyLiveEnglishDocumentRevision(before,qa.google_doc_revision);
+    if(!live.ok)return json({error:live.reason,code:live.code},409);
   }
   if (body.published === true && (before.status !== 'published' || (body.status !== undefined && body.status !== 'published'))) {
     return json({ error: 'Save the book as Publish Ready first; publication is a separate step and cannot remain set while rewinding workflow.' }, 409);
