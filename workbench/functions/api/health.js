@@ -11,6 +11,10 @@ export async function onRequest(context) {
   ).first();
   return json({
     ok: true,
+    write_protection: typeof context.env?.WORKBENCH_EDITOR_KEY==='string' &&
+      context.env.WORKBENCH_EDITOR_KEY.length>=32 ? 'enforced' : 'UNPROTECTED_LEGACY',
+    quality_gate: context.env?.WORKBENCH_REQUIRE_QA_EVIDENCE==='1' ? 'enforced' : 'LEGACY_MARKER_ONLY',
+
     projects: result?.count ?? 0,
     pdfs: {
       available: pdf?.available ?? 0,
