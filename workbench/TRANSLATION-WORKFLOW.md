@@ -47,7 +47,10 @@ Keep translation/formatting completion, Zahraa's actual human review, Publish Re
 
 ## Quality safeguards approved 2026-10-09
 
-Approved scope: independent source-aware critic, source-to-English coverage map, quality anomaly watchdog, scoped terminology memory, linked translation questions for human review, per-book publication evidence, and representative regression tests. These are acceptance requirements, not proof of deployed automation. Retain the existing per-batch and whole-edition gates, including REAL SCALE v3 indentation for all ordinary paragraphs (even one sentence) and indented numbered/bulleted lists. A human reviewer alone resolves human-owned translation judgments; do not auto-advance the human-review stage.
+Approved scope: independent source-aware critic, source-to-English coverage map, quality anomaly watchdog, scoped terminology memory, linked translation questions for human review, per-book publication evidence, and representative regression tests. These are acceptance requirements, not proof of deployed automation.
+
+**Batch evidence contract:** The production helper `functions/_translation.js` exports `assessTranslationEvidence(report, wholeBook)`. The future translation runner must supply source hash, exact target revision, individually identified source units with physical page, verified target anchor, independent critic result, ambiguity review, terminology review and batch-formatting evidence. Each check must carry an actual verifiable evidence reference and revision. For whole-book review also require the all-page render, native TOC stabilization, publication QA and regression results. A passing metadata preflight is only a prerequisite; the engine must independently inspect the cited source and rendered artifacts before accepting their claims.
+ Retain the existing per-batch and whole-edition gates, including REAL SCALE v3 indentation for all ordinary paragraphs (even one sentence) and indented numbered/bulleted lists. A human reviewer alone resolves human-owned translation judgments; do not auto-advance the human-review stage.
 
 ## Measure before calling it fastest
 
