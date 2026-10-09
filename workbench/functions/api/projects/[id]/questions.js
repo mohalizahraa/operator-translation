@@ -44,16 +44,28 @@ export async function onRequestPost(context){
     if(existing.source_page!==page||existing.arabic_text!==arabic) return json({error:'Question key already refers to a different source passage.'},409);
     return json({question:existing,unchanged:true});
   }
-  const question=await context.env.DB.prepare(`INSERT INTO translation_questions
-    (project_id,question_key,source_page,source_location,arabic_text,context_text,alternatives_json,proposed_english,rationale,confidence,severity,status)
-    VALUES(?,?,?,?,?,?,?,?,?,?,?,'unresolved') RETURNING *`)
-  .bind(id,key,page,phrase(body.source_location,1000)||null,arabic,phrase(body.context_text,6000)||null,
-    JSON.stringify(alternatives||[]),phrase(body.proposed_english,6000)||null,rationale,
-    phrase(body.confidence,100)||'uncertain',severity).first();
-  await context.env.DB.prepare('INSERT INTO translation_question_events(question_id,actor,action,payload_json) VALUES(?,?,?,?)')
-    .bind(question.id,actor,'question captured',JSON.stringify({question_key:key,source_page:page})).run();
-  await recordActivity(context.env.DB,id,actor,'translation question captured',null,{id:question.id,question_key:key});
-  return json({question},201);
+  // D1 batch is transactional: question + decision history + activity
+  // either commit together or roll back. INSERT OR IGNORE handles a racing retry.
+  const event=JSON.stringify({question_key:key,source_page:page});
+  const result=await context.env.DB.batch([
+    context.env.DB.prepare(`INSERT OR IGNORE INTO translation_questions
+      (project_id,question_key,source_page,source_location,arabic_text,context_text,alternatives_json,proposed_english,rationale,confidence,severity,status)
+      VALUES(?,?,?,?,?,?,?,?,?,?,?,'unresolved')`).bind(
+      id,key,page,phrase(body.source_location,1000)||null,arabic,phrase(body.context_text,6000)||null,
+      JSON.stringify(alternatives||[]),phrase(body.proposed_english,6000)||null,rationale,
+      phrase(body.confidence,100)||'uncertain',severity),
+    context.env.DB.prepare(`INSERT INTO translation_question_events(question_id,actor,action,payload_json)
+      SELECT id,?,'question captured',? FROM translation_questions
+      WHERE project_id=? AND question_key=? AND changes()>0`).bind(actor,event,id,key),
+    context.env.DB.prepare(`INSERT INTO activity(project_id,actor,action,before_json,after_json)
+      SELECT ?,?,'translation question captured',NULL,?
+      WHERE changes()>0`).bind(id,actor,JSON.stringify({question_key:key,source_page:page}))
+  ]);
+  const question=await context.env.DB.prepare('SELECT * FROM translation_questions WHERE project_id=? AND question_key=?').bind(id,key).first();
+  if(!question || question.source_page!==page || question.arabic_text!==arabic)
+    return json({error:'Question key conflicts with a concurrently captured different passage.'},409);
+  const inserted=Number(result?.[0]?.meta?.changes||0)>0;
+  return json({question,unchanged:!inserted},inserted?201:200);
 }
 export async function onRequestPatch(context){
   const auth=await requireEditorCapability(context);
@@ -71,8 +83,16 @@ export async function onRequestPatch(context){
       if(!access.accessible)return json({error:'Questions Google Doc cannot be read through the approved public access policy; correct its sharing first.'},409);
     }
     const old=await projectFor(context.env.DB,id);if(!old)return json({error:'Project not found.'},404);
-    await context.env.DB.prepare('UPDATE projects SET questions_doc_url=?, updated_at=CURRENT_TIMESTAMP WHERE id=?').bind(normalized||null,id).run();
-    await recordActivity(context.env.DB,id,actorFromRequest(context.request),'linked questions document',{questions_doc_url:old.questions_doc_url},{questions_doc_url:normalized||null});
+    const actor=actorFromRequest(context.request);
+    if((old.questions_doc_url||null)===(normalized||null))return json({project_id:id,questions_doc_url:normalized||null,unchanged:true});
+    const updated=await context.env.DB.batch([
+      context.env.DB.prepare('UPDATE projects SET questions_doc_url=?,updated_at=CURRENT_TIMESTAMP WHERE id=? AND questions_doc_url IS ?')
+        .bind(normalized||null,id,old.questions_doc_url||null),
+      context.env.DB.prepare(`INSERT INTO activity(project_id,actor,action,before_json,after_json)
+        SELECT ?,?,'linked questions document',?,? WHERE changes()>0`)
+        .bind(id,actor,JSON.stringify({questions_doc_url:old.questions_doc_url}),JSON.stringify({questions_doc_url:normalized||null}))
+    ]);
+    if(Number(updated?.[0]?.meta?.changes||0)!==1)return json({error:'Questions link changed concurrently; refresh and retry.'},409);
     return json({project_id:id,questions_doc_url:raw||null});
   }
   const key=phrase(body.question_key,200);
@@ -95,13 +115,24 @@ export async function onRequestPatch(context){
     return json({error:'The automated manuscript writer cannot replace the human reviewer answer during application.'},409);
   }
   const actor=actorFromRequest(context.request);
-  const updated=await context.env.DB.prepare(`UPDATE translation_questions SET
-      status=?, reviewer_answer=CASE WHEN ?<>'' THEN ? ELSE reviewer_answer END,
+  if(old.status===body.status)return json({question:old,unchanged:true});
+  // Compare-and-swap the prior status; only one writer may claim a decision.
+  // Keep question, event and activity in the same D1 transaction.
+  const committed=await context.env.DB.batch([
+    context.env.DB.prepare(`UPDATE translation_questions SET
+      status=?,reviewer_answer=CASE WHEN ?<>'' THEN ? ELSE reviewer_answer END,
       applied_reference=CASE WHEN ?<>'' THEN ? ELSE applied_reference END,
-      updated_at=CURRENT_TIMESTAMP WHERE id=? RETURNING *`)
-    .bind(body.status,answer,answer,applied,applied,old.id).first();
-  await context.env.DB.prepare('INSERT INTO translation_question_events(question_id,actor,action,payload_json) VALUES(?,?,?,?)')
-    .bind(old.id,actor,'question '+body.status,JSON.stringify({before:old.status,after:body.status,applied_reference:applied||null})).run();
-  await recordActivity(context.env.DB,id,actor,'translation question '+body.status,{id:old.id,status:old.status},{id:old.id,status:body.status});
+      updated_at=CURRENT_TIMESTAMP WHERE id=? AND status=?`)
+      .bind(body.status,answer,answer,applied,applied,old.id,old.status),
+    context.env.DB.prepare(`INSERT INTO translation_question_events(question_id,actor,action,payload_json)
+      SELECT ?,?,?,? WHERE changes()>0`).bind(
+      old.id,actor,'question '+body.status,JSON.stringify({before:old.status,after:body.status,applied_reference:applied||null})),
+    context.env.DB.prepare(`INSERT INTO activity(project_id,actor,action,before_json,after_json)
+      SELECT ?,?,?,?,? WHERE changes()>0`).bind(
+      id,actor,'translation question '+body.status,JSON.stringify({id:old.id,status:old.status}),JSON.stringify({id:old.id,status:body.status}))
+  ]);
+  if(Number(committed?.[0]?.meta?.changes||0)!==1)
+    return json({error:'Question decision changed concurrently. Refresh to see the latest reviewer decision.'},409);
+  const updated=await context.env.DB.prepare('SELECT * FROM translation_questions WHERE id=?').bind(old.id).first();
   return json({question:updated});
 }
