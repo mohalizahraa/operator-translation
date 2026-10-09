@@ -2,9 +2,9 @@
 
 Project 11, source 298 pages; SHA-256: 5e0a7395a4a439e493d647d95a2d58680880b27bc5e5043a16392c9b992c3c04.
 
-Consecutive source-certified: pages 1–90. Title and bibliographical front matter: 1–2. Blank PDF pages: 3–4. Handwritten Arabic acknowledgment compared to English text: 5. Blank PDF page: 6.
+Consecutive source-certified: pages 1–110. Title and bibliographical front matter: 1–2. Blank PDF pages: 3–4. Handwritten Arabic acknowledgment compared to English text: 5. Blank PDF page: 6.
 
-Resume at physical page 91. English draft coverage of 399 numbered rulings and 13 appendix units is not proof of translation verification. Arabic source witnesses for physical pages 3–298 are in workbench/handoffs/rites-of-hajj-source-physical-*-witness.txt. Workbench source counter must count only verified original pages. Full Arabic-English audit, all devotional texts, footnotes, table of contents, and rendered layout remain open.
+Resume at physical page 111. English draft coverage of 399 numbered rulings and 13 appendix units is not proof of translation verification. Arabic source witnesses for physical pages 3–298 are in workbench/handoffs/rites-of-hajj-source-physical-*-witness.txt. Workbench source counter must count only verified original pages. Full Arabic-English audit, all devotional texts, footnotes, table of contents, and rendered layout remain open.
 
 ## Physical pages 7–18 checked against English Google Doc
 
@@ -12,7 +12,7 @@ Resume at physical page 91. English draft coverage of 399 numbered rulings and 1
 - Page 12: Corrected a source-fidelity error in the English TOC: the entry about Hajj on behalf of a living person had been incorrectly rendered as a person acting on their own behalf. Also removed an unsupported 'Another' before Imam Ali ibn al-Husayn's Arafah supplication.
 - Page 14: blank source page, verified.
 - Pages 15–18: full Arabic preface text (invocation, method, editorial choices, practical recommendations, omission of obsolete cases, newly arising questions, concluding prayer, author/date) checked against English preface paragraphs 138–157. No omitted preface paragraph identified in this batch.
-- Physical pages 91–298 still unverified. No publication-ready claim; prayers, notes, TOC, and rendered QA remain open.
+- Physical pages 111–298 still unverified. No publication-ready claim; prayers, notes, TOC, and rendered QA remain open.
 
 ## Physical pages 19–30 checked against the authoritative PDF
 
@@ -71,6 +71,15 @@ Resume at physical page 91. English draft coverage of 399 numbered rulings and 1
 - Physical pp. 86–87: rulings 118–121. Restored Ruling 120's source-specific absence of iḥrām prohibitions after deliberate omission despite sinful entry, and restored validity without repeat on discovery only after Ḥajj and completion by talbiyah when remembered during the rites. Restored customary alignment's distance-to-Mecca criterion in ruling 121.
 - Physical pp. 88–90: rulings 122–130, Jeddah approaches and no-mīqāt routes. Corrected rule 122 to allow Jeddah *by vow* under its stated prerequisite without obligatory renewed iḥrām before the Sacred Precinct; corrected 123's original Prophetic site **ʿUsfān**, wrongly replaced with al-Tanʿīm in the draft. Restored no additional conversion intention in ruling 124 and the right to plan the independent-to-tamattuʿ path from the outset in ruling 125. Full text through ruling 130 compared; no further unsupported escalation in source-page counter.
 - Original aligned PDFKit + image-OCR witnesses and live Google Doc compared. Readback confirmed 12 targeted manuscript repairs; verified manuscript progress marker advanced to `⟦WBPROGRESS:11:90:298⟧`, independent Workbench D1 sync/readback still required. Next original physical page: 91.
+
+## Physical pages 91–110 checked (2026-10-08)
+
+- Physical p. 91: Chapter Eight and Part One opening headings checked. Physical p. 92 blank. Physical pp. 93–96: iḥrām intention, talbiyah, garments, rulings 131–142 and full cited ḥadīth checked. Restored obligatory provision for partially phonetic/translated talbiyah and deputy recitation if physically necessary, the exact sacrificial-animal marking and sandal definition for qirān, the exact quoted legal response before talbiyah, and the source's repeated-talbiyah schedule.
+- Physical pp. 97–99: recommended iḥrām practices and long Arabic source supplications checked against earlier restored full English prayers (including original order, full invocation blocks, and recommended talbiyah formulations). Confirmed no old summary-only placeholder in these pages; production/native footnote audit remains separate. 
+- Physical pp. 100–104: prohibition categories and rulings 143–155, hunting and sexual conduct penalties checked; restored domestic animals, domesticated/wild variations and offspring in ruling 147, and corrected the original predator exception/no-expiation rule in 148.
+- Physical pp. 105–107: rulings 156–161 checked; repaired the no-ejaculation looking case in ruling 156, perfume rule requiring blocking fragrance not only avoiding deliberate sniffing, narrator name **Yaʿqūb ibn Shuʿayb** previously reversed, and exact khalūq exemption/quotation. 
+- Physical pp. 108–110: prohibitions on masks, scented soaps, sewn garments and kohl (through ruling 171's first cases) checked. Repaired women’s masking limitation and scented soap's *unavoidable smell* condition. **Critical error fixed in ruling 170:** source explicitly says **no expiation** in either stated checkpoint/garment scenario; old English wrongly demanded expiation in both.
+- All twelve manuscript repairs were committed in the linked Google Doc with revision guard/readback. `⟦WBPROGRESS:11:110:298⟧` now marks consecutive source-collated physical pages, but native footnote/TOC and rendered full-formatting acceptance are not claimed. Next source page 111.
 
 ## Nonconsecutive fidelity restorations elsewhere in the manuscript
 
