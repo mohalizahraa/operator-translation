@@ -144,3 +144,10 @@ test('rejects critic review labels without concrete findings', async () =>
     f.critiqueUnit=async ()=>({status:'BLOCK',findings:[],criticId:'critic'});
     await assert.rejects(run(f),/structured disposition/);
   }));
+
+test('refuses reuse after staged artifact becomes group/world readable', async () =>
+  fixture(async f => {
+    const staged=await run(f);
+    await chmod(staged.path,0o644);
+    await assert.rejects(run(f),/private regular file/);
+  }));
