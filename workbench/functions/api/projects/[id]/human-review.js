@@ -45,11 +45,19 @@ export async function onRequestPost(context){
   const existing=await context.env.DB.prepare(`SELECT id FROM translation_human_review_attestations
     WHERE project_id=? AND reviewer_name=? AND source_pdf_sha256=? AND google_doc_revision=?`).bind(id,name,sourceHash,revision).first();
   if(existing)return json({attestation_id:existing.id,unchanged:true});
-  const receipt=await context.env.DB.prepare(`INSERT INTO translation_human_review_attestations
-    (project_id,source_pdf_sha256,google_doc_revision,reviewer_name,declared_scope)
-    VALUES(?,?,?,?,'entire final manuscript') RETURNING id`).bind(id,sourceHash,revision,name).first();
-  await recordActivity(context.env.DB,id,name,'human manuscript review attested',null,
-    {attestation_id:receipt.id,revision,source_pdf_sha256:sourceHash});
-  return json({attestation_id:receipt.id,reviewer_name:name,google_doc_revision:revision,
+  const result=await context.env.DB.batch([
+    context.env.DB.prepare(`INSERT OR IGNORE INTO translation_human_review_attestations
+      (project_id,source_pdf_sha256,google_doc_revision,reviewer_name,declared_scope)
+      VALUES(?,?,?,?,'entire final manuscript')`).bind(id,sourceHash,revision,name),
+    context.env.DB.prepare(`INSERT INTO activity(project_id,actor,action,before_json,after_json)
+      SELECT ?,?,'human manuscript review attested',NULL,? WHERE changes()>0`).bind(
+        id,name,JSON.stringify({revision,source_pdf_sha256:sourceHash}))
+  ]);
+  const receipt=await context.env.DB.prepare(`SELECT id FROM translation_human_review_attestations
+    WHERE project_id=? AND source_pdf_sha256=? AND google_doc_revision=? AND reviewer_name=?`)
+    .bind(id,sourceHash,revision,name).first();
+  if(!receipt)return json({error:'Human approval was not committed; please refresh.'},409);
+  const inserted=Number(result?.[0]?.meta?.changes||0)>0;
+  return json({attestation_id:receipt.id,unchanged:!inserted,reviewer_name:name,google_doc_revision:revision,
     note:'Recorded an explicit reviewer credential-backed attestation; this does not mechanically prove how thoroughly the human read the source.'},201);
 }
