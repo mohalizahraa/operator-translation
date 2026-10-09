@@ -98,6 +98,8 @@ As applicable:
 
 This is **continuous DMSC hygiene**, not permission for unrelated broad cleanup during every task. Keep maintenance inside the affected dependency cone unless broader drift is evidenced. Never delete first and investigate later, overwrite concurrent work, or let cleanup delay the controlling path when the cleanup can safely be deferred.
 
+**Routing checkpoint at integration/closure (founder 2026-10-09):** Execute ASSURANCE §8.2's final routing pass at the same coherent change-set boundary as the final DMSC pass. Re-evaluate the project/router + still-material profile owners, prior user design answers/evidence, residual user-owned specification forks, and real canonical→descendant/code/tests/plugin-mirror propagation. Fix discovered gaps and rerun both passes before reporting completion. Do not create a new polling daemon by calling a lifecycle check “automatic.”
+
 #### Operator-self mutation closure — mandatory whole-repository floor pass
 
 The founder's standing rule is stronger for **Operator's own repository**: after every completed Operator mutation/change-set, the change is not complete until the **entire current Operator repository has been DMSC-revalidated to the floor** under THINK §7 and the applicable KNOWLEDGE/ASSURANCE/reconciliation procedures.

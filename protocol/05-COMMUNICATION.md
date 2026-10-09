@@ -51,6 +51,8 @@ A substantive answer is ready to present as the **final answer** only after the 
 - After user feedback, recompute the affected work cone and repeat the same solve → integrate → DMSC-to-floor loop before the next substantive final answer.
 - For a genuinely atomic question or an explicitly staged request, the final-answer boundary may be correspondingly small.
 
+**Paired automatic routing check-in (founder 2026-10-09):** Before a substantive final answer or a consequential completion claim, run ASSURANCE §8.2's final routing integrity pass **beside** THINK's final DMSC floor. Confirm the right project docs/evidence, residual founder-owned decision gates, propagated code/tests/mirrors, and actual proof states. If the pass exposes a repair, do it and repeat both checks; if the necessary permission/verification is unavailable, report the precise OPEN gate. This is a per-completion workflow requirement, not a scheduled background automation.
+
 This rule governs **when** to surface the final answer; THINK owns the reasoning/work-graph saturation method and Core owns the parent-task completion boundary.
 
 

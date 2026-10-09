@@ -231,6 +231,20 @@ Bind the claim to a source-derived qualifier set or equivalent reconstruction pr
 
 A semantic-completeness claim passes only when a fresh consumer using the candidate would answer representative material edge probes compatibly with the source. Topic mention, a strong parent summary, or preservation of most cases is not enough. Conversely, do not require verbatim retention of redundant examples that add no unique condition, rationale, status, or reconstruction value.
 
+## 8.2 Automatic final routing integrity pass — paired with DMSC floor (founder directive 2026-10-09)
+
+At every substantive answer, coherent project mutation/change-set or completion/handoff boundary, perform a **dependency-scoped routing check-in** after the last material change, alongside (not instead of) THINK's mandatory final DMSC-to-the-floor pass. This is a **workflow/lifecycle gate**, not a background timer, and it must not invent a live monitor. The first entrypoint may be the user turn, project router, active repo, issue or handoff; route based on the **whole active work graph**, not only the latest sentence.
+
+Before declaring closure:
+
+1. **Re-evaluate the active task and owner graph.** List material decision/specification, THINK/DMSC, action, knowledge, assurance, coding/design/research, founder operating policy and other specialized owners still needed. Confirm the current project router and canonical docs were actually read/fetched at the depth demanded by this task, including compatible earlier provenance and examples; do not confuse a surface mention with a read or successful retrieval.
+2. **Check source authority and question gates.** Validate new user corrections and their temporal/scoped precedence, unresolved owner contradictions, and any **founder-owned** questions remaining after retrieval. Material design forks must be surfaced to the founder *before* hardening, not silently decided by code or left only as an unannounced issue; low-risk agent-owned questions must not burden the founder.
+3. **Check propagation and execution.** Verify that each changed owner flows to all materially affected code, surface contracts, diagrams/evidence indexes, docs, navigation/AGENTS routers, tests/evals/CI gates, derived plugin mirrors, downstream consumers, work queue/status and handoff. Distinguish written, integrated, tested, packaged and user-accepted. For cross-repo/projection changes, compare actual content/hash rather than assuming sync.
+4. **Run decisive canaries at the right failure layer.** A router/static check tests reachability and missing authority text, but not real use by a new task. Simulate at least one **fresh consumer** entry from the affected task/category when consequential and check it retrieves the right project evidence and asks/does not ask as required. Where real behavioral execution cannot be tested, keep that proof explicitly OPEN.
+5. **Repair then rerun both passes.** A discovered omission or contradiction is part of the current parent scope if authorized and currently admissible. Fix the highest correct owner; re-run the affected router pass and the final DMSC-to-floor pass on the new candidate. Stop when both saturate, or explicitly report unresolved blocks/permissions/uncertainty instead of declaring full closure.
+
+This check-in **always applies to substantive completion**, with proportional depth. For a truly atomic answer it can be a fast mental preflight; for Operator/protocol edits it must reach the already-mandatory **whole-current-repo DMSC floor**, including canonical/mirror topology, live executable routes and stale/historical traps. Only existing project checks or authorized CI hooks are “automatic” in the machine-enforced sense: never claim a daemon or monitoring task exists without a real implementation.
+
 ## 9. Product/software completion is multi-layer evidence
 
 For user-facing software, **implemented, tested, usable, performant, packaged, delivered, and complete** are distinct claims.
