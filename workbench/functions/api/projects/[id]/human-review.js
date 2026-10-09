@@ -6,8 +6,10 @@ export async function onRequestGet(context){
   const id=idFrom(context);if(!id)return json({error:'Invalid project id.'},400);
   const p=await context.env.DB.prepare('SELECT id FROM projects WHERE id=?').bind(id).first();
   if(!p)return json({error:'Project not found.'},404);
-  const {results}=await context.env.DB.prepare(`SELECT id,reviewer_name,source_pdf_sha256,google_doc_revision,
-    declared_scope,approved_at FROM translation_human_review_attestations WHERE project_id=? ORDER BY id DESC`).bind(id).all();
+  let results;
+  try{({results}=await context.env.DB.prepare(`SELECT id,reviewer_name,source_pdf_sha256,google_doc_revision,
+    declared_scope,approved_at FROM translation_human_review_attestations WHERE project_id=? ORDER BY id DESC`).bind(id).all());}
+  catch{return json({error:'Human review ledger requires its guarded migration.',code:'schema_pending'},503);}
   return json({project_id:id,attestations:results||[]});
 }
 export async function onRequestPost(context){
