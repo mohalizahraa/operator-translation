@@ -2,9 +2,9 @@
 
 Project 11, source 298 pages; SHA-256: 5e0a7395a4a439e493d647d95a2d58680880b27bc5e5043a16392c9b992c3c04.
 
-Consecutive source-certified: pages 1–130. Title and bibliographical front matter: 1–2. Blank PDF pages: 3–4. Handwritten Arabic acknowledgment compared to English text: 5. Blank PDF page: 6.
+Consecutive source-certified: pages 1–150. Title and bibliographical front matter: 1–2. Blank PDF pages: 3–4. Handwritten Arabic acknowledgment compared to English text: 5. Blank PDF page: 6.
 
-Resume at physical page 131. English draft coverage of 399 numbered rulings and 13 appendix units is not proof of translation verification. Arabic source witnesses for physical pages 3–298 are in workbench/handoffs/rites-of-hajj-source-physical-*-witness.txt. Workbench source counter must count only verified original pages. Full Arabic-English audit, all devotional texts, footnotes, table of contents, and rendered layout remain open.
+Resume at physical page 151. English draft coverage of 399 numbered rulings and 13 appendix units is not proof of translation verification. Arabic source witnesses for physical pages 3–298 are in workbench/handoffs/rites-of-hajj-source-physical-*-witness.txt. Workbench source counter must count only verified original pages. Full Arabic-English audit, all devotional texts, footnotes, table of contents, and rendered layout remain open.
 
 ## Physical pages 7–18 checked against English Google Doc
 
@@ -12,7 +12,7 @@ Resume at physical page 131. English draft coverage of 399 numbered rulings and 
 - Page 12: Corrected a source-fidelity error in the English TOC: the entry about Hajj on behalf of a living person had been incorrectly rendered as a person acting on their own behalf. Also removed an unsupported 'Another' before Imam Ali ibn al-Husayn's Arafah supplication.
 - Page 14: blank source page, verified.
 - Pages 15–18: full Arabic preface text (invocation, method, editorial choices, practical recommendations, omission of obsolete cases, newly arising questions, concluding prayer, author/date) checked against English preface paragraphs 138–157. No omitted preface paragraph identified in this batch.
-- Physical pages 131–298 still unverified. No publication-ready claim; prayers, notes, TOC, and rendered QA remain open.
+- Physical pages 151–298 still unverified. No publication-ready claim; prayers, notes, TOC, and rendered QA remain open.
 
 ## Physical pages 19–30 checked against the authoritative PDF
 
@@ -89,6 +89,16 @@ Resume at physical page 131. English draft coverage of 399 numbered rulings and 
 - Physical pp. 121–124: bloodletting, clipping, extraction, weapons, sanctuary vegetation and expiation-location rules 203–211. Corrected required sheep for necessary tooth extraction **when bleeding occurs**, tree-value vs no-grass-expiation distinction, and prohibition on consuming sacrificial expiation meat. 
 - Physical pp. 125–130: ʿUmrah/ṭawāf transition and full extended prescribed duʿāʾ pages 126–129 compared with existing English full invocations. Preserved the **source-printed** numeric statement at p. 125 (approximately 87.552 km from Kaʿbah) rather than the invented earlier English 7–17 miles; **flag external geography/numerical validation as still open**. Restored the printed ‘ṭawāf of Ḥajj’ wording in the intention formula on p. 130 despite the fact it occurs under the ʿUmrah chapter, for later editorial query. Rulings 215–216 and ritual-purity conditions checked up to physical p. 130; remaining source starts p. 131.
 - 13 source-aligned corrections were read back from the Google Doc. Consecutive marker `⟦WBPROGRESS:11:130:298⟧` placed; not equivalent to complete translation or native-footnote/TOC/render QA. Next original physical page: 131.
+
+## Physical pages 131–150 checked (2026-10-08)
+
+- Physical pp. 131–132: rules 217–221 on ritual purity, lost wuḍūʾ, original Zamzam/water rights note, impurities during ṭawāf, male circumcision. Restored original's **obligatory precaution** in ruling 218 for doubting whether wuḍūʾ was initially performed: renewed purification and a fresh ṭawāf with intention between completing the previous and restarting. Restored exact private water ownership example instead of altered administrative-permission test.
+- Physical pp. 133–135: rulings 221–230 (menstruation before/during ʿUmrah, conversion to ifrād, postpartum, medication, istiḥāḍah) checked; repaired source-prescribed order and exact circumstances of the ifrād conversion/assigned ṭawāf in 224.
+- Physical pp. 136–138: all **nine** conditions of ṭawāf checked, then rulings 231–233. Crucially the old English had only **seven** conditions, omitting the mandatory condition of ṭawāf inside the Sacred Mosque and the prohibition on adjoining a second obligatory ṭawāf before praying the first ṭawāf prayer. Restored both, plus source numeric boundaries for the seventh (26.5 cubits / 6.5 cubits near Ḥijr Ismāʿīl). Subsequent exceptional case in ruling 245 allows upper-floor ṭawāf where crowded/advanced age; interpret independently rather than erase exception.
+- Physical pp. 139–143: interruption and incomplete/additional/doubtful circuits, rulings 234–247; corrected ruling 240 third case to source's instruction for a **fresh** ṭawāf with niyyat al-rajāʾ rather than simply completing the current circuit; clarified the 245 exception and preference for deputation when upper-floor ṭawāf is allowed.
+- Physical pp. 144–146: complete long prescribed prayers and site-specific ṭawāf etiquettes as well as the quoted Qurʾān 2:201 text compared with existing full English blocks. Verse migration into native footnote remains part of first full formatting pass, not yet done.
+- Physical pp. 147–150: ṭawāf prayer rulings 249–254 and saʿy rulings 255–263; corrected omitted explicit invalidating **riyāʾ** condition in 255. On original p. 150 ruling 260's answer uses the term ‘ṭawāf’ while the question concerns saʿy on upper corridor; retained semantically correct topic in English and registered this printed source-language anomaly for editorial checking.
+- Seven substantive replacement paragraphs read back from Google Doc. Verified marker advanced to `⟦WBPROGRESS:11:150:298⟧`; site D1 requires distinct sync/readback. Next physical source page 151.
 
 ## Nonconsecutive fidelity restorations elsewhere in the manuscript
 
