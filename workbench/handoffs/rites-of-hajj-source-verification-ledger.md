@@ -2,9 +2,9 @@
 
 Project 11, source 298 pages; SHA-256: 5e0a7395a4a439e493d647d95a2d58680880b27bc5e5043a16392c9b992c3c04.
 
-Consecutive source-certified: pages 1–110. Title and bibliographical front matter: 1–2. Blank PDF pages: 3–4. Handwritten Arabic acknowledgment compared to English text: 5. Blank PDF page: 6.
+Consecutive source-certified: pages 1–130. Title and bibliographical front matter: 1–2. Blank PDF pages: 3–4. Handwritten Arabic acknowledgment compared to English text: 5. Blank PDF page: 6.
 
-Resume at physical page 111. English draft coverage of 399 numbered rulings and 13 appendix units is not proof of translation verification. Arabic source witnesses for physical pages 3–298 are in workbench/handoffs/rites-of-hajj-source-physical-*-witness.txt. Workbench source counter must count only verified original pages. Full Arabic-English audit, all devotional texts, footnotes, table of contents, and rendered layout remain open.
+Resume at physical page 131. English draft coverage of 399 numbered rulings and 13 appendix units is not proof of translation verification. Arabic source witnesses for physical pages 3–298 are in workbench/handoffs/rites-of-hajj-source-physical-*-witness.txt. Workbench source counter must count only verified original pages. Full Arabic-English audit, all devotional texts, footnotes, table of contents, and rendered layout remain open.
 
 ## Physical pages 7–18 checked against English Google Doc
 
@@ -12,7 +12,7 @@ Resume at physical page 111. English draft coverage of 399 numbered rulings and 
 - Page 12: Corrected a source-fidelity error in the English TOC: the entry about Hajj on behalf of a living person had been incorrectly rendered as a person acting on their own behalf. Also removed an unsupported 'Another' before Imam Ali ibn al-Husayn's Arafah supplication.
 - Page 14: blank source page, verified.
 - Pages 15–18: full Arabic preface text (invocation, method, editorial choices, practical recommendations, omission of obsolete cases, newly arising questions, concluding prayer, author/date) checked against English preface paragraphs 138–157. No omitted preface paragraph identified in this batch.
-- Physical pages 111–298 still unverified. No publication-ready claim; prayers, notes, TOC, and rendered QA remain open.
+- Physical pages 131–298 still unverified. No publication-ready claim; prayers, notes, TOC, and rendered QA remain open.
 
 ## Physical pages 19–30 checked against the authoritative PDF
 
@@ -80,6 +80,15 @@ Resume at physical page 111. English draft coverage of 399 numbered rulings and 
 - Physical pp. 105–107: rulings 156–161 checked; repaired the no-ejaculation looking case in ruling 156, perfume rule requiring blocking fragrance not only avoiding deliberate sniffing, narrator name **Yaʿqūb ibn Shuʿayb** previously reversed, and exact khalūq exemption/quotation. 
 - Physical pp. 108–110: prohibitions on masks, scented soaps, sewn garments and kohl (through ruling 171's first cases) checked. Repaired women’s masking limitation and scented soap's *unavoidable smell* condition. **Critical error fixed in ruling 170:** source explicitly says **no expiation** in either stated checkpoint/garment scenario; old English wrongly demanded expiation in both.
 - All twelve manuscript repairs were committed in the linked Google Doc with revision guard/readback. `⟦WBPROGRESS:11:110:298⟧` now marks consecutive source-collated physical pages, but native footnote/TOC and rendered full-formatting acceptance are not claimed. Next source page 111.
+
+## Physical pages 111–130 checked (2026-10-08)
+
+- Physical pp. 111–114: remaining eye-kohl and mirror rulings, footwear, lying and disputation, including the full original Qurʾān 2:197 quotation, rulings 172–180, compared to English. Footnote relocation for Qurʾānic quotation is **not yet done** and belongs to full formatting.
+- Physical pp. 115–118: adornment, anointing, hair removal, covering the head, and women's face/veil rulings 181–194 compared; source-specific repairs: ignorance in anointing requires feeding a poor person (old English said no expiation); fallen-hair charity is a *mudd* measure (not vague handful); no carrying objects on the head; obligatory renewed talbiyah under the required case; **ruling 193** restored the actual mobile-phone-against-ear question (old English invented a face-mask question).
+- Physical pp. 119–120: shade and expiation rules 195–202 compared; strengthened explicit required expiation when travel cover protects from weather rather than treating it as discretionary. Preserved distinct special exception when forced by authorities and no escape.
+- Physical pp. 121–124: bloodletting, clipping, extraction, weapons, sanctuary vegetation and expiation-location rules 203–211. Corrected required sheep for necessary tooth extraction **when bleeding occurs**, tree-value vs no-grass-expiation distinction, and prohibition on consuming sacrificial expiation meat. 
+- Physical pp. 125–130: ʿUmrah/ṭawāf transition and full extended prescribed duʿāʾ pages 126–129 compared with existing English full invocations. Preserved the **source-printed** numeric statement at p. 125 (approximately 87.552 km from Kaʿbah) rather than the invented earlier English 7–17 miles; **flag external geography/numerical validation as still open**. Restored the printed ‘ṭawāf of Ḥajj’ wording in the intention formula on p. 130 despite the fact it occurs under the ʿUmrah chapter, for later editorial query. Rulings 215–216 and ritual-purity conditions checked up to physical p. 130; remaining source starts p. 131.
+- 13 source-aligned corrections were read back from the Google Doc. Consecutive marker `⟦WBPROGRESS:11:130:298⟧` placed; not equivalent to complete translation or native-footnote/TOC/render QA. Next original physical page: 131.
 
 ## Nonconsecutive fidelity restorations elsewhere in the manuscript
 
