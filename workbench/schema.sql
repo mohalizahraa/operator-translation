@@ -148,3 +148,16 @@ CREATE TABLE IF NOT EXISTS translation_quality_evidence (
   FOREIGN KEY(project_id) REFERENCES projects(id) ON DELETE CASCADE
 );
 CREATE INDEX IF NOT EXISTS idx_quality_evidence_project ON translation_quality_evidence(project_id,to_page);
+
+CREATE TABLE IF NOT EXISTS translation_human_review_attestations (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  project_id INTEGER NOT NULL,
+  source_pdf_sha256 TEXT NOT NULL,
+  google_doc_revision TEXT NOT NULL,
+  reviewer_name TEXT NOT NULL,
+  declared_scope TEXT NOT NULL,
+  approved_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(project_id,source_pdf_sha256,google_doc_revision,reviewer_name),
+  FOREIGN KEY(project_id) REFERENCES projects(id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_human_review_project ON translation_human_review_attestations(project_id,approved_at);
