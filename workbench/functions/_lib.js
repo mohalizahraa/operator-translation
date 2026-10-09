@@ -4,7 +4,7 @@ import { PDF_AUDIT, PDF_AUDIT_VERSION } from './_pdf_audit.js';
 const CATALOG_COLUMNS = [
   ['catalog_id','TEXT'],['translit','TEXT'],['author','TEXT'],['author_ar','TEXT'],['category','TEXT'],
   ['topic_en','TEXT'],['topic_ar','TEXT'],['package_url','TEXT'],['pages','INTEGER'],['volumes','INTEGER'],['catalog_date','TEXT'],['cover_url','TEXT'],
-  ['translated_pages','INTEGER NOT NULL DEFAULT 0'],['translation_progress_at','TEXT'],
+  ['questions_doc_url','TEXT'],['translated_pages','INTEGER NOT NULL DEFAULT 0'],['translation_progress_at','TEXT'],
   ['pdf_status',"TEXT NOT NULL DEFAULT 'unchecked'"],['pdf_checked_at','TEXT'],['pdf_check_note','TEXT']
 ];
 
@@ -44,6 +44,27 @@ export async function ensureCatalog(db) {
     updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY(project_id) REFERENCES projects(id) ON DELETE CASCADE
   )`).run();
+  await db.prepare(`CREATE TABLE IF NOT EXISTS translation_questions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT, project_id INTEGER NOT NULL,
+    question_key TEXT NOT NULL, source_page INTEGER NOT NULL,
+    source_location TEXT, arabic_text TEXT NOT NULL, context_text TEXT,
+    alternatives_json TEXT NOT NULL DEFAULT '[]', proposed_english TEXT,
+    rationale TEXT NOT NULL, confidence TEXT NOT NULL DEFAULT 'uncertain',
+    severity TEXT NOT NULL DEFAULT 'review', status TEXT NOT NULL DEFAULT 'unresolved',
+    reviewer_answer TEXT, applied_reference TEXT,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(project_id,question_key),
+    FOREIGN KEY(project_id) REFERENCES projects(id) ON DELETE CASCADE
+  )`).run();
+  await db.prepare('CREATE INDEX IF NOT EXISTS idx_translation_questions_project_status ON translation_questions(project_id,status,source_page)').run();
+  await db.prepare(`CREATE TABLE IF NOT EXISTS translation_question_events (
+    id INTEGER PRIMARY KEY AUTOINCREMENT, question_id INTEGER NOT NULL,
+    actor TEXT NOT NULL, action TEXT NOT NULL, payload_json TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY(question_id) REFERENCES translation_questions(id) ON DELETE CASCADE
+  )`).run();
+  await db.prepare('CREATE INDEX IF NOT EXISTS idx_question_events_question ON translation_question_events(question_id,id)').run();
   const existingColumns = await db.prepare('PRAGMA table_info(projects)').all();
   const names = new Set((existingColumns.results || []).map(row => row.name));
   for (const obsolete of ['priority','blocked','blocker_reason']) {
