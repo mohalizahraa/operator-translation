@@ -2,9 +2,9 @@
 
 Project 11, source 298 pages; SHA-256: 5e0a7395a4a439e493d647d95a2d58680880b27bc5e5043a16392c9b992c3c04.
 
-Consecutive source-certified: pages 1–33. Title and bibliographical front matter: 1–2. Blank PDF pages: 3–4. Handwritten Arabic acknowledgment compared to English text: 5. Blank PDF page: 6.
+Consecutive source-certified: pages 1–36. Title and bibliographical front matter: 1–2. Blank PDF pages: 3–4. Handwritten Arabic acknowledgment compared to English text: 5. Blank PDF page: 6.
 
-Resume at physical page 34. English draft coverage of 399 numbered rulings and 13 appendix units is not proof of translation verification. Arabic source witnesses for physical pages 3–298 are in workbench/handoffs/rites-of-hajj-source-physical-*-witness.txt. Workbench source counter must count only verified original pages. Full Arabic-English audit, all devotional texts, footnotes, table of contents, and rendered layout remain open.
+Resume at physical page 37. English draft coverage of 399 numbered rulings and 13 appendix units is not proof of translation verification. Arabic source witnesses for physical pages 3–298 are in workbench/handoffs/rites-of-hajj-source-physical-*-witness.txt. Workbench source counter must count only verified original pages. Full Arabic-English audit, all devotional texts, footnotes, table of contents, and rendered layout remain open.
 
 ## Physical pages 7–18 checked against English Google Doc
 
@@ -12,7 +12,7 @@ Resume at physical page 34. English draft coverage of 399 numbered rulings and 1
 - Page 12: Corrected a source-fidelity error in the English TOC: the entry about Hajj on behalf of a living person had been incorrectly rendered as a person acting on their own behalf. Also removed an unsupported 'Another' before Imam Ali ibn al-Husayn's Arafah supplication.
 - Page 14: blank source page, verified.
 - Pages 15–18: full Arabic preface text (invocation, method, editorial choices, practical recommendations, omission of obsolete cases, newly arising questions, concluding prayer, author/date) checked against English preface paragraphs 138–157. No omitted preface paragraph identified in this batch.
-- Physical pages 34–298 still unverified. No publication-ready claim; prayers, notes, TOC, and rendered QA remain open.
+- Physical pages 37–298 still unverified. No publication-ready claim; prayers, notes, TOC, and rendered QA remain open.
 
 ## Physical pages 19–30 checked against the authoritative PDF
 
@@ -28,6 +28,13 @@ Resume at physical page 34. English draft coverage of 399 numbered rulings and 1
 - Physical p. 32: completed ruling 5 and rulings 6–7, plus the beginning of ruling 8 and the minor’s-Hajj heading, checked against the page-aligned original witness and live manuscript.
 - Physical p. 33: completed ruling 8, all four legal-adulthood cases in ruling 9, the minor’s expenses in ruling 10, and the beginning of ruling 11 checked against the original witness and live manuscript. Related ruling 15 on physical p. 34 was independently corrected (the costs fall on the guardian when the trip serves the guardian’s own interests); p. 34 has NOT been consecutively certified yet.
 - Checked manuscript readback after these repairs. Updated Google Doc verified marker to 33/298; downstream Workbench D1 sync and final render/footnote gates remain separate verification requirements. Consecutive next page is 34.
+
+## Physical pages 34–36 checked against original source (2026-10-08)
+
+- Physical p. 34: continued ruling 11, rulings 12–16 and the start of the sanity condition checked against PDFKit/image-OCR witness and Google Doc. Corrected ruling 16’s **reversed legal meaning**: the original Arabic requires circumcision for the validity of a minor’s Ḥajj even where recommended; the previous English wrongly said it was *not* a condition. Ruling 15’s guardian-cost correction from this page was already applied in the preceding batch.
+- Physical p. 35: sanity, the overarching ability condition, time, safety/illness and transport requirements, and first part of ruling 17 checked; corrected unsafe “may have to appoint” paraphrase to the source’s mandatory appointment of a deputy when illness precludes attendance.
+- Physical p. 36: completed ruling 17, the remaining ability conditions (family maintenance, livelihood after return, conflicting higher-priority obligations), ruling 18, and the beginning of ruling 19 checked. Restored original shop/orchard/factory examples, the marriage-to-prevent-forbidden-action example, and the elderly-parent care case omitted from the old English. Ruling 19 continues on p. 37; whole next source page 37 remains to be verified.
+- English Google Doc readback confirmed these manuscript repairs. Updated its physical-page marker from 33/298 to 36/298. Workbench D1 synchronization remains a distinct mandatory follow-up/readback through the self-hosted hajj progress workflow.
 
 ## Nonconsecutive fidelity restorations elsewhere in the manuscript
 
