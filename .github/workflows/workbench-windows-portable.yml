@@ -1,0 +1,48 @@
+name: Windows Workbench portable checks
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'workbench/functions/**'
+      - 'workbench/scripts/**'
+      - 'workbench/public/**'
+      - 'workbench/package.json'
+      - '.github/workflows/workbench-windows-portable.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: workbench-windows-portable-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify project, fast-start and live sync invariants
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          Set-Location workbench
+          $checks = @(
+            'scripts/check-progress-invariant.mjs',
+            'scripts/check-live-sync-invariant.mjs',
+            'scripts/check-translation-fast-start.mjs',
+            'scripts/sync-verified-progress.test.mjs'
+          )
+          foreach ($script in $checks) {
+            if ($script -like '*.test.mjs') {
+              node --test $script
+            } else {
+              node $script
+            }
+            if ($LASTEXITCODE -ne 0) { throw "$script failed with exit $LASTEXITCODE" }
+          }
