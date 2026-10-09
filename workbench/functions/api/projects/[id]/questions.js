@@ -1,4 +1,4 @@
-import {actorFromRequest,ensureCatalog,json,recordActivity} from '../../../_lib.js';
+import {actorFromRequest,ensureCatalog,json,recordActivity,normalizeGoogleDocUrl,verifyGoogleDocLinkAccess} from '../../../_lib.js';
 import {requireEditorCapability} from '../../../_write_auth.js';
 
 const idFrom=context=>{const n=Number(context.params.id);return Number.isInteger(n)&&n>0?n:null;};
@@ -61,10 +61,15 @@ export async function onRequestPatch(context){
   if(!body||typeof body!=='object')return json({error:'Invalid JSON.'},400);
   if(body.questions_doc_url!==undefined){
     const raw=phrase(body.questions_doc_url,1000);
-    if(raw && !/^https:\/\/docs\.google\.com\/document\/d\/[a-zA-Z0-9_-]+(?:\/|$)/.test(raw))return json({error:'Questions document must be a Google Docs URL.'},400);
+    const normalized=normalizeGoogleDocUrl(raw);
+    if(normalized===false)return json({error:'Questions document must be a valid Google Docs link.'},400);
+    if(normalized){
+      const access=await verifyGoogleDocLinkAccess(normalized);
+      if(!access.accessible)return json({error:'Questions Google Doc cannot be read through the approved public access policy; correct its sharing first.'},409);
+    }
     const old=await projectFor(context.env.DB,id);if(!old)return json({error:'Project not found.'},404);
-    await context.env.DB.prepare('UPDATE projects SET questions_doc_url=?, updated_at=CURRENT_TIMESTAMP WHERE id=?').bind(raw||null,id).run();
-    await recordActivity(context.env.DB,id,actorFromRequest(context.request),'linked questions document',{questions_doc_url:old.questions_doc_url},{questions_doc_url:raw||null});
+    await context.env.DB.prepare('UPDATE projects SET questions_doc_url=?, updated_at=CURRENT_TIMESTAMP WHERE id=?').bind(normalized||null,id).run();
+    await recordActivity(context.env.DB,id,actorFromRequest(context.request),'linked questions document',{questions_doc_url:old.questions_doc_url},{questions_doc_url:normalized||null});
     return json({project_id:id,questions_doc_url:raw||null});
   }
   const key=phrase(body.question_key,200);
