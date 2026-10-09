@@ -1,0 +1,7 @@
+# Workbench Codex / runner instructions
+
+The repository-root `AGENTS.md` and canonical projected Operator authorities continue to govern translation, formatting, and Workbench behavior. This scoped file adds only the project-owned **Windows GPU execution** procedure.
+
+**Before doing any Windows GPU-heavy Arabic OCR or GPU model/translation task**, read `runner/GPU-SCHEDULING.md`, then run all GPU commands through `scripts/with-exclusive-gpu.ps1`. Two translation runners share one RTX 4070, so **one GPU-heavy job at a time, automatically and without reminders**. Never invoke GPU-heavy OCR or translation outside the exclusive host lock; do not remove the lock as a performance optimization. Mark GPU workflows `# GPU_HEAVY` and require their GPU stage to use the wrapper.
+
+Workload separation: Windows translation/Workbench tasks stay in this repository; Mac-only PDFKit/Vision jobs stay on macOS. The Windows GPU OCR setup is experimental until source fidelity, layout accuracy, reproducibility and speed pass a representative benchmark. Never advance live verified page progress from draft OCR alone.

@@ -1,0 +1,28 @@
+name: Windows Translation GPU Slot Smoke
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-gpu:
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 10
+    # GPU_HEAVY — manual hardware probe; all GPU access through host mutex.
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Prove shared GPU mutex excludes parallel runner jobs
+        shell: pwsh
+        run: |
+          node workbench/scripts/gpu-lock-smoke.mjs
+          if ($LASTEXITCODE -ne 0) { throw 'GPU lock smoke failed' }
+      - name: Detect NVIDIA device only under the shared mutex
+        shell: pwsh
+        run: |
+          & ./workbench/scripts/with-exclusive-gpu.ps1 -Executable 'nvidia-smi'
+          if ($LASTEXITCODE -ne 0) { throw 'GPU probe failed or mutex could not be acquired' }

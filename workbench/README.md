@@ -4,6 +4,10 @@
 
 Internal collaborative work manager for translating Sayyid Kamal al-Haydari's books. This is intentionally separate from the public archive/publication surface.
 
+## Windows GPU translation runner safety
+
+**Automatic one-at-a-time GPU rule:** Mohammed's two Windows self-hosted translation runners share one RTX 4070. Every GPU-heavy OCR/model command must use the machine-wide exclusive PowerShell lock described in [GPU scheduling](runner/GPU-SCHEDULING.md). The scoped [Codex instructions](AGENTS.md) make this rule mandatory during Windows translation work. The Windows acceptance suite checks future GPU workflow definitions and uses two child processes to verify that jobs cannot overlap. Lightweight CPU-only Workbench jobs may run in parallel. Mac-only PDFKit/Vision jobs remain on macOS. Do not bypass the guard to make benchmarks look faster.
+
 ## Product contract
 
 - One shared workspace and database for Zahraa + Mohammed (Brother).
