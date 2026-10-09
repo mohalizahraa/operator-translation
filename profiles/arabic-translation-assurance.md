@@ -42,6 +42,8 @@ As applicable, verify:
 
 If any applicable gate is open, failed, untested, or blocked, do not call the edition publication-ready.
 
+**Per-batch independent critique (2026-10-09):** A separate Arabic-visible comparison pass must challenge omissions, doctrinal shifts, negation, numbers, pronouns, source questions and notes; record its source-unit coverage, findings and exact target revision. Watchdog anomalies prompt investigation, not automatic error claims. Source maps, scoped terminology decisions, questions, formatting proof and regression outcomes must remain attributable to the tested manuscript revision. These gates supplement rather than replace the edition-wide rules below.
+
 
 ## 9. Use exact work-state language
 
