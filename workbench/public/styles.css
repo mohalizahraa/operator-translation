@@ -644,35 +644,42 @@ body,button,input,select,textarea{font-family:var(--font-ui)}
   .board-list{scrollbar-gutter:auto}
 }
 
-/* Recent page updates: progress and bilingual title must NOT share a line.
-   A numerical gap in adjacent columns looked cramped even when tests passed. */
+/* Dashboard translation titles: progress stays left, Arabic + English pair aligns right.
+   Keep the columns genuinely separated on desktop and reflow them on smaller screens. */
+.live-translation-copy{align-items:center}
+.live-translation-copy strong{order:-1;flex:none}
+.live-translation-copy .book-title-pair{flex:1;min-width:0;text-align:right;justify-items:end}
+.live-translation-copy .book-title-en{font-family:"EB Garamond",serif;font-size:12px}
 .translation-feed-item>.translation-feed-detail{
   display:grid;
-  grid-template-columns:minmax(0,1fr);
-  row-gap:10px;
-  align-items:start;
+  grid-template-columns:minmax(120px,1fr) minmax(0,2fr);
+  column-gap:clamp(24px,4vw,72px);
+  align-items:center;
   min-width:0;
 }
 .translation-feed-item .translation-feed-update{
   display:block;
-  width:fit-content;
+  grid-column:1;
   max-width:100%;
   white-space:normal;
   line-height:1.5;
 }
 .translation-feed-item .translation-feed-title{
   display:block;
+  grid-column:2;
+  justify-self:end;
   min-width:0;
   max-width:100%;
-  margin-inline-start:0;
-  padding-inline-start:15px;
-  border-inline-start:2px solid var(--line);
+  text-align:right;
+  padding-inline-end:12px;
+  border-inline-end:2px solid var(--line);
 }
 .translation-feed-title .book-title-pair{
   display:grid;
-  width:fit-content;
   max-width:100%;
   gap:3px;
+  text-align:right;
+  justify-items:end;
   vertical-align:top;
 }
 .translation-feed-title .book-title-ar{
@@ -686,6 +693,13 @@ body,button,input,select,textarea{font-family:var(--font-ui)}
   overflow-wrap:anywhere;
 }
 @media(max-width:720px){
-  .translation-feed-item>.translation-feed-detail{row-gap:9px}
-  .translation-feed-item .translation-feed-title{padding-inline-start:12px}
+  .live-translation-copy{align-items:stretch}
+  .live-translation-copy strong{align-self:flex-start}
+  .live-translation-copy .book-title-pair{width:100%}
+  .translation-feed-item>.translation-feed-detail{
+    grid-template-columns:minmax(0,1fr);
+    row-gap:7px;
+    align-items:stretch;
+  }
+  .translation-feed-item .translation-feed-title{grid-column:1;justify-self:end}
 }

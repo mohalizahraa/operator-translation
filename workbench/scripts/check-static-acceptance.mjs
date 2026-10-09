@@ -24,9 +24,12 @@ const coverProxySource = await fs.readFile(new URL('functions/api/official-cover
 const coverSourcesSource = await fs.readFile(new URL('functions/_cover_sources.js', root), 'utf8');
 const stylesSource = await fs.readFile(new URL('public/styles.css', root), 'utf8');
 assert(appSource.includes('class="translation-feed-detail"') && appSource.includes('class="translation-feed-update"') && appSource.includes('class="translation-feed-title"'), 'Recent page updates have lost separate progress-label and bilingual-title containers.');
-assert(stylesSource.includes('.translation-feed-item>.translation-feed-detail{') && stylesSource.includes('grid-template-columns:minmax(0,1fr);') && stylesSource.includes('row-gap:10px;'), 'Recent page updates must stack the label above the bilingual title at every width.');
-assert(stylesSource.includes('padding-inline-start:15px;') && stylesSource.includes('border-inline-start:2px solid var(--line)'), 'Recent page update titles need a visible, consistent second-row indentation.');
-assert(!stylesSource.includes('grid-template-columns:max-content minmax(0,1fr)'), 'Previous visually cramped side-by-side feed layout still exists.');
+const dashboardTitleLayout=stylesSource.split('/* Dashboard translation titles:')[1] || '';
+assert(dashboardTitleLayout.includes('grid-template-columns:minmax(120px,1fr) minmax(0,2fr);') && dashboardTitleLayout.includes('column-gap:clamp(24px,4vw,72px);'), 'Recent page update titles must occupy a separated right-hand desktop column.');
+assert(dashboardTitleLayout.includes('justify-self:end;') && dashboardTitleLayout.includes('text-align:right;') && dashboardTitleLayout.includes('justify-items:end;'), 'Arabic and English feed titles must both align to the right.');
+assert(dashboardTitleLayout.includes('.live-translation-copy strong{order:-1;') && dashboardTitleLayout.includes('.live-translation-copy .book-title-pair{flex:1;'), 'Assigned-book rows must place progress left and bilingual titles right.');
+assert(dashboardTitleLayout.includes('@media(max-width:720px){') && dashboardTitleLayout.includes('grid-template-columns:minmax(0,1fr);'), 'Narrow layouts must reflow rather than squeeze bilingual titles.');
+assert(!dashboardTitleLayout.includes('grid-template-columns:max-content minmax(0,1fr)'), 'The previously cramped feed layout must not return.');
 assert(indexSource.includes('id="board-scroll-controls"') && indexSource.includes('id="board-scroll-prev"') && indexSource.includes('id="board-scroll-next"'), 'Desktop Board scrolling controls are missing.');
 assert(stylesSource.includes('.wrap{width:100%;max-width:1760px}') && stylesSource.includes('.board-list{overscroll-behavior-y:auto'), 'Responsive desktop layout or vertical Board scroll boundary is missing.');
 assert(appSource.includes('function updateBoardScrollControls()') && appSource.includes("addEventListener('scroll',updateBoardScrollControls"), 'Board scrolling controls are not wired.');
