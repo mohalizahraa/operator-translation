@@ -722,3 +722,7 @@ When the user authorizes cleanup of superseded working artifacts:
 - enumerate the full in-scope storage surface, including pagination/duplicate variants where applicable, before bulk deletion; then re-list or otherwise verify the post-cleanup active set so preservation claims are evidence-backed rather than assumed.
 
 The goal is a small active working set without loss of the knowledge needed to reconstruct why the current translation and release state are what they are.
+
+## Project-specific Qurʾānic citation convention — Brotherhood & Unity
+
+For the English edition *The Book of Brotherhood & Unity* (*Muṣādaqat al-Ikhwān / Kitāb al-Ikhwān wa-l-Ulaf*), the user requires Qurʾānic footnotes in the exact form **Sūrah name: verse number**, e.g. `Al-Ḥujurāt: 10`, `Āl ʿImrān: 103`, or `Al-Insān: 8–9`. Do not prefix these standalone Qurʾānic citations with `Qurʾān`, `Sūrat`, or `verse`, and do not add a parenthesized numeric sūrah number. Preserve any genuinely substantive textual or reading qualification after the citation. This is a scoped edition decision, not a blanket replacement for all other projects' citation conventions.
