@@ -8,9 +8,11 @@ export async function onRequestGet(context){
   const id=idFrom(context);if(!id)return json({error:'Invalid project id.'},400);
   const project=await context.env.DB.prepare('SELECT id FROM projects WHERE id=?').bind(id).first();
   if(!project)return json({error:'Project not found.'},404);
-  const {results}=await context.env.DB.prepare(
+  let results;
+  try{({results}=await context.env.DB.prepare(
     'SELECT id,from_page,to_page,source_pdf_sha256,google_doc_revision,recorded_by,created_at FROM translation_quality_evidence WHERE project_id=? ORDER BY to_page,id'
-  ).bind(id).all();
+  ).bind(id).all());}
+  catch{return json({error:'QA evidence table requires its guarded migration.',code:'schema_pending'},503);}
   return json({project_id:id,receipts:results||[],note:'These are submitted evidence-presence receipts, not independent certification that the manuscript matches its source.'});
 }
 export async function onRequestPost(context){
