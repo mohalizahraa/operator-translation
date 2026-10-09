@@ -2,9 +2,9 @@
 
 Project 11, source 298 pages; SHA-256: 5e0a7395a4a439e493d647d95a2d58680880b27bc5e5043a16392c9b992c3c04.
 
-Consecutive source-certified: pages 1–170. Title and bibliographical front matter: 1–2. Blank PDF pages: 3–4. Handwritten Arabic acknowledgment compared to English text: 5. Blank PDF page: 6.
+Consecutive source-certified: pages 1–190. Title and bibliographical front matter: 1–2. Blank PDF pages: 3–4. Handwritten Arabic acknowledgment compared to English text: 5. Blank PDF page: 6.
 
-Resume at physical page 171. English draft coverage of 399 numbered rulings and 13 appendix units is not proof of translation verification. Arabic source witnesses for physical pages 3–298 are in workbench/handoffs/rites-of-hajj-source-physical-*-witness.txt. Workbench source counter must count only verified original pages. Full Arabic-English audit, all devotional texts, footnotes, table of contents, and rendered layout remain open.
+Resume at physical page 191. English draft coverage of 399 numbered rulings and 13 appendix units is not proof of translation verification. Arabic source witnesses for physical pages 3–298 are in workbench/handoffs/rites-of-hajj-source-physical-*-witness.txt. Workbench source counter must count only verified original pages. Full Arabic-English audit, all devotional texts, footnotes, table of contents, and rendered layout remain open.
 
 ## Physical pages 7–18 checked against English Google Doc
 
@@ -12,7 +12,7 @@ Resume at physical page 171. English draft coverage of 399 numbered rulings and 
 - Page 12: Corrected a source-fidelity error in the English TOC: the entry about Hajj on behalf of a living person had been incorrectly rendered as a person acting on their own behalf. Also removed an unsupported 'Another' before Imam Ali ibn al-Husayn's Arafah supplication.
 - Page 14: blank source page, verified.
 - Pages 15–18: full Arabic preface text (invocation, method, editorial choices, practical recommendations, omission of obsolete cases, newly arising questions, concluding prayer, author/date) checked against English preface paragraphs 138–157. No omitted preface paragraph identified in this batch.
-- Physical pages 171–298 still unverified. No publication-ready claim; prayers, notes, TOC, and rendered QA remain open.
+- Physical pages 191–298 still unverified. No publication-ready claim; prayers, notes, TOC, and rendered QA remain open.
 
 ## Physical pages 19–30 checked against the authoritative PDF
 
@@ -111,6 +111,17 @@ Resume at physical page 171. English draft coverage of 399 numbered rulings and 
 - Physical pp. 167–169: full extended ʿArafah supplications, exhortations, narrations, and original references to appended full Duʿāʾ al-Ḥusayn and Zayn al-ʿĀbidīn compared with draft; native footnotes for Qurʾān text still open.
 - Physical p. 170: Muzdalifah rules 296–298, original name Jamʿ and approximately 10 km location restored in ruling 296, essential dawn-sunrise window checked. Eight changed paragraphs were read back; no formatting or native TOC certification implied.
 - Doc marker updated to `⟦WBPROGRESS:11:170:298⟧`; site D1 must be separately synchronized and read back. Next source page: 171.
+
+## Physical pages 171–190 checked (2026-10-08)
+
+- Physical pp. 171–173: exceptional standing at al-Muzdalifah and both sites, rulings 298–301, all ordinary/exceptional combinations compared and already present in English without contradiction identified.
+- Physical pp. 174–175: remaining six-case standing contingencies and the complete al-Muzdalifah recommended prayers, 70-pebble preparation and ḥadīth references compared.
+- Physical pp. 176–179: stoning rulings 303–308, modern structures, overlooked stoning, late recollections and appropriate returns. Corrected the original's **eight separate stoning conditions**; prior English labeled the set as *seven* and collapsed the unused-pebble prerequisite into the seventh. Source's daylight vs nighttime exceptions also separated from slaughter/shaving restrictions.
+- Physical pp. 180–182: sacrificial slaughter rulings 309–314 and conditions compared; restored exact rule 310 that a formerly seemingly sound purchased animal later found defective/emaciated may be **slaughtered without returning**; original ruling 312 tests doubt about prescribed characteristics or **actual location of slaughter at Minā**, not draft's different intention/form test. Earlier correction to rule 314 remained verified.
+- Physical pp. 183–186: rules 315–326, substitution by fasting, agent reliability, three-way distribution, full recommended slaughter invocation compared to existing English; previous major corrections to rules 319 and 320 preserved.
+- Physical pp. 187–189: shaving/taqṣīr rulings 327–338, detailed source ḥadīth, deputation and hair ritual compared; **critical reversal repaired in ruling 336:** the deputy must follow **the deputy's own**, not the principal's, shaving/taqṣīr obligation. Corrected rule 337 validity despite improper order and explicit **no repeat** of ṭawāf/saʿy when omitted shaving discovered only after departing Mecca in rule 332.
+- Physical p. 190: Minā night-stay introduction and conditional third night, rulings 339–340 compared to English. Normal two nights and third-night condition retained.
+- Six source-backed repairs read back from live Doc; marker advanced to `⟦WBPROGRESS:11:190:298⟧`. Site D1 synchronization and whole-edition formatting remain separately open. Next page 191.
 
 ## Nonconsecutive fidelity restorations elsewhere in the manuscript
 
