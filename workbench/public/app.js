@@ -86,6 +86,7 @@ async function api(path, options = {}) {
         headers: {
           'content-type': 'application/json',
           'x-workbench-actor': state.actor,
+          ...(sessionStorage.getItem('workbench-editor-key') ? {'x-workbench-editor-key':sessionStorage.getItem('workbench-editor-key')} : {}),
           ...(options.headers || {}),
         },
       });
@@ -99,6 +100,12 @@ async function api(path, options = {}) {
     if (canRetry && attempt<2 && retryable.has(response.status)) {
       await new Promise(resolve=>setTimeout(resolve,350*(2**attempt)));
       continue;
+    }
+    if (response.status===401 && data.code==='editor_access_required' && !options.__editorKeyRetry) {
+      const key=window.prompt('Enter the shared Workbench editor key to save this change. It stays in this browser tab session only.');
+      if (!key) throw new Error('Editor key required. No changes saved.');
+      sessionStorage.setItem('workbench-editor-key',key);
+      return api(path,{...options,__editorKeyRetry:true});
     }
     throw new Error(data.error || `Request failed (${response.status})`);
   }
@@ -274,6 +281,11 @@ function googleDocLinkMarkup(p) {
     ? `<button class="mini-link secondary-link english-book-link" type="button" data-open-english="${p.id}">English Book</button>`
     : `<button class="mini-link secondary-link english-book-button" type="button" data-link-english="${p.id}">English Book · link</button>`;
 }
+function questionsDocLinkMarkup(p) {
+  return p.questions_doc_url
+    ? `<button class="mini-link secondary-link" type="button" data-open-questions="${p.id}">Questions</button>`
+    : `<button class="mini-link secondary-link" type="button" data-link-questions="${p.id}">Questions · link</button>`;
+}
 async function setProjectDeadline(id, value) {
   const project=state.projects.find(p=>p.id===id);
   const current=project?.due_date || '';
@@ -439,6 +451,7 @@ function projectMarkup(p, compact=false, selectable=false) {
         ${workOnBookMarkup(p)}
         ${p.pdf_available ? `<a class="mini-link pdf" href="/api/pdf/${p.id}" target="_blank" rel="noopener">Arabic PDF</a>` : ''}
         ${googleDocLinkMarkup(p)}
+        ${questionsDocLinkMarkup(p)}
       </div>
       ${quickControlsMarkup(p,true)}
     </article>`;
@@ -464,6 +477,7 @@ function projectMarkup(p, compact=false, selectable=false) {
         ${workOnBookMarkup(p)}
         ${p.pdf_available ? `<a class="mini-link pdf" href="/api/pdf/${p.id}" target="_blank" rel="noopener">Arabic PDF</a>` : (p.pdf_missing ? '<span class="pill pdf-missing">PDF missing</span>' : '<span class="pill">PDF checking…</span>')}
         ${googleDocLinkMarkup(p)}
+        ${questionsDocLinkMarkup(p)}
       </div>
     </div>
     <div class="project-side">
@@ -529,6 +543,22 @@ async function startWorkOnBook(id) {
 }
 
 function bindQuickActions(root=document) {
+  root.querySelectorAll('[data-open-questions]').forEach(button=>button.addEventListener('click',event=>{
+    event.stopPropagation();
+    const project=state.projects.find(p=>p.id===Number(button.dataset.openQuestions));
+    if(project?.questions_doc_url) window.open(project.questions_doc_url,'_blank','noopener,noreferrer');
+  }));
+  root.querySelectorAll('[data-link-questions]').forEach(button=>button.addEventListener('click',async event=>{
+    event.stopPropagation();
+    const id=Number(button.dataset.linkQuestions);
+    const raw=window.prompt('Paste the separate Google Doc URL for this book’s translation questions:');
+    if(raw===null||!raw.trim())return;
+    try {
+      await api(`/api/projects/${id}/questions`,{method:'PATCH',body:JSON.stringify({questions_doc_url:raw.trim()})});
+      await loadData();
+      toast('Questions document linked to this book.');
+    } catch(error){toast(error.message);}
+  }));
   root.querySelectorAll('[data-work-on-book]').forEach(button => button.addEventListener('click', event => {
     event.stopPropagation();
     startWorkOnBook(Number(button.dataset.workOnBook));
@@ -802,6 +832,7 @@ function assignedProjectMarkup(p) {
       <div class="entry-actions assigned-actions">
         ${workOnBookMarkup(p)}
         ${googleDocLinkMarkup(p)}
+        ${questionsDocLinkMarkup(p)}
         ${p.pdf_available ? `<a class="mini-link pdf" href="/api/pdf/${p.id}" target="_blank" rel="noopener">Arabic PDF</a>` : ''}
       </div>
     </div>
