@@ -39,7 +39,7 @@ Do not use a bulk replacement technique that destroys notes, links, formatting, 
 
 ## Edition formatting profiles — inherited shared default
 
-**Active standard:** REAL SCALE v2 inherits every applicable v1 formatting rule except explicit v2 overrides. It applies to every Haydari Workbench book, regardless of collaborator assignment.
+**Active standard:** REAL SCALE v3 inherits every applicable v2 and v1 formatting rule except explicit later overrides. It applies to every Haydari Workbench book, regardless of collaborator assignment.
 
 Formatting can vary between English editions without changing the translation method itself. Preserve each user-selected edition format as a **named, versioned profile** rather than silently rewriting one standing style contract whenever a new experiment is tried.
 
@@ -153,7 +153,7 @@ The inspected reference contains isolated formatting drift that is **not** part 
 
 ### Formatting Profile v2 — REAL SCALE tightened book rhythm
 
-**Status:** user-selected refinement and current preferred REAL SCALE format, recorded 2026-09-26.
+**Status:** user-selected refinement recorded 2026-09-26; retained as the reconstructable v2 predecessor of active v3.
 
 **Inheritance rule:** v2 inherits **Formatting Profile v1 — REAL SCALE** in full except for the explicit overrides below. Preserve v1 as the reconstructable earlier experiment rather than rewriting its recorded measurements and rules.
 
@@ -166,6 +166,16 @@ The inspected reference contains isolated formatting drift that is **not** part 
 - **Heading pagination hierarchy:** semantic **H1 chapter openings and H2 major sections start on a new page**. For a multi-paragraph H1 chapter-opening block (for example a chapter label followed by its title/subtitle), place the forced break on the opening of the block; do **not** force another page between paragraphs that belong to the same H1 opening block. Semantic **H3 subsections and H4 lower-level headings remain in continuous document flow** and never receive a forced page break merely because of their level.
 - **H3/H4 anti-stranding:** preserve the v1 spacing for H3/H4 and keep each heading with the following text where the host supports it. If insufficient room remains at the bottom of a page, let the renderer move the heading with following text naturally; do not manufacture a manual blank page or spacer.
 - **Body alignment:** ordinary English body text is **left-aligned / ragged-right**, not fully justified. Do not introduce full justification unless a later book-specific profile explicitly adopts and verifies it.
+
+### Formatting Profile v3 — Indentation coverage correction
+
+**Status:** founder-approved correction, 2026-10-09. **This is the current shared REAL SCALE standard** for every collaborator and every book. Preserve v1 and v2 as historical edition versions; v3 inherits all their rules except the explicit list-indentation override below.
+
+- **Every ordinary text-bearing paragraph gets its prescribed indentation, including one-sentence or one-line paragraphs.** Length, run count, proximity to a list/heading, and whether the paragraph occupies only one rendered line are never reasons to remove the 18 pt first-line body indent. Apply the approved first-line indent to ordinary prose, continuation prose, quotations presented as body paragraphs, standalone body-text sentences, and explanatory paragraphs between or inside lists. Resolve the paragraph's semantic role before setting geometry; do not accidentally restyle headings, native TOC entries, page furniture, tables, or intentionally centered title/epigraph/dedication display compositions as ordinary body prose.
+- **Numbered and bulleted lists must ALSO be visibly indented, even when an item consists of only one sentence.** This explicitly supersedes v1's 2026-09-24 “lists are not indented” decision for new/current REAL SCALE v3 editions. Use native list structures where supported and a consistent hanging layout: **18 pt marker/number position, 36 pt list-text/wrapped-line start, 0 pt end indent** relative to the body margin. For a native Google Docs list this normally means `indentStart=36 pt` and `indentFirstLine=18 pt`, subject to the host's native bullet/number treatment. For literal-number list paragraphs, reproduce the same rendered marker/text separation and continuation alignment without corrupting source wording or turning lists into arbitrary prose. Preserve semantic nesting with additional consistent per-level offsets and verify each level in the rendered export.
+- **No silent exceptions for short text.** All one-sentence list items, single-sentence standalone paragraphs, chapter-body teasers, or otherwise brief body text must pass the same class-specific indentation check as long paragraphs. Do not apply an unindented style merely because a segment was produced by a different batch, model, importer, or Google Docs named-style inheritance.
+- **Dedicated display compositions retain their layout semantics.** The deliberate centered chapter-title/epigraph/front-matter pages and native headings/TOC are not ordinary body paragraphs; maintain the existing special geometry for those classes. The contents/teaser list on a centered chapter opener retains its centered-column composition and left-aligned item text, but must still have internally consistent visible list indentation and wrapped-line alignment within that column when the source establishes list semantics.
+- **Acceptance gate:** inventory **all** body, literal-list, native-list, nested-list, and footnote paragraphs across the complete edition; check computed paragraph styles **and** rendered first-line/list-marker/wrapped-line positions for every relevant class. Flag and repair every unindented ordinary body paragraph, zero-indent list item, short-line exception, and unstable list wrap. Perform the same checks in the **first applicable formatting pass**, not as optional post-review cleanup. Layout-changing indentation repairs invalidate downstream TOC/page-number/render evidence, so rerun terminal verification.
 
 ### REAL SCALE integrity gates
 
