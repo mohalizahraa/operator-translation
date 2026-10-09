@@ -1,0 +1,21 @@
+#!/usr/bin/env node
+import assert from 'node:assert/strict';
+import {createHash} from 'node:crypto';
+import {verifyLiveEnglishDocumentRevision} from '../functions/_translation.js';
+const doc={google_doc_url:'https://docs.google.com/document/d/ExampleBook1234567890/edit'};
+const sha=s=>createHash('sha256').update(s).digest('hex');
+const rev='public-export-sha256:'+sha('Proofread manuscript');
+const mock=text=>async()=>new Response(text,{status:200,headers:{'content-type':'text/plain'}});
+let status=await verifyLiveEnglishDocumentRevision(doc,rev,mock('Proofread manuscript'));
+assert.equal(status.ok,true);
+status=await verifyLiveEnglishDocumentRevision(doc,rev,mock('Proofread manuscript revised'));
+assert.equal(status.code,'stale_manuscript_revision');
+status=await verifyLiveEnglishDocumentRevision(doc,'native-docs-revision-unknown',mock('Proofread manuscript'));
+assert.equal(status.code,'unverifiable_revision');
+status=await verifyLiveEnglishDocumentRevision(doc,rev,async()=>{throw Error('network down');});
+assert.equal(status.code,'document_unreachable');
+status=await verifyLiveEnglishDocumentRevision({google_doc_url:null},rev,mock('Proofread manuscript'));
+assert.equal(status.code,'missing_document');
+status=await verifyLiveEnglishDocumentRevision(doc,rev,async()=>new Response('Not found',{status:403}));
+assert.equal(status.code,'document_unreachable');
+console.log('Live English document revision guard: PASS (matching/changed/unverifiable/offline/missing/denied).');
