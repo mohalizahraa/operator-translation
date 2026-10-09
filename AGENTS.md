@@ -12,7 +12,7 @@ Always freshly load:
 
 For Arabic→English book/manuscript translation, editorial review, formatting, or publication work, also freshly load:
 
-- `profiles/arabic-book-translation.md`
+- `profiles/arabic-book-translation.md` (task router; load applicable child profiles by task)
 - `protocol/01-REASONING-DMSC.md`
 - `protocol/02-EXECUTION.md`
 - `protocol/03-KNOWLEDGE-AND-DOCS.md`

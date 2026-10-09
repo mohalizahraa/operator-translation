@@ -1,0 +1,36 @@
+# Arabic Book Translation — Workbench Integration
+
+Preserves section numbers and all original operational requirements.
+
+## Haydari Translation Workbench integration
+
+For Sayyid Kamal al-Haydari translation/publication work, the canonical shared Workbench is:
+
+> **https://haydari-translation-workbench.pages.dev**
+
+Treat that Workbench as the live operational surface for project assignment, linked English Book targets, canonical Arabic-PDF access, source-page translation progress, workflow status, and publication-tracking state. When those fields are material to the active task, retrieve current Workbench state rather than relying on remembered chat/repository status, and keep the Workbench synchronized with verified progress and lifecycle changes produced by the work.
+
+The Workbench's own project contract remains authoritative for its field semantics, status transitions, access invariants, progress/checkpoint rules, and deployment behavior. Do not duplicate those mechanics into this profile; use the current Workbench/project authority and preserve the URL above as the stable discovery point.
+
+### Fast-start / resume path for Haydari translations
+
+**Book-led collaborator context:** Resolve the named Workbench book first. When assignment is Zahraa or Mohammed, use the assignee as a provisional guess about the speaker, not a verified identity. Both, Unassigned, contrary context or an unusual cross-assignment request may require confirmation before actor-attributed writes. The named target book, organizational assignee, actual speaker, and mutation actor are distinct; either collaborator can work on any authorized book. The same translation and formatting standards govern every book.
+
+
+For a Haydari request to **start, continue, resume, or finish translating a book**, classify the request before retrieval and use the Workbench's machine-readable translation/project contract directly. Do **not** begin by browsing the Workbench frontend, running ordinary web search, reconstructing from chat history, or rediscovering already-known source/target URLs.
+
+- **Known project/book:** retrieve its composite translation context directly from `/api/projects/{id}/translation-context`.
+- **Continue / resume with a known collaborator:** retrieve `/api/translations/current?assignee=<name>`. This route intentionally resolves only an eligible `in_progress` project. A successful response with `current_translation: null` means **there is no active translation for that collaborator**; it is not a retrieval failure and should not trigger repeated retries or frontend discovery.
+- **Start the next/new assigned book:** do **not** use the current-translation endpoint as the discovery route. Retrieve `/api/projects` directly, preserve the Workbench API's returned priority/order, filter to projects whose status is `not_started` and whose assignee is the collaborator or `Both`, and select the first eligible project unless stronger explicit project/user priority overrides that order. Do not silently substitute an `Unassigned`, review, completed, or published project when no eligible assigned project exists.
+- After resolving a next/new project, retrieve `/api/projects/{id}/translation-context` for that exact project. Establish the English target before content work; if the Workbench has no linked English Book yet, create/link the persistent translation document through the available authorized document capability. Move the selected project through the Workbench project contract into the Translating/`in_progress` state before advancing translation progress so future `continue` requests can resolve it deterministically.
+- Use a **direct HTTP/JavaScript-capable fetch or connector path that can read JSON API responses**. If one generic page/web retriever cannot expose a known API route, switch immediately to an API-capable retrieval path rather than spending attempts on frontend browsing, search-engine discovery, or repeated access through the wrong transport.
+- Treat the resolved context as an **operational projection over existing owners**, not as a new semantic source. The canonical Arabic PDF remains the semantic and physical-page authority; the linked English Book remains the mutation target; verified checkpoints/markers govern resumable progress; stored transcript, mirror, OCR, or other recovery routes are access witnesses whose recovered wording must still be aligned back to the canonical PDF before source-page progress advances.
+- Once the context is available, open the linked target and the indicated canonical/recovery source route directly and continue from the verified source-page boundary. Do **not** re-discover the PDF or English Doc from the frontend/search when the context already supplies them.
+- **Workbench synchronization is mandatory during work, never an end-of-book chore or an action requiring a user reminder.** After each verified source-page batch is written to the linked English Book and read back successfully, immediately publish the matching source-page checkpoint through the Workbench's dedicated progress/checkpoint contract (or its verified progress-marker sync path when that is the project-authorized mechanism), then read the Workbench state back and confirm the correct project/count before beginning the next batch. Never advance the live counter from extraction alone, unreadable pages, unverified draft text, or a write that has not been read back. If checkpoint publication fails, preserve the verified manuscript work but repair/reconcile the Workbench checkpoint before continuing far enough that resume state could become materially stale.
+- **Sync even with no Workbench browser open:** after each verified batch is written to the linked Google Doc, use the direct verified-marker synchronization API (or the authorized evidence-bound checkpoint endpoint), then GET the live project again and confirm matching project id, page numerator and denominator, and stage. Only continue the next batch after this D1 readback succeeds. A Doc marker or browser polling alone is not sufficient. If the sync or readback fails, retain verified manuscript work, report the unsynchronized state and repair it before advancing.
+- **All status mutations:** update and confirm the live Workbench during the same work unit when formatting is completed, a human review is recorded, a link changes, or an assignment changes. Formatting never advances verified translated-source page counters.
+- Fall back to the normal source-access/reconciliation ladder only when the direct Workbench contract is unavailable, internally stale/conflicted, points to an inaccessible route, lacks a witness needed for the current source defect, or disagrees with stronger live source↔target evidence.
+- When work discovers a reusable source-access fact that would otherwise need to be rediscovered later—such as a clean same-work transcript series, mirror, page-alignment rule, or recurring extraction defect—persist it through the Workbench's source-pack owner after verification instead of leaving it only in chat memory.
+- If Workbench context, the English Doc, and source evidence disagree about the resume boundary, reconcile that conflict first. Speed never authorizes duplicate translation, skipped source units, guessed damaged text, or an unverified progress advance.
+
+
