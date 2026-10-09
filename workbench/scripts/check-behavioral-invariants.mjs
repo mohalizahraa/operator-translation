@@ -72,8 +72,10 @@ assert(history.baseline===2,'History baseline must reconcile immutable transitio
 assert(history.dayDeltas['2026-09-05']===-1,'Workflow rewind must remain visible in completion history.');
 
 const {assessTranslationEvidence}=await import('../functions/_translation.js');
-const quality={source_hash:'source-sha',target_revision:'rev1',units:[{id:'u1',source_page:1,target_anchor:'p1',status:'VERIFIED'}],checks:Object.fromEntries(['independent_critic','ambiguity_review','terminology_review','batch_formatting','full_render','native_toc','publication_review','regression'].map(k=>[k,{status:'PASS',target_revision:'rev1',evidence_ref:k}]))};
+const quality={source_hash:'source-sha',target_revision:'rev1',from_page:1,to_page:1,source_total_pages:1,units:[{id:'u1',source_page:1,target_anchor:'p1',status:'VERIFIED'}],checks:Object.fromEntries(['independent_critic','ambiguity_review','terminology_review','batch_formatting','full_render','native_toc','publication_review','regression'].map(k=>[k,{status:'PASS',target_revision:'rev1',evidence_ref:k}]))};
 assert(assessTranslationEvidence(quality,true).ready,'Complete evidence report should pass preflight.');
 assert(!assessTranslationEvidence({...quality,units:[{...quality.units[0],status:'PARTIAL'}]},true).ready,'Partial source coverage must fail preflight.');
+assert(!assessTranslationEvidence({...quality,to_page:2,source_total_pages:2},false).ready,'An unaccounted source page must fail preflight.');
+assert(!assessTranslationEvidence({...quality,from_page:2,to_page:2,source_total_pages:2},true).ready,'A whole-book claim starting after source page one must fail.');
 assert(!assessTranslationEvidence({...quality,checks:{...quality.checks,independent_critic:{status:'PASS',target_revision:'stale',evidence_ref:'critic'}}},true).ready,'Stale critic evidence must fail preflight.');
 console.log('Workbench behavioral invariants: PASS');
