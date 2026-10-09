@@ -2,9 +2,9 @@
 
 Project 11, source 298 pages; SHA-256: 5e0a7395a4a439e493d647d95a2d58680880b27bc5e5043a16392c9b992c3c04.
 
-Consecutive source-certified: pages 1–70. Title and bibliographical front matter: 1–2. Blank PDF pages: 3–4. Handwritten Arabic acknowledgment compared to English text: 5. Blank PDF page: 6.
+Consecutive source-certified: pages 1–90. Title and bibliographical front matter: 1–2. Blank PDF pages: 3–4. Handwritten Arabic acknowledgment compared to English text: 5. Blank PDF page: 6.
 
-Resume at physical page 71. English draft coverage of 399 numbered rulings and 13 appendix units is not proof of translation verification. Arabic source witnesses for physical pages 3–298 are in workbench/handoffs/rites-of-hajj-source-physical-*-witness.txt. Workbench source counter must count only verified original pages. Full Arabic-English audit, all devotional texts, footnotes, table of contents, and rendered layout remain open.
+Resume at physical page 91. English draft coverage of 399 numbered rulings and 13 appendix units is not proof of translation verification. Arabic source witnesses for physical pages 3–298 are in workbench/handoffs/rites-of-hajj-source-physical-*-witness.txt. Workbench source counter must count only verified original pages. Full Arabic-English audit, all devotional texts, footnotes, table of contents, and rendered layout remain open.
 
 ## Physical pages 7–18 checked against English Google Doc
 
@@ -12,7 +12,7 @@ Resume at physical page 71. English draft coverage of 399 numbered rulings and 1
 - Page 12: Corrected a source-fidelity error in the English TOC: the entry about Hajj on behalf of a living person had been incorrectly rendered as a person acting on their own behalf. Also removed an unsupported 'Another' before Imam Ali ibn al-Husayn's Arafah supplication.
 - Page 14: blank source page, verified.
 - Pages 15–18: full Arabic preface text (invocation, method, editorial choices, practical recommendations, omission of obsolete cases, newly arising questions, concluding prayer, author/date) checked against English preface paragraphs 138–157. No omitted preface paragraph identified in this batch.
-- Physical pages 71–298 still unverified. No publication-ready claim; prayers, notes, TOC, and rendered QA remain open.
+- Physical pages 91–298 still unverified. No publication-ready claim; prayers, notes, TOC, and rendered QA remain open.
 
 ## Physical pages 19–30 checked against the authoritative PDF
 
@@ -62,6 +62,15 @@ Resume at physical page 71. English draft coverage of 399 numbered rulings and 1
 - Physical pp. 66 and 68 blank in PDFKit and image-OCR. Page 67: chapter heading for ʿUmrah and its kinds present.
 - Physical pp. 69–70: ʿUmrah introduction and rulings 92–97 through the starting shared rite list compared. Restored ruling 93's missing *affirmative* obligation for standalone ʿUmrah when able even without ability for Ḥajj, subject to the special combined Ḥajj al-tamattuʿ exception. Corrected ruling 94 to say independent ʿUmrah **is obligatory** for the stated ifrād/qirān deputy scenario, not merely “may be obligatory.”
 - All repaired source sections were read back from the original linked English manuscript. The verified document marker advanced to `⟦WBPROGRESS:11:70:298⟧`; website D1 still requires independent checkpoint readback. Next source physical page: 71.
+
+## Physical pages 71–90 checked (2026-10-08)
+
+- Physical pp. 71–74: continued ʿUmrah rulings 97–106 and entry exemptions. **Corrected ruling 100's dangerous frequency error:** original says twice per week, not once every two weeks. Restored preferred independent ʿUmrah timing (Rajab then Ramaḍān) and checked ʿUmrah-of-tamattuʿ conversion, single-person requirement, menstruation/deputation cases.
+- Physical pp. 75, 81: chapter-opening heading leaves checked against the English manuscript. Physical pp. 76, 80, 82: blank physical pages (empty PDFKit/image-OCR). Physical pp. 77–79: pilgrimage categories and timings, rulings 107–113. **Corrected ruling 110:** original distance is sixteen farsakhs (about 90 km), not six farsakhs. Corrected the distinction between confidence of timely return for nearby excursions and certainty for distant travel in ruling 113.
+- Physical pp. 83–85: mīqāt definitions (original points 1–10) and rulings 114–117 compared against English. Corrected ruling 117's *actual* vow scenario (forgot or deliberately breached the vow to enter from Karbalāʾ), not previous fabricated scenario of already entering at Karbalāʾ and passing the station. Kept valid iḥrām and required expiation for deliberate vow breach.
+- Physical pp. 86–87: rulings 118–121. Restored Ruling 120's source-specific absence of iḥrām prohibitions after deliberate omission despite sinful entry, and restored validity without repeat on discovery only after Ḥajj and completion by talbiyah when remembered during the rites. Restored customary alignment's distance-to-Mecca criterion in ruling 121.
+- Physical pp. 88–90: rulings 122–130, Jeddah approaches and no-mīqāt routes. Corrected rule 122 to allow Jeddah *by vow* under its stated prerequisite without obligatory renewed iḥrām before the Sacred Precinct; corrected 123's original Prophetic site **ʿUsfān**, wrongly replaced with al-Tanʿīm in the draft. Restored no additional conversion intention in ruling 124 and the right to plan the independent-to-tamattuʿ path from the outset in ruling 125. Full text through ruling 130 compared; no further unsupported escalation in source-page counter.
+- Original aligned PDFKit + image-OCR witnesses and live Google Doc compared. Readback confirmed 12 targeted manuscript repairs; verified manuscript progress marker advanced to `⟦WBPROGRESS:11:90:298⟧`, independent Workbench D1 sync/readback still required. Next original physical page: 91.
 
 ## Nonconsecutive fidelity restorations elsewhere in the manuscript
 
