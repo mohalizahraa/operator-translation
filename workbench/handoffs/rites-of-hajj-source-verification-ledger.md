@@ -2,9 +2,9 @@
 
 Project 11, source 298 pages; SHA-256: 5e0a7395a4a439e493d647d95a2d58680880b27bc5e5043a16392c9b992c3c04.
 
-Consecutive source-certified: pages 1–190. Title and bibliographical front matter: 1–2. Blank PDF pages: 3–4. Handwritten Arabic acknowledgment compared to English text: 5. Blank PDF page: 6.
+Consecutive source-certified: pages 1–210. Title and bibliographical front matter: 1–2. Blank PDF pages: 3–4. Handwritten Arabic acknowledgment compared to English text: 5. Blank PDF page: 6.
 
-Resume at physical page 191. English draft coverage of 399 numbered rulings and 13 appendix units is not proof of translation verification. Arabic source witnesses for physical pages 3–298 are in workbench/handoffs/rites-of-hajj-source-physical-*-witness.txt. Workbench source counter must count only verified original pages. Full Arabic-English audit, all devotional texts, footnotes, table of contents, and rendered layout remain open.
+Resume at physical page 211. English draft coverage of 399 numbered rulings and 13 appendix units is not proof of translation verification. Arabic source witnesses for physical pages 3–298 are in workbench/handoffs/rites-of-hajj-source-physical-*-witness.txt. Workbench source counter must count only verified original pages. Full Arabic-English audit, all devotional texts, footnotes, table of contents, and rendered layout remain open.
 
 ## Physical pages 7–18 checked against English Google Doc
 
@@ -12,7 +12,7 @@ Resume at physical page 191. English draft coverage of 399 numbered rulings and 
 - Page 12: Corrected a source-fidelity error in the English TOC: the entry about Hajj on behalf of a living person had been incorrectly rendered as a person acting on their own behalf. Also removed an unsupported 'Another' before Imam Ali ibn al-Husayn's Arafah supplication.
 - Page 14: blank source page, verified.
 - Pages 15–18: full Arabic preface text (invocation, method, editorial choices, practical recommendations, omission of obsolete cases, newly arising questions, concluding prayer, author/date) checked against English preface paragraphs 138–157. No omitted preface paragraph identified in this batch.
-- Physical pages 191–298 still unverified. No publication-ready claim; prayers, notes, TOC, and rendered QA remain open.
+- Physical pages 211–298 still unverified. No publication-ready claim; prayers, notes, TOC, and rendered QA remain open.
 
 ## Physical pages 19–30 checked against the authoritative PDF
 
@@ -122,6 +122,15 @@ Resume at physical page 191. English draft coverage of 399 numbered rulings and 
 - Physical pp. 187–189: shaving/taqṣīr rulings 327–338, detailed source ḥadīth, deputation and hair ritual compared; **critical reversal repaired in ruling 336:** the deputy must follow **the deputy's own**, not the principal's, shaving/taqṣīr obligation. Corrected rule 337 validity despite improper order and explicit **no repeat** of ṭawāf/saʿy when omitted shaving discovered only after departing Mecca in rule 332.
 - Physical p. 190: Minā night-stay introduction and conditional third night, rulings 339–340 compared to English. Normal two nights and third-night condition retained.
 - Six source-backed repairs read back from live Doc; marker advanced to `⟦WBPROGRESS:11:190:298⟧`. Site D1 synchronization and whole-edition formatting remain separately open. Next page 191.
+
+## Physical pages 191–210 checked (2026-10-08)
+
+- Physical pp. 191–193: conditional night stays at Minā and three jamarāt rulings 341–346. Restored details of two permissible **halves of the night**, no departure before noon on day twelve, and per-night sheep expiation.
+- Physical pp. 194–198: rules 347–353, Ḥajj ṭawāf, its prayer and saʿy, corrections for omission and full recommended Meccan ṭawāf invocations; repaired mandatory (rather than conditional/optional) appointment of a deputy for ṭawāf omitted and discovered after departing Mecca.
+- Physical pp. 199–202: rules 354–366, ṭawāf al-nisāʾ; **critical repaired rule 360:** after converting independent ʿUmrah to ʿUmrat al-tamattuʿ, ṭawāf al-nisāʾ **is not obligatory**. Corrected ruling 363 to describe an Imāmī pilgrim who follows other schools' party and misuses tawaf al-wadāʿ/ifāḍah, not an adherent of another school. Reviewed original school conversion, errors, and repeated omissions.
+- Physical p. 203 Chapter Nine title; p. 204 blank. Physical pp. 205–207: full *al-maṣdūd* scenarios in ruling 367 and 368–369, exact nesting of obstructed sites and rites vs deputation compared. Replaced loose and uncertain prior English summary with source-complete distinct alternatives for blocked Masjid rites and Minā rites, including three branches for inability to obtain deputies for stoning and slaughter and the following-year residual obligations. Removed the source-check-required placeholder because this source unit was actually checked; formatting/secondary proofreading remains open.
+- Physical pp. 208–209: illness-blocked *al-maḥṣūr* cases in ruling 367 and rulings 370–372 checked; restored distinction that illness preventing **ʿUmrat al-tamattuʿ** allows release from women restriction, unlike illness preventing independent ʿUmrah or Ḥajj; source's **fourth case** of illness preventing both standings and conversion to independent ʿUmrah was previously omitted and has been added in full.
+- Physical p. 210 blank as witnessed by both PDFKit and image OCR. Eight source passages plus removal of prior unresolved-source warning read back in live Doc. Physical source marker now `⟦WBPROGRESS:11:210:298⟧`; D1 sync and edition formatting remain separate open acceptance gates. Next page 211.
 
 ## Nonconsecutive fidelity restorations elsewhere in the manuscript
 
