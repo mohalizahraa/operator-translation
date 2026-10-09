@@ -35,6 +35,19 @@ For stronger individual accountability or restricted Google Doc access, use a se
 - `POST /api/projects/:id/human-review` records a distinct, revision-bound declaration. `GET` lists attestation metadata; no reviewer secret is logged or stored. The strict Publish Ready transition requires a matching attestation on the latest whole-book QA candidate. An AI cannot legitimately assert that a human read a book, regardless of whether the system records a credential-backed declaration.
 - A later revision of the final manuscript requires new source-aligned QA and another review attestation. This is enforced by comparing manuscript revisions rather than accepting a historical `Needs Review` status.
 
+
+## Integrity and recovery additions — 2026-10-09
+
+**Live manuscript freshness:** the `public-export-sha256:<digest>` in a whole-book QA receipt must match the **current** unauthenticated Google Doc text export before new human attestation, Publish Ready, or first publication in strict mode. Deleted/restricted Docs, network failures, changed text and native revision IDs that cannot be verified from the public export all **block** approval. An edit immediately after verification remains a race: true immutable publication requires a locked snapshot/verified Drive revision or a versioned release artifact. The current system cannot call an existing manuscript immutable.
+
+**Atomic editorial writes:** question capture, question decision, Questions Doc linking, QA receipt capture, and reviewer attestation now execute their primary mutation and activity/event record within a D1 `batch()` transaction. Stable keys, uniqueness constraints, and optimistic status checks make retries idempotent and competing reviewer decisions reject stale writers. `scripts/check-editorial-transactions.py` rehearses duplicates, stale updates and rollback on synthetic SQLite data; it cannot replace a live D1 integration test.
+
+**Recoverability:** `scripts/check-backup-restore.py` exercises an entirely synthetic `schema.sql` export/reimport, foreign-key check and preservation of questions, event history, QA and reviewer receipts. It makes **no production backup** and persists no source-book content. Real backup requires a separately authorized Cloudflare D1 export to a controlled destination, secure retention, an off-production restore rehearsal, and a monitored freshness/checksum status. Never execute a restore against production as a test, never dump live D1 into a GitHub commit or publicly downloadable CI artifact, and do not add recurring or paid storage without the owner's direction.
+
+**Integrity readback:** `GET /api/projects/:id/integrity` is read-only, returns clearly scoped verified source denominator, metadata QA page coverage, unresolved/blocking questions, human review and whether strict security/QA flags are active. Adding `?verify_live=1` compares the latest whole-book evidence to the live Google Doc export and reports stale/unverifiable revisions without changing any project state. Project/Board cards offer **Integrity** to open this report. Absence of warnings does not establish scholarly translation correctness.
+
+**Full real-book acceptance still open:** a designated book must traverse canonical PDF page mapping → verified extraction/OCR → complete Arabic→English translation including notes → revision-tied Questions Doc → formatter/render and native TOC → source-aligned independent review → human final approval → interruption/recovery → publication in staging. Test first in a scratch/staging copy; do not change live book progress to fake this proof. Keep document access and source content out of automated public logs.
+
 ## Next integration work
 
 1. Provision the production write secret without exposing it. Confirm protected mutation and stable collaborator access.
