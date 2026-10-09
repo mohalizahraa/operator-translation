@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS projects (
   pdf_checked_at TEXT,
   pdf_check_note TEXT,
   google_doc_url TEXT,
+  questions_doc_url TEXT,
   translated_pages INTEGER NOT NULL DEFAULT 0 CHECK (translated_pages >= 0),
   translation_progress_at TEXT,
   cover_url TEXT,
@@ -97,3 +98,38 @@ CREATE TABLE IF NOT EXISTS project_covers (
   updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY(project_id) REFERENCES projects(id) ON DELETE CASCADE
 );
+
+
+CREATE TABLE IF NOT EXISTS translation_questions (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  project_id INTEGER NOT NULL,
+  question_key TEXT NOT NULL,
+  source_page INTEGER NOT NULL CHECK (source_page > 0),
+  source_location TEXT,
+  arabic_text TEXT NOT NULL,
+  context_text TEXT,
+  alternatives_json TEXT NOT NULL DEFAULT '[]',
+  proposed_english TEXT,
+  rationale TEXT NOT NULL,
+  confidence TEXT NOT NULL DEFAULT 'uncertain',
+  severity TEXT NOT NULL DEFAULT 'review' CHECK (severity IN ('review','blocking')),
+  status TEXT NOT NULL DEFAULT 'unresolved' CHECK (status IN ('unresolved','answered','applied')),
+  reviewer_answer TEXT,
+  applied_reference TEXT,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE (project_id, question_key),
+  FOREIGN KEY(project_id) REFERENCES projects(id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_translation_questions_project_status ON translation_questions(project_id,status,source_page);
+
+CREATE TABLE IF NOT EXISTS translation_question_events (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  question_id INTEGER NOT NULL,
+  actor TEXT NOT NULL,
+  action TEXT NOT NULL,
+  payload_json TEXT NOT NULL,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY(question_id) REFERENCES translation_questions(id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_question_events_question ON translation_question_events(question_id,id);
