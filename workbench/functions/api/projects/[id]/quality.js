@@ -46,13 +46,19 @@ export async function onRequestPost(context){
     if(existing.report_json!==serialized)return json({error:'The same revision/range has a different receipt; change evidence version explicitly instead of overwriting.'},409);
     return json({receipt_id:existing.id,unchanged:true,warnings:evaluated.warnings});
   }
-  const inserted=await context.env.DB.prepare(`INSERT INTO translation_quality_evidence
-    (project_id,from_page,to_page,source_pdf_sha256,google_doc_revision,report_json,recorded_by)
-    VALUES(?,?,?,?,?,?,?) RETURNING id`).bind(
-      id,report.from_page,report.to_page,report.source_hash,report.target_revision,serialized,actor
-    ).first();
-  await recordActivity(context.env.DB,id,actor,'translation QA evidence submitted',null,
-    {receipt_id:inserted.id,from_page:report.from_page,to_page:report.to_page,target_revision:report.target_revision});
-  return json({receipt_id:inserted.id,preflight_ready:true,warnings:evaluated.warnings,
+  const commit=await context.env.DB.batch([
+    context.env.DB.prepare(`INSERT OR IGNORE INTO translation_quality_evidence
+      (project_id,from_page,to_page,source_pdf_sha256,google_doc_revision,report_json,recorded_by)
+      VALUES(?,?,?,?,?,?,?)`).bind(
+      id,report.from_page,report.to_page,report.source_hash,report.target_revision,serialized,actor),
+    context.env.DB.prepare(`INSERT INTO activity(project_id,actor,action,before_json,after_json)
+      SELECT ?,?,'translation QA evidence submitted',NULL,? WHERE changes()>0`).bind(
+      id,actor,JSON.stringify({from_page:report.from_page,to_page:report.to_page,target_revision:report.target_revision}))
+  ]);
+  const receipt=await context.env.DB.prepare(`SELECT id,report_json FROM translation_quality_evidence
+    WHERE project_id=? AND from_page=? AND to_page=? AND source_pdf_sha256=? AND google_doc_revision=?`)
+    .bind(id,report.from_page,report.to_page,report.source_hash,report.target_revision).first();
+  if(!receipt || receipt.report_json!==serialized)return json({error:'Conflicting QA receipt was saved concurrently. Refresh and reconcile rather than overwrite.'},409);
+  const inserted=Number(commit?.[0]?.meta?.changes||0)>0;  return json({receipt_id:receipt.id,unchanged:!inserted,preflight_ready:true,warnings:evaluated.warnings,
     limitation:'Presence and consistency of claimed evidence checked; not independently source/render verified.'},201);
 }
