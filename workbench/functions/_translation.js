@@ -285,3 +285,40 @@ export async function getTranslationContext(db, request, projectId) {
     },
   };
 }
+
+/* Evidence-presence preflight for translation runners.
+   This checks checkpoint completeness, not the truth of a critic's judgment. */
+export function assessTranslationEvidence(report, wholeBook=false) {
+  const blockers=[],warnings=[];
+  const text=v=>typeof v==='string'&&v.trim().length>0;
+  if (!text(report?.source_hash)) blockers.push('missing canonical source hash');
+  if (!text(report?.target_revision)) blockers.push('missing manuscript revision');
+  const units=Array.isArray(report?.units)?report.units:[];
+  if (!units.length) blockers.push('empty source-unit denominator');
+  const ids=new Set();
+  for (const unit of units) {
+    if (!text(unit.id)||ids.has(unit.id)) blockers.push('missing or duplicate source-unit id');
+    if (text(unit.id)) ids.add(unit.id);
+    if (!Number.isInteger(unit.source_page)||unit.source_page<1) blockers.push('source unit lacks physical page');
+    if (!text(unit.target_anchor)||unit.status!=='VERIFIED') blockers.push('source unit not verified against English target');
+  }
+  const required=['independent_critic','ambiguity_review','terminology_review','batch_formatting'];
+  if (wholeBook) required.push('full_render','native_toc','publication_review','regression');
+  for (const name of required) {
+    const check=report?.checks?.[name];
+    if (check?.status!=='PASS'||!text(check.evidence_ref)||check.target_revision!==report?.target_revision) {
+      blockers.push(name+' lacks revision-matched PASS evidence');
+    }
+  }
+  const questionKeys=new Set();
+  for (const q of (Array.isArray(report?.questions)?report.questions:[])) {
+    if (!text(q.question_key)||questionKeys.has(q.question_key)) blockers.push('missing or duplicate translation question key');
+    if (text(q.question_key)) questionKeys.add(q.question_key);
+    if (!text(q.arabic_text)||!text(q.source_location)||!text(q.provisional_english)) blockers.push('question lacks source/context/provisional translation');
+  }
+  if (report?.metrics?.suspected_truncation===true) warnings.push('possible omitted or compressed text');
+  if (report?.metrics?.unusual_speed===true) warnings.push('translation pace anomaly');
+  if (report?.metrics?.zero_question_streak===true) warnings.push('challenge persistent absence of questions without inventing ambiguity');
+  if (report?.metrics?.terminology_drift===true) warnings.push('possible glossary inconsistency');
+  return {ready:blockers.length===0,blockers:[...new Set(blockers)],warnings};
+}
