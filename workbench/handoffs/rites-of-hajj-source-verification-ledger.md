@@ -2,9 +2,9 @@
 
 Project 11, source 298 pages; SHA-256: 5e0a7395a4a439e493d647d95a2d58680880b27bc5e5043a16392c9b992c3c04.
 
-Consecutive source-certified: pages 1–30. Title and bibliographical front matter: 1–2. Blank PDF pages: 3–4. Handwritten Arabic acknowledgment compared to English text: 5. Blank PDF page: 6.
+Consecutive source-certified: pages 1–33. Title and bibliographical front matter: 1–2. Blank PDF pages: 3–4. Handwritten Arabic acknowledgment compared to English text: 5. Blank PDF page: 6.
 
-Resume at physical page 31. English draft coverage of 399 numbered rulings and 13 appendix units is not proof of translation verification. Arabic source witnesses for physical pages 3–298 are in workbench/handoffs/rites-of-hajj-source-physical-*-witness.txt. Workbench source counter must count only verified original pages. Full Arabic-English audit, all devotional texts, footnotes, table of contents, and rendered layout remain open.
+Resume at physical page 34. English draft coverage of 399 numbered rulings and 13 appendix units is not proof of translation verification. Arabic source witnesses for physical pages 3–298 are in workbench/handoffs/rites-of-hajj-source-physical-*-witness.txt. Workbench source counter must count only verified original pages. Full Arabic-English audit, all devotional texts, footnotes, table of contents, and rendered layout remain open.
 
 ## Physical pages 7–18 checked against English Google Doc
 
@@ -12,7 +12,7 @@ Resume at physical page 31. English draft coverage of 399 numbered rulings and 1
 - Page 12: Corrected a source-fidelity error in the English TOC: the entry about Hajj on behalf of a living person had been incorrectly rendered as a person acting on their own behalf. Also removed an unsupported 'Another' before Imam Ali ibn al-Husayn's Arafah supplication.
 - Page 14: blank source page, verified.
 - Pages 15–18: full Arabic preface text (invocation, method, editorial choices, practical recommendations, omission of obsolete cases, newly arising questions, concluding prayer, author/date) checked against English preface paragraphs 138–157. No omitted preface paragraph identified in this batch.
-- Physical pages 31–298 still unverified. No publication-ready claim; prayers, notes, TOC, and rendered QA remain open.
+- Physical pages 34–298 still unverified. No publication-ready claim; prayers, notes, TOC, and rendered QA remain open.
 
 ## Physical pages 19–30 checked against the authoritative PDF
 
@@ -21,6 +21,13 @@ Resume at physical page 31. English draft coverage of 399 numbered rulings and 1
 - Pages 25–28: Qurʾān 3:96–97 and 9:28; legal ruling 1; reports attributed to al-Ṣādiq, al-Sajjād and al-Bāqir; sanctuary prohibitions; Qurʾān 22:25, al-Ḥalabī’s response, Kaʿbah invocations and complete Jāmiʿ al-Saʿādāt excerpt; early-Islamic Meccan sites and both pilgrimage-merit narrations checked against English CHAPTER ONE and its associated native citations.
 - Page 29: Chapter Two title; page 30 blank.
 - These checkpoints certify translation/content comparison, not completed publisher formatting or exact 1-to-1 native footnote structure. Source witness page images have been rendered/compared earlier, and Arabic OCR and PDF text witnesses retained.
+
+## Physical pages 31–33 checked against original source (2026-10-08)
+
+- Physical p. 31: Chapter Two legal rulings 2–5 and the attached source note checked against the original-page PDF/OCR witnesses. Corrected ruling 3’s mistranslated examples of an excuse from “injury or embarrassment and hardship” to “difficulty or undue hardship.” Corrected ruling 4’s improperly weakened borrowing/selling obligation to preserve its imperative source meaning. The source note is present in the English draft but still needs native-footnote normalization in the full formatting pass.
+- Physical p. 32: completed ruling 5 and rulings 6–7, plus the beginning of ruling 8 and the minor’s-Hajj heading, checked against the page-aligned original witness and live manuscript.
+- Physical p. 33: completed ruling 8, all four legal-adulthood cases in ruling 9, the minor’s expenses in ruling 10, and the beginning of ruling 11 checked against the original witness and live manuscript. Related ruling 15 on physical p. 34 was independently corrected (the costs fall on the guardian when the trip serves the guardian’s own interests); p. 34 has NOT been consecutively certified yet.
+- Checked manuscript readback after these repairs. Updated Google Doc verified marker to 33/298; downstream Workbench D1 sync and final render/footnote gates remain separate verification requirements. Consecutive next page is 34.
 
 ## Nonconsecutive fidelity restorations elsewhere in the manuscript
 
