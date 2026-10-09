@@ -125,3 +125,22 @@ test('detects a tampered existing staged artifact, never overwrites', async () =
     await writeFile(first.path,'tampered artifact');
     await assert.rejects(run(f),/differs or is incomplete/);
   }));
+
+test('keeps exact Arabic lineation and English whitespace in staged evidence', async () =>
+  fixture(async f => {
+    f.manifest.units[0].sourceText = '  طلب العلم\\nسطر ثان  ';
+    const original=f.translateUnit;
+    f.translateUnit=async (unit,context)=>unit.id==='body-1'
+      ? {english:'  Seeking knowledge.\\nSecond line.  '}
+      : original(unit,context);
+    const record=await run(f);
+    const staged=JSON.parse(await readFile(record.path,'utf8'));
+    assert.equal(staged.units[0].sourceText,'  طلب العلم\\nسطر ثان  ');
+    assert.equal(staged.units[0].english,'  Seeking knowledge.\\nSecond line.  ');
+  }));
+
+test('rejects critic review labels without concrete findings', async () =>
+  fixture(async f => {
+    f.critiqueUnit=async ()=>({status:'BLOCK',findings:[],criticId:'critic'});
+    await assert.rejects(run(f),/structured disposition/);
+  }));
