@@ -29,20 +29,6 @@ for table in ('translation_questions','translation_question_events','activity'):
  assert d.execute(f'SELECT COUNT(*) FROM {table}').fetchone()[0]==1,f'duplicate {table}'
 qid=d.execute("SELECT id FROM translation_questions").fetchone()[0]
 
-def decide(expected,new):
- d.execute("BEGIN")
- try:
-  d.execute("UPDATE translation_questions SET status=? WHERE id=? AND status=?",(new,qid,expected))
-  n=d.execute("SELECT changes()").fetchone()[0]
-  # Mimic the production batch's immediately following conditional audit statements.
-  d.execute("""INSERT INTO translation_question_events(question_id,actor,action,payload_json)
-       SELECT ?,'Zahraa',?,'{}' WHERE changes()>0""",(qid,'question '+new)) if False else None
-  # SELECT changes() above resets the last-statement changes counter; run actual
-  # production statement sequence without querying in between instead.
-  d.execute("ROLLBACK")
- except:
-  d.execute("ROLLBACK")
-  raise
 def atomic_decision(expected,new):
  d.execute("BEGIN")
  d.execute("UPDATE translation_questions SET status=? WHERE id=? AND status=?",(new,qid,expected))
