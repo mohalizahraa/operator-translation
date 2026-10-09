@@ -1,5 +1,6 @@
 import {ensureCatalog,json,recordActivity} from '../../../_lib.js';
 import {requireEditorCapability,requireHumanReviewerCapability} from '../../../_write_auth.js';
+import {verifyLiveEnglishDocumentRevision} from '../../../_translation.js';
 
 function idFrom(context){const n=Number(context.params.id);return Number.isInteger(n)&&n>0?n:null;}
 export async function onRequestGet(context){
@@ -36,6 +37,8 @@ export async function onRequestPost(context){
     WHERE project_id=? AND from_page=1 AND to_page=? AND source_pdf_sha256=? AND google_doc_revision=? LIMIT 1`)
     .bind(id,Number(p.pages||0),sourceHash,revision).first();
   if(!whole)return json({error:'No whole-book QA receipt matches this exact reviewed manuscript revision.'},409);
+  const revisionCheck=await verifyLiveEnglishDocumentRevision(p,revision);
+  if(!revisionCheck.ok)return json({error:revisionCheck.reason,code:revisionCheck.code},409);
   const open=await context.env.DB.prepare(`SELECT COUNT(*) AS count FROM translation_questions
     WHERE project_id=? AND severity='blocking' AND status<>'applied'`).bind(id).first();
   if(Number(open?.count||0)>0)return json({error:'Blocking Arabic editorial questions remain unresolved or unapplied.',open_blockers:open.count},409);
