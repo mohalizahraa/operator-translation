@@ -192,7 +192,7 @@ Define failure behavior too. Security/privacy/destructive/irreversible or equiva
 
 ### 5.0 Route founder operating constraints before tool routing
 
-When GitHub compute/billing/runner selection, hosted platform/provider/fallback/decommissioning, Vercel/Railway choice, or Operator Status hosting continuity is material, load `protocol/07-FOUNDER-OPERATING-CONSTRAINTS.md` **before** selecting the route.
+When GitHub compute/billing/runner selection, hosted platform/provider/fallback/decommissioning, Cloudflare-only hosting or blocked Vercel/Railway choice, or Operator Status hosting continuity is material, load `protocol/07-FOUNDER-OPERATING-CONSTRAINTS.md` **before** selecting the route.
 
 That routed owner is the canonical source for the founder's zero-paid GitHub compute and hosted-platform boundaries. ACT enforces those constraints during execution; it does not maintain a second copy here.
 
