@@ -16,6 +16,11 @@ function string(value, label, max = 1000) {
   if (typeof value !== 'string' || !value.trim() || value.length > max) fail(label + ' required');
   return value.trim();
 }
+// Text-bearing source content is not metadata: preserve exact whitespace/lineation.
+function contentText(value, label, max = 200000) {
+  if (typeof value !== 'string' || !value.trim() || value.length > max) fail(label + ' required');
+  return value;
+}
 function int(value, label, minimum = 0) {
   if (!Number.isSafeInteger(value) || value < minimum) fail(label + ' invalid');
   return value;
@@ -57,7 +62,7 @@ export function validateBatch(input) {
       if (u.sourceText !== undefined && u.sourceText !== '') fail('blank page must not contain translatable text');
       return { id, page, kind, surface, sourceRef };
     }
-    const sourceText = string(u.sourceText, 'Arabic source text', 100000);
+    const sourceText = contentText(u.sourceText, 'Arabic source text', 100000);
     return { id, page, kind, surface, sourceRef, sourceText };
   });
   for (let page = fromPage; page <= toPage; page++)
@@ -106,11 +111,12 @@ export async function stageTranslationBatch({ manifest, pdfPath, outputDir, tran
     }
     const context = { source: batch.source, target: batch.target, batch: batch.batch };
     const translated = await translateUnit(unit, context);
-    const english = string(translated?.english, 'English draft for unit ' + unit.id, 200000);
+    const english = contentText(translated?.english, 'English draft for unit ' + unit.id);
     if (ARABIC.test(english)) fail('unadjudicated Arabic script in English draft unit ' + unit.id);
     const critic = await critiqueUnit({ unit, english, context });
     if (!critic || !['PASS', 'REVIEW', 'BLOCK'].includes(critic.status) ||
-      !Array.isArray(critic.findings) || critic.findings.some(x => typeof x !== 'string' || x.length > 3000))
+      !Array.isArray(critic.findings) || critic.findings.some(x => typeof x !== 'string' || !x.trim() || x.length > 3000) ||
+      (critic.status !== 'PASS' && critic.findings.length === 0))
       fail('critic returned no structured disposition for unit ' + unit.id);
     results.push({ ...unit, english, critic: {
       status: critic.status, findings: critic.findings, criticId: string(critic.criticId, 'critic identity', 200)
