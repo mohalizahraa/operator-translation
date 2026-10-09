@@ -45,6 +45,10 @@ After all declared source units and text surfaces are covered, perform the curre
 
 Keep translation/formatting completion, Zahraa's actual human review, Publish Ready, and publication distinct under the Workbench stage contract. Machine review cannot impersonate Zahraa's human-review gate. Remove working telemetry from publication artifacts as required by the current profile/contract.
 
+## Quality safeguards approved 2026-10-09
+
+Approved scope: independent source-aware critic, source-to-English coverage map, quality anomaly watchdog, scoped terminology memory, linked translation questions for human review, per-book publication evidence, and representative regression tests. These are acceptance requirements, not proof of deployed automation. Retain the existing per-batch and whole-edition gates, including REAL SCALE v3 indentation for all ordinary paragraphs (even one sentence) and indented numbered/bulleted lists. A human reviewer alone resolves human-owned translation judgments; do not auto-advance the human-review stage.
+
 ## Measure before calling it fastest
 
 Use a representative hostile-case pilot before scaling a new OCR/editing route: ordinary paragraphs, dense footnotes, quotations, headings, difficult scans, and other structures actually present. Measure end-to-end verified batch cycle time, not OCR speed alone: preparation/startup, OCR, transfers, translation, correction/review, formatting, target readback, and Workbench sync. Record failures/rework and resource contention, not just successful runs. Character-error rates require human-verified reference text; missing Mac measurements remain unknown.
