@@ -6,6 +6,7 @@ on:
       - 'workbench/public/**'
       - 'workbench/functions/**'
       - 'workbench/scripts/**'
+      - 'workbench/engine/**'
       - 'workbench/package.json'
       - 'workbench/schema.sql'
 
