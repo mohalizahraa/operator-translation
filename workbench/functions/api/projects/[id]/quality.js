@@ -1,4 +1,4 @@
-import {ensureCatalog,json,actorFromRequest} from '../../../_lib.js';
+import {ensureCatalog,json,actorFromRequest,recordActivity} from '../../../_lib.js';
 import {assessTranslationEvidence} from '../../../_translation.js';
 import {requireEditorCapability} from '../../../_write_auth.js';
 
@@ -49,6 +49,8 @@ export async function onRequestPost(context){
     VALUES(?,?,?,?,?,?,?) RETURNING id`).bind(
       id,report.from_page,report.to_page,report.source_hash,report.target_revision,serialized,actor
     ).first();
+  await recordActivity(context.env.DB,id,actor,'translation QA evidence submitted',null,
+    {receipt_id:inserted.id,from_page:report.from_page,to_page:report.to_page,target_revision:report.target_revision});
   return json({receipt_id:inserted.id,preflight_ready:true,warnings:evaluated.warnings,
     limitation:'Presence and consistency of claimed evidence checked; not independently source/render verified.'},201);
 }
