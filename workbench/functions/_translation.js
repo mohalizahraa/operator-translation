@@ -41,6 +41,35 @@ function hex(bytes) {
   return [...new Uint8Array(bytes)].map(value => value.toString(16).padStart(2,'0')).join('');
 }
 
+// Native Google Docs revision IDs cannot be verified by a public text export.
+// Only public-export-sha256 fingerprints are accepted for an unauthenticated
+// live-revision check; any unavailable/changed document must fail closed.
+export async function verifyLiveEnglishDocumentRevision(project, expectedRevision, fetcher=fetch) {
+  const prefix='public-export-sha256:';
+  if (typeof expectedRevision!=='string'||!expectedRevision.startsWith(prefix) ||
+      !/^[a-f0-9]{64}$/.test(expectedRevision.slice(prefix.length))) {
+    return {ok:false,code:'unverifiable_revision',reason:'Expected a verified public-export-sha256 revision; native Docs revision requires authenticated Drive verification.'};
+  }
+  const id=googleDocIdFromUrl(project?.google_doc_url);
+  if(!id) return {ok:false,code:'missing_document',reason:'English manuscript Google Doc is not linked.'};
+  let response;
+  try {response=await fetcher(`https://docs.google.com/document/d/${id}/export?format=txt`,
+    {redirect:'follow',headers:{'user-agent':'Haydari-Translation-Workbench/1.0'},cache:'no-store'});}
+  catch {return {ok:false,code:'document_unreachable',reason:'The current English Google Doc export cannot be read.'};}
+  if(!response?.ok) return {ok:false,code:'document_unreachable',reason:'The current English Google Doc export is not available.'};
+  const size=Number(response.headers?.get('content-length')||0);
+  if(size>10*1024*1024) return {ok:false,code:'document_too_large',reason:'Manuscript export exceeds the safe revision-check limit.'};
+  let body;
+  try {body=await response.text();}
+  catch {return {ok:false,code:'document_unreachable',reason:'Could not read the current manuscript export.'};}
+  if(new TextEncoder().encode(body).length>10*1024*1024)
+    return {ok:false,code:'document_too_large',reason:'Manuscript export exceeds the safe revision-check limit.'};
+  const digest=hex(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(body)));
+  return digest===expectedRevision.slice(prefix.length)
+    ? {ok:true,code:'revision_matches'}
+    : {ok:false,code:'stale_manuscript_revision',reason:'The English Google Doc has changed since its quality/reviewer attestation.'};
+}
+
 export async function readPublicProgressMarker(project) {
   const normalizedProject = normalizeProject(project);
   if (!normalizedProject.page_count_verified) {
