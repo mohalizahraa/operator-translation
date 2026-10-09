@@ -2,9 +2,9 @@
 
 Project 11, source 298 pages; SHA-256: 5e0a7395a4a439e493d647d95a2d58680880b27bc5e5043a16392c9b992c3c04.
 
-Consecutive source-certified: pages 1–36. Title and bibliographical front matter: 1–2. Blank PDF pages: 3–4. Handwritten Arabic acknowledgment compared to English text: 5. Blank PDF page: 6.
+Consecutive source-certified: pages 1–50. Title and bibliographical front matter: 1–2. Blank PDF pages: 3–4. Handwritten Arabic acknowledgment compared to English text: 5. Blank PDF page: 6.
 
-Resume at physical page 37. English draft coverage of 399 numbered rulings and 13 appendix units is not proof of translation verification. Arabic source witnesses for physical pages 3–298 are in workbench/handoffs/rites-of-hajj-source-physical-*-witness.txt. Workbench source counter must count only verified original pages. Full Arabic-English audit, all devotional texts, footnotes, table of contents, and rendered layout remain open.
+Resume at physical page 51. English draft coverage of 399 numbered rulings and 13 appendix units is not proof of translation verification. Arabic source witnesses for physical pages 3–298 are in workbench/handoffs/rites-of-hajj-source-physical-*-witness.txt. Workbench source counter must count only verified original pages. Full Arabic-English audit, all devotional texts, footnotes, table of contents, and rendered layout remain open.
 
 ## Physical pages 7–18 checked against English Google Doc
 
@@ -12,7 +12,7 @@ Resume at physical page 37. English draft coverage of 399 numbered rulings and 1
 - Page 12: Corrected a source-fidelity error in the English TOC: the entry about Hajj on behalf of a living person had been incorrectly rendered as a person acting on their own behalf. Also removed an unsupported 'Another' before Imam Ali ibn al-Husayn's Arafah supplication.
 - Page 14: blank source page, verified.
 - Pages 15–18: full Arabic preface text (invocation, method, editorial choices, practical recommendations, omission of obsolete cases, newly arising questions, concluding prayer, author/date) checked against English preface paragraphs 138–157. No omitted preface paragraph identified in this batch.
-- Physical pages 37–298 still unverified. No publication-ready claim; prayers, notes, TOC, and rendered QA remain open.
+- Physical pages 51–298 still unverified. No publication-ready claim; prayers, notes, TOC, and rendered QA remain open.
 
 ## Physical pages 19–30 checked against the authoritative PDF
 
@@ -35,6 +35,18 @@ Resume at physical page 37. English draft coverage of 399 numbered rulings and 1
 - Physical p. 35: sanity, the overarching ability condition, time, safety/illness and transport requirements, and first part of ruling 17 checked; corrected unsafe “may have to appoint” paraphrase to the source’s mandatory appointment of a deputy when illness precludes attendance.
 - Physical p. 36: completed ruling 17, the remaining ability conditions (family maintenance, livelihood after return, conflicting higher-priority obligations), ruling 18, and the beginning of ruling 19 checked. Restored original shop/orchard/factory examples, the marriage-to-prevent-forbidden-action example, and the elderly-parent care case omitted from the old English. Ruling 19 continues on p. 37; whole next source page 37 remains to be verified.
 - English Google Doc readback confirmed these manuscript repairs. Updated its physical-page marker from 33/298 to 36/298. Workbench D1 synchronization remains a distinct mandatory follow-up/readback through the self-hosted hajj progress workflow.
+
+## Physical pages 37–50 checked against source (2026-10-08)
+
+- Physical pp. 37–38: end of ruling 19 and rulings 20–26 checked against original PDF witness and Google Doc. Restored precise **blood-money (diyah)** example in ruling 21, original commercial vehicle and earning-during-Ḥajj conditions in ruling 23.
+- Physical pp. 39–40: rulings 26–30 and agency-contract cases confirmed against original, including the restored distinct time-restricted and unrestricted contracts in ruling 28. Ruling 30 repaired to include the source's hard-to-repay loan scenario omitted in the previous draft.
+- Physical pp. 41–42: rulings 30–36 checked through p. 42 portion. Ruling 32 corrected a materially reversed second hypothetical: the original concerns someone financially **and** physically able but prevented from performing Ḥajj, not someone physically able but financially unable. Ruling 33 corrected a dangerous reversal: borrowing for Ḥajj when repayment is impossible is **not permitted**, not merely optional. Physical p. 42's creditor cases checked against the existing English text.
+- Physical p. 43: remainder of creditor cases; rulings 37–38 including charitable loans and merits checked. Arabic source prioritizes khums and zakāt in ruling 42 whereas ruling 37 says debts to people take precedence; preserve each ruling as written and retain the source-level relationship for later editorial consistency review, rather than silently rewriting them into a single synthesized legal priority.
+- Physical pp. 44–45: rulings 39–44 verified. Restored invalidity of prayer and ṭawāf with unpaid-khums clothing/sacrificial payments (ruling 39), religious-support livelihood cases (ruling 41), source-specific dues-priority formulation (ruling 42). **Reversed** incorrect English in ruling 43: prepaid registration money for Ḥajj counted as muʾūnah and is exempt from khums at year end. Restored the actual partial-khums-payment question and qualified validity of Ḥajj (ruling 44).
+- Physical pp. 46–47: rulings 44–48 checked; reinforced explicit mandatory pilgrimage despite deliberate waste of assets (ruling 45) and obligation to borrow in the original's feasible/non-hardship loss-of-funds case (ruling 46). Prior cross-check of ruling 48 retained. 
+- Physical pp. 48–49: rulings 49–55; corrected the distinct outcome of intentional disposal of financial ability in ruling 51 (no Ḥajj obligation that year but sin for forfeiting ability). **Replaced wholly wrong** ruling 55 English marriage-contract scenario with original husband's threatened-divorce scenario. 
+- Physical p. 50: concluding women's maḥram ruling 56, jewelry ruling 57, opening recommended-Ḥajj ruling 58 and its original reference compared to English draft. Whole native-footnote normalization remains open.
+- Google Doc readback confirmed all affected legal paragraphs; advanced `⟦WBPROGRESS:11:50:298⟧`. Site D1 progress must be independently checked. Next original page: 51.
 
 ## Nonconsecutive fidelity restorations elsewhere in the manuscript
 
