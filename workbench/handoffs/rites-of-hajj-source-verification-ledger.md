@@ -2,9 +2,9 @@
 
 Project 11, source 298 pages; SHA-256: 5e0a7395a4a439e493d647d95a2d58680880b27bc5e5043a16392c9b992c3c04.
 
-Consecutive source-certified: pages 1–50. Title and bibliographical front matter: 1–2. Blank PDF pages: 3–4. Handwritten Arabic acknowledgment compared to English text: 5. Blank PDF page: 6.
+Consecutive source-certified: pages 1–60. Title and bibliographical front matter: 1–2. Blank PDF pages: 3–4. Handwritten Arabic acknowledgment compared to English text: 5. Blank PDF page: 6.
 
-Resume at physical page 51. English draft coverage of 399 numbered rulings and 13 appendix units is not proof of translation verification. Arabic source witnesses for physical pages 3–298 are in workbench/handoffs/rites-of-hajj-source-physical-*-witness.txt. Workbench source counter must count only verified original pages. Full Arabic-English audit, all devotional texts, footnotes, table of contents, and rendered layout remain open.
+Resume at physical page 61. English draft coverage of 399 numbered rulings and 13 appendix units is not proof of translation verification. Arabic source witnesses for physical pages 3–298 are in workbench/handoffs/rites-of-hajj-source-physical-*-witness.txt. Workbench source counter must count only verified original pages. Full Arabic-English audit, all devotional texts, footnotes, table of contents, and rendered layout remain open.
 
 ## Physical pages 7–18 checked against English Google Doc
 
@@ -12,7 +12,7 @@ Resume at physical page 51. English draft coverage of 399 numbered rulings and 1
 - Page 12: Corrected a source-fidelity error in the English TOC: the entry about Hajj on behalf of a living person had been incorrectly rendered as a person acting on their own behalf. Also removed an unsupported 'Another' before Imam Ali ibn al-Husayn's Arafah supplication.
 - Page 14: blank source page, verified.
 - Pages 15–18: full Arabic preface text (invocation, method, editorial choices, practical recommendations, omission of obsolete cases, newly arising questions, concluding prayer, author/date) checked against English preface paragraphs 138–157. No omitted preface paragraph identified in this batch.
-- Physical pages 51–298 still unverified. No publication-ready claim; prayers, notes, TOC, and rendered QA remain open.
+- Physical pages 61–298 still unverified. No publication-ready claim; prayers, notes, TOC, and rendered QA remain open.
 
 ## Physical pages 19–30 checked against the authoritative PDF
 
@@ -47,6 +47,14 @@ Resume at physical page 51. English draft coverage of 399 numbered rulings and 1
 - Physical pp. 48–49: rulings 49–55; corrected the distinct outcome of intentional disposal of financial ability in ruling 51 (no Ḥajj obligation that year but sin for forfeiting ability). **Replaced wholly wrong** ruling 55 English marriage-contract scenario with original husband's threatened-divorce scenario. 
 - Physical p. 50: concluding women's maḥram ruling 56, jewelry ruling 57, opening recommended-Ḥajj ruling 58 and its original reference compared to English draft. Whole native-footnote normalization remains open.
 - Google Doc readback confirmed all affected legal paragraphs; advanced `⟦WBPROGRESS:11:50:298⟧`. Site D1 progress must be independently checked. Next original page: 51.
+
+## Physical pages 51–60 checked (2026-10-08)
+
+- Physical p. 51: remaining Ḥajj recommendation discussion, rulings 59 and 60 checked. Repaired ruling 59's mistaken implication that the sponsor must be unable to perform Ḥajj personally; the source recommends capable people sponsoring those unable to afford Ḥajj. Restored the explicit merit comparison with charity in ruling 60.
+- Physical pp. 52, 54, and 60: blank leaves, witnessed by both empty PDFKit and image-OCR extraction. Physical p. 53: Chapter Three title (sponsored Ḥajj) present in the English draft; p. 59: Chapter Four title (bequests) present.
+- Physical pp. 55–56: sponsored Hajj rulings 61–67 compared against the Arabic. Corrected ruling 61: accepting sponsorship establishes ability only if **not incompatible with the recipient's social/religious standing**, whereas the former English wrongly said standing made no difference.
+- Physical pp. 57–58: original sponsored-Hajj rulings 67–72 compared against English. Corrected ruling 69's post-iḥrām withdrawal rule: sponsor owes minimum costs for completing pilgrimage even if sponsor refuses, not that the recipient must temporarily advance personal money.
+- No new remaining content omissions identified in the 61–68, 70–72 sequence; all four corrected legal passages were read back from the live English Google Doc, and marker advanced to `⟦WBPROGRESS:11:60:298⟧`. D1 site sync requires separate readback.
 
 ## Nonconsecutive fidelity restorations elsewhere in the manuscript
 
