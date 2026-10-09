@@ -44,6 +44,30 @@ export async function onRequestPatch(context) {
       && Number(before.translated_pages || 0) < Number(before.pages || 0)) {
     return json({ error: 'Verified source-page translation must reach the physical PDF total before Needs Formatting.' }, 409);
   }
+  if(context.env?.WORKBENCH_REQUIRE_QA_EVIDENCE==='1' && body.status && body.status!==before.status){
+    if(before.status==='in_progress' && body.status==='review'){
+      const {results}=await context.env.DB.prepare(
+        'SELECT from_page,to_page,source_pdf_sha256 FROM translation_quality_evidence WHERE project_id=? ORDER BY from_page,to_page'
+      ).bind(id).all();
+      const latest=await context.env.DB.prepare('SELECT source_pdf_sha256 FROM translation_progress_checkpoints WHERE project_id=? ORDER BY id DESC LIMIT 1').bind(id).first();
+      const rows=(results||[]).filter(q=>q.source_pdf_sha256===latest?.source_pdf_sha256);
+      let end=0;
+      for(const item of rows){if(item.from_page<=end+1 && item.to_page>end)end=item.to_page;}
+      if(!normalizedBefore.page_count_verified || end<Number(before.pages||0)){
+        return json({error:'Cannot enter Needs Formatting: complete, source-consistent QA receipts do not cover every physical page.',code:'qa_coverage_incomplete'},409);
+      }
+    }
+    if(before.status==='review' && body.status==='completed'){
+      const latest=await context.env.DB.prepare('SELECT source_pdf_sha256,google_doc_revision FROM translation_progress_checkpoints WHERE project_id=? ORDER BY id DESC LIMIT 1').bind(id).first();
+      const whole=await context.env.DB.prepare(`SELECT id FROM translation_quality_evidence
+        WHERE project_id=? AND from_page=1 AND to_page=? AND source_pdf_sha256=? AND google_doc_revision=? LIMIT 1`)
+        .bind(id,Number(before.pages||0),latest?.source_pdf_sha256||'',latest?.google_doc_revision||'').first();
+      if(!whole)return json({error:'Whole-book rendered/TOC/publication QA receipt is required before Needs Review.',code:'whole_book_qa_required'},409);
+    }
+    if(before.status==='completed' && body.status==='published'){
+      return json({error:'Publish Ready requires a separately verified human reviewer attestation tied to the exact final manuscript. This attestation route is not yet configured.',code:'human_review_attestation_required'},409);
+    }
+  }
   if (body.published === true && (before.status !== 'published' || (body.status !== undefined && body.status !== 'published'))) {
     return json({ error: 'Save the book as Publish Ready first; publication is a separate step and cannot remain set while rewinding workflow.' }, 409);
   }
