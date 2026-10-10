@@ -179,6 +179,48 @@ test('connected path rejects ambiguous native source before any translation/mode
       manifest,pdfPath:options.pdfPath,outputDir:'/private/output/unused',backend:'poppler',run,
       translateUnit:async()=>{called++;return {english:'anything'};},
       critiqueUnit:async()=>({status:'PASS',findings:[],criticId:'test'})
-    }),/unresolved native-text/);
+    }),/OCR or visual review/);
     assert.equal(called,0);
+  }));
+
+test('two units cannot claim the same single Arabic PDF text occurrence', async () =>
+  fixture(async options=>{
+    const {run}=popplerStub(['طلب العلم','تعليق مهم','المقدمة']);
+    const witness=await extractNativeSourcePages({...options,run});
+    const manifest={
+      source:{projectId:9,pdfSha256:options.pdfSha256,pageCount:3},
+      target:{documentId:'english',expectedRevision:'r1'},
+      batch:{verifiedThrough:0,fromPage:1,toPage:3},
+      units:[
+        {id:'u1',page:1,kind:'text',surface:'body',sourceRef:'p1 body',sourceText:'طلب العلم'},
+        {id:'u2',page:1,kind:'text',surface:'quotation',sourceRef:'p1 duplicate',sourceText:'طلب العلم'},
+        {id:'u3',page:2,kind:'text',surface:'footnote',sourceRef:'p2',sourceText:'تعليق مهم'},
+        {id:'u4',page:3,kind:'text',surface:'body',sourceRef:'p3',sourceText:'المقدمة'}
+      ]
+    };
+    const comparison=compareNativeSourceUnits(manifest,witness);
+    assert.equal(comparison.units[0].result,'NATIVE_EXACT_TEXT_CANDIDATE');
+    assert.equal(comparison.units[1].result,'DUPLICATE_UNIT_TEXT_NEEDS_DISAMBIGUATION');
+  }));
+
+test('non-Arabic PDF native text does not certify Arabic source even on substring match', async () =>
+  fixture(async options=>{
+    const manifest={
+      source:{projectId:9,pdfSha256:options.pdfSha256,pageCount:3},
+      target:{documentId:'english',expectedRevision:'r1'},
+      batch:{verifiedThrough:0,fromPage:1,toPage:3},
+      units:[
+        {id:'u1',page:1,kind:'text',surface:'body',sourceRef:'p1',sourceText:'The native page'},
+        {id:'u2',page:2,kind:'text',surface:'body',sourceRef:'p2',sourceText:'Second native page'},
+        {id:'u3',page:3,kind:'text',surface:'body',sourceRef:'p3',sourceText:'Third native page'}
+      ]
+    };
+    const {run}=popplerStub(['The native page','Second native page','Third native page']);
+    let called=false;
+    await assert.rejects(stageNativeSourceAlignedBatch({
+      manifest,pdfPath:options.pdfPath,outputDir:'/private/unneeded',backend:'poppler',run,
+      translateUnit:async()=>{called=true;return {english:'draft'};},
+      critiqueUnit:async()=>({status:'PASS',findings:[],criticId:'critic'})
+    }),/no readable Arabic/);
+    assert.equal(called,false);
   }));
