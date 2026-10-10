@@ -37,6 +37,8 @@ Exact pagination need not remain identical when English expansion changes line f
 
 Do not use a bulk replacement technique that destroys notes, links, formatting, tables, objects, or layout merely because it is faster.
 
+**Early Qurʾānic body-vs-note placement preflight (before whole-edition styling):** For each edition with Qurʾānic quotations, inventory verse-bearing target body spans **and native footnote segments** before a full typography pass. Crosswalk each quotation and reference/anchor to the authoritative Arabic source's main-body or footnote location. A verse found inside a footnote is a **review signal, not proof of an error**: the Arabic original may legitimately quote it there. Flag unexplained body↔note movement, missing/duplicated verses, wrong verse/reference pairings, or detached callouts early so typography/pagination are not finalized around inherited defects. Verify the source position before relocation; do not bulk-move based on the inherited English draft. Preserve every native note and source-supported note text; mark unreadable-source cases OPEN instead of guessing. After any verified correction, rerun location, anchors, semantic styling, rendered pagination, and terminal TOC checks. Quote counts alone cannot certify source placement.
+
 ## Edition formatting profiles — inherited shared default
 
 **Active standard:** REAL SCALE v3 inherits every applicable v2 and v1 formatting rule except explicit later overrides. It applies to every Haydari Workbench book, regardless of collaborator assignment.
