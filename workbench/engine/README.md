@@ -42,10 +42,29 @@ The read-only adapter requires no browser and no paid API. On macOS it reuses th
 
 Synthetic unit tests exercise hash mismatch, page holes/delimiters, source alignment, unreadable and duplicate witnesses, error redaction and connected staging. The native integration test creates an actual tiny two-page synthetic PDF, then exercises PDFKit on macOS (or Poppler when installed elsewhere), including page isolation. It is **not** a real Arabic OCR/translation-quality benchmark.
 
+## Optional zero-cost local model adapter
+
+`local-ollama.mjs` provides `createLocalOllamaPair({translatorModel, criticModel, ...})`. It connects to **loopback HTTP only** (`127.0.0.1`, `localhost` or `::1`) using Ollama's non-streaming `/api/generate` route. Model names are explicit and distinct; `/api/tags` must prove both are **already installed**. No pull/download, external API fallback, prompts in logs, automatic model choice, workflow-status mutation or paid inference is allowed. The transport rejects redirects, invalid/oversized responses, wrong-model responses, refusals and unstructured critic results.
+
+```js
+const models = createLocalOllamaPair({
+  translatorModel:'installed-translator:tag',
+  criticModel:'separate-installed-critic:tag'
+});
+await models.verifyModels();
+const staged = await stageNativeSourceAlignedBatch({
+  manifest, pdfPath, outputDir,
+  translateUnit:models.translateUnit,
+  critiqueUnit:models.critiqueUnit
+});
+```
+
+The selected models above are **illustrative names only**, not assertions of installation. A second model's distinct ID does **not** itself prove independent critical quality, Arabic proficiency or scholarly correctness. The critic's PASS is **candidate feedback**, not the Workbench's independent source inspection/human review gate. Do not promote a model from test doubles to production until reviewer-validated real Arabic calibration (including footnotes, ambiguity and negative controls) passes. The 2026-10-05 Mac inventory found one pre-existing `zahraa-brain:latest` Ollama model, and an earlier local book pilot produced a refusal rather than usable translation; therefore no usable real translator+critic pair is presently established. Installation/licensing/storage and quality remain explicit decisions/evidence gates.
+
 ## Next independently admitted work
 
 - **Source QA/OCR**: add page-image comparison, complete page/surface segmentation, footnote and scan OCR recovery, printed-page labels and damaged-source escalation. Unique native-text matches are insufficient. Follow the approved host division and Windows GPU lock whenever relevant.
-- **Local zero-cost model adapters**: establish authorized translation and independently executed Arabic-visible critique, then calibrate on reviewer-validated source passages. Do not confuse a synthetic test double with a capable scholarly translator.
+- **Real calibrated models**: benchmark locally available models and independently executed Arabic-visible critique against reviewer-validated source passages. The localhost adapter exists, but available suitable model pair, Arabic fidelity and model licensing are not yet proven.
 - **Document writer and formatting**: construct the exact English target with native notes/structure and REAL SCALE formatting; inspect rendered output and exact target revision. One designated writer, no concurrent final manuscript edits.
 - **Review/QA and checkpoint**: independent evidence verification and human-owned questions, revision-bound QA receipts, Workbench writes and live D1 readback. Do not enable strict QA or advance book counters until these are proven. Workbench production protection, real D1 backups and Cloudflare state remain separate open loops.
 
