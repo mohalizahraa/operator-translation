@@ -155,6 +155,8 @@ test('connected native witness -> translator -> critic -> private draft preserve
       assert.equal(result.verifiedProgressAdvanced,false);
       const draft=JSON.parse(await readFile(result.path,'utf8'));
       assert.equal(draft.units[1].surface,'footnote');
+      assert.equal(draft.nativeSourceWitness.pageTextDigests.length,3);
+      assert.equal(draft.nativeSourceWitness.status,'TEXT_ONLY_NOT_VISUALLY_VERIFIED');
       assert.equal(draft.verifiedProgressAdvanced,false);
     } finally { await rm(safeDir,{recursive:true,force:true}); }
   }));
