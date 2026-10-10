@@ -1,10 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { extractNativeSourcePages, compareNativeSourceUnits } from './source.mjs';
+import { extractNativeSourcePages, compareNativeSourceUnits, stageNativeSourceAlignedBatch } from './source.mjs';
 
 async function fixture(fn) {
   const root=await mkdtemp(join(tmpdir(),'haydari-native-source-'));
@@ -127,4 +127,56 @@ test('does not reveal source text or executable stderr when reader fails', async
       assert.match(error.message,/reader failed/);
       return true;
     });
+  }));
+
+test('connected native witness -> translator -> critic -> private draft preserves no progress', async () =>
+  fixture(async options=>{
+    const safeDir=join(tmpdir(),'haydari-connected-'+process.pid+'-'+Date.now());
+    await mkdir(safeDir,{mode:0o700});
+    try {
+      const manifest={
+        source:{projectId:7,pdfSha256:options.pdfSha256,pageCount:3},
+        target:{documentId:'target-doc',expectedRevision:'revision-before'},
+        batch:{verifiedThrough:0,fromPage:1,toPage:3},
+        units:[
+          {id:'u1',page:1,kind:'text',surface:'body',sourceRef:'PDF physical p1',sourceText:'طلب العلم'},
+          {id:'u2',page:2,kind:'text',surface:'footnote',sourceRef:'PDF physical p2 note',sourceText:'تعليق مهم'},
+          {id:'u3',page:3,kind:'text',surface:'heading',sourceRef:'PDF physical p3',sourceText:'المقدمة'}
+        ]
+      };
+      const {run}=popplerStub(['طلب العلم','تعليق مهم','المقدمة']);
+      const result=await stageNativeSourceAlignedBatch({
+        manifest,pdfPath:options.pdfPath,outputDir:safeDir,backend:'poppler',run,
+        translateUnit:async (unit)=>({english:{u1:'Seek knowledge.',u2:'Important note.',u3:'Introduction'}[unit.id]}),
+        critiqueUnit:async ()=>({status:'PASS',findings:[],criticId:'test-independent-critic'})
+      });
+      assert.equal(result.state,'STAGED_NEEDS_SOURCE_AND_FORMAT_REVIEW');
+      assert.equal(result.nativeSourceWitness.unitCountAligned,3);
+      assert.equal(result.verifiedProgressAdvanced,false);
+      const draft=JSON.parse(await readFile(result.path,'utf8'));
+      assert.equal(draft.units[1].surface,'footnote');
+      assert.equal(draft.verifiedProgressAdvanced,false);
+    } finally { await rm(safeDir,{recursive:true,force:true}); }
+  }));
+
+test('connected path rejects ambiguous native source before any translation/model call', async () =>
+  fixture(async options=>{
+    const manifest={
+      source:{projectId:7,pdfSha256:options.pdfSha256,pageCount:3},
+      target:{documentId:'target-doc',expectedRevision:'revision-before'},
+      batch:{verifiedThrough:0,fromPage:1,toPage:3},
+      units:[
+        {id:'u1',page:1,kind:'text',surface:'body',sourceRef:'PDF p1',sourceText:'طلب العلم'},
+        {id:'u2',page:2,kind:'blank',surface:'other',sourceRef:'PDF p2 image proof still needed'},
+        {id:'u3',page:3,kind:'text',surface:'body',sourceRef:'PDF p3',sourceText:'المقدمة'}
+      ]
+    };
+    let called=0;
+    const {run}=popplerStub(['طلب العلم','','المقدمة']);
+    await assert.rejects(stageNativeSourceAlignedBatch({
+      manifest,pdfPath:options.pdfPath,outputDir:'/private/output/unused',backend:'poppler',run,
+      translateUnit:async()=>{called++;return {english:'anything'};},
+      critiqueUnit:async()=>({status:'PASS',findings:[],criticId:'test'})
+    }),/unresolved native-text/);
+    assert.equal(called,0);
   }));
