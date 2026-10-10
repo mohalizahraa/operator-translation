@@ -201,20 +201,17 @@ export async function stageNativeSourceAlignedBatch({
   if (exceptions.length)
     fail('source contains unresolved native-text, blank-page or alignment witnesses on physical page(s): ' +
       [...new Set(exceptions.map(u => u.physicalPage))].join(', '));
-  const staged = await stageTranslationBatch({
-    manifest:batch,pdfPath,outputDir,translateUnit,critiqueUnit
-  });
-  return {
-    ...staged,
-    nativeSourceWitness: {
-      backend:witness.backend,
-      pdfSha256:witness.sourcePdfSha256,
-      pageTextDigests:witness.pages.map(p=>({
-        physicalPage:p.physicalPage, nativeTextSha256:p.nativeTextSha256
-      })),
-      unitCountAligned:alignment.nativeTextCandidatesMatched,
-      status:'NATIVE_TEXT_CANDIDATE_ONLY_NOT_SOURCE_VERIFIED'
-    },
-    verifiedProgressAdvanced:false
+  const nativeSourceWitness = {
+    status:'TEXT_ONLY_NOT_VISUALLY_VERIFIED',
+    backend:witness.backend,
+    pdfSha256:witness.sourcePdfSha256,
+    pageTextDigests:witness.pages.map(p=>({
+      physicalPage:p.physicalPage, nativeTextSha256:p.nativeTextSha256
+    })),
+    unitCountAligned:alignment.nativeTextCandidatesMatched
   };
+  const staged = await stageTranslationBatch({
+    manifest:batch,pdfPath,outputDir,translateUnit,critiqueUnit,nativeSourceWitness
+  });
+  return {...staged, nativeSourceWitness, verifiedProgressAdvanced:false};
 }
