@@ -1,0 +1,48 @@
+name: Engine real-source read-only pilot
+
+on:
+  push:
+    paths:
+      - '.github/workflows/engine-real-source-pilot.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-pilot:
+    runs-on: [self-hosted, operator-translation, macOS, ARM64]
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Read existing canonical Hajj PDF with engine PDFKit adapter
+        shell: bash
+        env:
+          EXPECTED_SOURCE_SHA: 5e0a7395a4a439e493d647d95a2d58680880b27bc5e5043a16392c9b992c3c04
+          EXPECTED_PHYSICAL_PAGES: '298'
+        run: |
+          set -euo pipefail
+          umask 077
+          source_pdf="$(mktemp "${RUNNER_TEMP:-/tmp}/engine-source-XXXXXXXX.pdf")"
+          trap 'rm -f "$source_pdf"' EXIT
+          curl -fsSL --retry 2 --connect-timeout 20 --max-time 180             "https://haydari-translation-workbench.pages.dev/api/pdf/11"             -o "$source_pdf"
+          SOURCE_PDF="$source_pdf" node --input-type=module <<'JS'
+          import { extractNativeSourcePages } from './workbench/engine/source.mjs';
+          const witness=await extractNativeSourcePages({
+            pdfPath:process.env.SOURCE_PDF,
+            pdfSha256:process.env.EXPECTED_SOURCE_SHA,
+            pageCount:Number(process.env.EXPECTED_PHYSICAL_PAGES),
+            fromPage:1,toPage:2,backend:'pdfkit'
+          });
+          if(witness.pages.length!==2 || witness.verifiedProgressAdvanced!==false)
+            throw new Error('SOURCE_PILOT_BOUNDARY_FAILED');
+          // No source passages, page text, credentials or PDFs in logs/artifacts.
+          console.log('REAL_SOURCE_READ_ONLY',JSON.stringify({
+            sourceIdentityVerified:true,physicalPageCount:witness.physicalPageCount,
+            observedPhysicalPages:witness.pages.length,
+            candidateStatuses:witness.pages.map(p=>p.status),
+            anyNativeArabic:witness.pages.map(p=>p.hasArabic),
+            translatedPages:0,
+            publishedPages:0
+          }));
+          JS
