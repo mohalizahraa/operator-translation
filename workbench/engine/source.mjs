@@ -5,7 +5,7 @@ import { promisify } from 'node:util';
 import { open, stat } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { isAbsolute } from 'node:path';
-import { sha256File, validateBatch } from './batch.mjs';
+import { sha256File, validateBatch, stageTranslationBatch } from './batch.mjs';
 
 const runProcess = promisify(execFile);
 const SHA = /^[a-f0-9]{64}$/;
@@ -169,6 +169,52 @@ export function compareNativeSourceUnits(manifest, witness) {
     nativeTextCandidatesMatched:units.filter(u=>u.result === 'NATIVE_EXACT_TEXT_CANDIDATE').length,
     units, status:'TEXT_ONLY_NOT_VISUALLY_VERIFIED',
     safeToClaimSourceCoverage:false,
+    verifiedProgressAdvanced:false
+  };
+}
+
+/**
+ * Smallest connected execution slice: authentic PDF bytes -> native page text
+ * -> unique text candidates -> translation/critic -> durable private draft.
+ *
+ * This is NOT independent source verification or a checkpoint: page images,
+ * notes, segmentation coverage, semantic review and rendered target QA are open.
+ */
+export async function stageNativeSourceAlignedBatch({
+  manifest, pdfPath, outputDir, translateUnit, critiqueUnit,
+  backend, run
+}) {
+  const batch = validateBatch(manifest);
+  const witness = await extractNativeSourcePages({
+    pdfPath,
+    pdfSha256:batch.source.pdfSha256,
+    pageCount:batch.source.pageCount,
+    fromPage:batch.batch.fromPage,
+    toPage:batch.batch.toPage,
+    ...(backend ? {backend} : {}),
+    ...(run ? {run} : {})
+  });
+  const alignment = compareNativeSourceUnits(batch, witness);
+  const exceptions = alignment.units.filter(
+    unit => unit.result !== 'NATIVE_EXACT_TEXT_CANDIDATE'
+  );
+  if (exceptions.length)
+    fail('source contains unresolved native-text, blank-page or alignment witnesses on physical page(s): ' +
+      [...new Set(exceptions.map(u => u.physicalPage))].join(', '));
+  const staged = await stageTranslationBatch({
+    manifest:batch,pdfPath,outputDir,translateUnit,critiqueUnit
+  });
+  return {
+    ...staged,
+    nativeSourceWitness: {
+      backend:witness.backend,
+      pdfSha256:witness.sourcePdfSha256,
+      pageTextDigests:witness.pages.map(p=>({
+        physicalPage:p.physicalPage, nativeTextSha256:p.nativeTextSha256
+      })),
+      unitCountAligned:alignment.nativeTextCandidatesMatched,
+      status:'NATIVE_TEXT_CANDIDATE_ONLY_NOT_SOURCE_VERIFIED'
+    },
     verifiedProgressAdvanced:false
   };
 }
