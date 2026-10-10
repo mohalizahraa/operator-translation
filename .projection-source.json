@@ -1,8 +1,8 @@
 {
   "projection": "operator-translation",
   "canonical_repository": "mohalizahraa/operator-protocol",
-  "canonical_commit": "47b3108a18868243c3b712d6e2266de5730f2b08",
-  "projected_content_sha256": "3e3fa23f1800da9322e03e4280e7eb1fd6dfeb5828cb7bc0ab2612091e552c28",
+  "canonical_commit": "d71ed8cf619c1feffdd0719ce117ff584a1168ff",
+  "projected_content_sha256": "e622c759ff8fd49f8432ac3a30bf7a17dd5b6bdaf424239f557c5604cc82a3b8",
   "projected_files": 21,
   "destination_repository": "mohalizahraa/operator-translation",
   "scope": "Arabic-to-English book/manuscript translation and directly related editorial/publication Operator authorities",
