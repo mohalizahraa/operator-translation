@@ -149,6 +149,7 @@ export function compareNativeSourceUnits(manifest, witness) {
       fail('source witness missing or modified after extraction');
     pageMap.set(page, comparable(row.nativeText));
   }
+  const usedText = new Set();
   const units = batch.units.map(unit => {
     if (unit.kind === 'blank') return {
       id:unit.id, physicalPage:unit.page, result:'BLANK_NEEDS_VISUAL_PROOF'
@@ -158,8 +159,14 @@ export function compareNativeSourceUnits(manifest, witness) {
     const at = pageText.indexOf(query);
     let result = 'NOT_IN_NATIVE_TEXT_NEEDS_PDF_OR_OCR_REVIEW';
     if (query && at >= 0) {
-      result = pageText.indexOf(query, at + query.length) < 0
-        ? 'NATIVE_EXACT_TEXT_CANDIDATE' : 'REPEATED_TEXT_NEEDS_DISAMBIGUATION';
+      const key=unit.page+':'+query;
+      if (pageText.indexOf(query, at + query.length) >= 0)
+        result = 'REPEATED_TEXT_NEEDS_DISAMBIGUATION';
+      else if (usedText.has(key))
+        result = 'DUPLICATE_UNIT_TEXT_NEEDS_DISAMBIGUATION';
+      else
+        result = 'NATIVE_EXACT_TEXT_CANDIDATE';
+      usedText.add(key);
     }
     return {id:unit.id, physicalPage:unit.page, result};
   });
@@ -195,6 +202,9 @@ export async function stageNativeSourceAlignedBatch({
     ...(run ? {run} : {})
   });
   const alignment = compareNativeSourceUnits(batch, witness);
+  if (witness.pages.some(page => !page.hasArabic))
+    fail('native source page contains no readable Arabic; OCR or visual review required on physical page(s): ' +
+      witness.pages.filter(page => !page.hasArabic).map(page => page.physicalPage).join(', '));
   const exceptions = alignment.units.filter(
     unit => unit.result !== 'NATIVE_EXACT_TEXT_CANDIDATE'
   );
