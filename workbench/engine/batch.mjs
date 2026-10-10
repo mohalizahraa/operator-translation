@@ -94,7 +94,7 @@ async function privateDirectory(directory) {
   return actual;
 }
 
-export async function stageTranslationBatch({ manifest, pdfPath, outputDir, translateUnit, critiqueUnit }) {
+export async function stageTranslationBatch({ manifest, pdfPath, outputDir, translateUnit, critiqueUnit, nativeSourceWitness = null }) {
   const batch = validateBatch(manifest);
   if (typeof translateUnit !== 'function' || typeof critiqueUnit !== 'function')
     fail('translator and independent critic adapters required');
@@ -102,6 +102,16 @@ export async function stageTranslationBatch({ manifest, pdfPath, outputDir, tran
   if (typeof pdfPath !== 'string' || !isAbsolute(pdfPath)) fail('canonical source PDF path must be absolute');
   const observedHash = await sha256File(pdfPath);
   if (observedHash !== batch.source.pdfSha256) fail('canonical source PDF hash mismatch');
+  if (nativeSourceWitness !== null) {
+    if (!nativeSourceWitness || nativeSourceWitness.status !== 'TEXT_ONLY_NOT_VISUALLY_VERIFIED' ||
+        nativeSourceWitness.pdfSha256 !== batch.source.pdfSha256 ||
+        !Array.isArray(nativeSourceWitness.pageTextDigests) ||
+        nativeSourceWitness.pageTextDigests.length !== batch.batch.toPage - batch.batch.fromPage + 1 ||
+        nativeSourceWitness.pageTextDigests.some((p, i) =>
+          p.physicalPage !== batch.batch.fromPage + i ||
+          typeof p.nativeTextSha256 !== 'string' || !SHA256.test(p.nativeTextSha256)))
+      fail('native witness summary is invalid or belongs to a different source batch');
+  }
   const directory = await privateDirectory(outputDir);
   const results = [];
   for (const unit of batch.units) {
@@ -127,6 +137,7 @@ export async function stageTranslationBatch({ manifest, pdfPath, outputDir, tran
     schema: 'haydari-engine-staged-batch-v1',
     ...batch,
     units: results,
+    ...(nativeSourceWitness ? { nativeSourceWitness } : {}),
     state: hasConcerns ? 'STAGED_WITH_OPEN_CRITIC_FINDINGS' : 'STAGED_NEEDS_SOURCE_AND_FORMAT_REVIEW',
     verifiedProgressAdvanced: false,
     manuscriptMutated: false,
