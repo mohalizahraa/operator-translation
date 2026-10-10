@@ -9,7 +9,7 @@ This profile specializes translation procedure. It does not weaken source author
 
 ## Universal house standard, speed and routing
 
-**One shared mandatory Arabic→English translation and formatting standard governs every book handled in the Haydari Translation Workbench, regardless of whether Zahraa or Mohammed owns or requests it.** Collaborator/book identity affects discovery and attribution only; it never selects lower or alternate quality requirements. The live formatting house profile is REAL SCALE v2, inheriting v1 except explicit overrides.
+**One shared mandatory Arabic→English translation and formatting standard governs every book handled in the Haydari Translation Workbench, regardless of whether Zahraa or Mohammed owns or requests it.** Collaborator/book identity affects discovery and attribution only; it never selects lower or alternate quality requirements. The live formatting house profile is REAL SCALE v3, inheriting v2 and v1 except explicit later overrides.
 
 **Quality is a hard acceptance constraint; optimize speed subject to it.** Target exceptional publication-grade faithfulness to the authoritative Arabic, exact scholarly terminology and nuance, elegant natural English, all source-bearing surfaces, line-by-line revision, genuine native document semantics, and full verification. Save time through deterministic source/target lookup, verified glossary reuse, efficient batches, mechanical QA and avoiding redundant work. Do not trade away a fidelity or production gate for throughput.
 
