@@ -23,7 +23,7 @@ jobs:
         run: |
           set -euo pipefail
           umask 077
-          source_pdf="$(mktemp "${RUNNER_TEMP:-/tmp}/engine-source-XXXXXXXX.pdf")"
+          source_pdf="$(mktemp "${RUNNER_TEMP:-/tmp}/engine-source-XXXXXXXX")"
           trap 'rm -f "$source_pdf"' EXIT
           curl -fsSL --retry 2 --connect-timeout 20 --max-time 180             "https://haydari-translation-workbench.pages.dev/api/pdf/11"             -o "$source_pdf"
           SOURCE_PDF="$source_pdf" node --input-type=module <<'JS'
