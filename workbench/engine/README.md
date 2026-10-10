@@ -30,9 +30,21 @@ const staged = await stageTranslationBatch({
 
 The adapter functions above are integration placeholders; neither is bundled and no model invocation is claimed. Do **not** send book text or credentials through public CI, console logs, repository commits or arbitrary external services.
 
+## Native PDF source witness (second engine slice)
+
+`source.mjs` is a read-only source adapter. It verifies the **actual file hash** against the manifest, opens the PDF using macOS PDFKit (`swift pdfkit-source.swift`) or an installed Poppler `pdfinfo`/`pdftotext`, checks the physical page count and extracts **one candidate witness per physical PDF page**. Every page carries its original text, a SHA-256 hash of that extracted text and a distinct warning when native text is missing, non-Arabic, or needs visual alignment. Native extraction is **not OCR** and cannot prove scanned-page content or detect all missing footnotes.
+
+`compareNativeSourceUnits(manifest, witness)` compares explicit source units to the corresponding page's normalized native text, distinguishing unique matches, repeated ambiguous text, missing text and blank pages. It never says that the complete page or its layout was verified. A unique substring match proves **text-location plausibility only**, not full surface coverage, reading order, image contents, authorship or faithful translation.
+
+`stageNativeSourceAlignedBatch(...)` is the connected path: check real PDF → extract pages → check each unit against the correct physical page → call separate translation/critic adapters → privately stage the result. It **fails closed before translating** if any unit is missing/repeated or if a page is blank/unreadable without independently resolved OCR/visual evidence. As with the original staging path, it cannot mutate Google Docs, D1, status, review or verified progress. For scanned/source-damaged passages the future OCR/source-review owner must supply separately checked evidence; bypassing the guard by using the older raw staging API would not upgrade that data's truth state.
+
+The read-only adapter requires no browser and no paid API. On macOS it reuses the project's existing PDFKit route; on other systems it needs installed Poppler. Input PDF byte streams and extracted book text are **not saved in the Git repository or printed to logs**. Any real book or export remains private and must follow project permissions.
+
+Synthetic unit tests exercise hash mismatch, page holes/delimiters, source alignment, unreadable and duplicate witnesses, error redaction and connected staging. The native integration test creates an actual tiny two-page synthetic PDF, then exercises PDFKit on macOS (or Poppler when installed elsewhere), including page isolation. It is **not** a real Arabic OCR/translation-quality benchmark.
+
 ## Next independently admitted work
 
-- **Source adapter**: verify page/unit text against the PDF image/extraction, including footnotes, front matter and damaged-source escalation; use the approved Mac/Windows host division and GPU lock for any real Windows GPU work.
+- **Source QA/OCR**: add page-image comparison, complete page/surface segmentation, footnote and scan OCR recovery, printed-page labels and damaged-source escalation. Unique native-text matches are insufficient. Follow the approved host division and Windows GPU lock whenever relevant.
 - **Local zero-cost model adapters**: establish authorized translation and independently executed Arabic-visible critique, then calibrate on reviewer-validated source passages. Do not confuse a synthetic test double with a capable scholarly translator.
 - **Document writer and formatting**: construct the exact English target with native notes/structure and REAL SCALE formatting; inspect rendered output and exact target revision. One designated writer, no concurrent final manuscript edits.
 - **Review/QA and checkpoint**: independent evidence verification and human-owned questions, revision-bound QA receipts, Workbench writes and live D1 readback. Do not enable strict QA or advance book counters until these are proven. Workbench production protection, real D1 backups and Cloudflare state remain separate open loops.
