@@ -1,6 +1,6 @@
 {
-  "release_id": "20261009-integrity-revision-1",
-  "app_version": "20261009-integrity-revision-1",
+  "release_id": "20261013-english-pdf-links-1",
+  "app_version": "20261013-english-pdf-links-1",
   "css_version": "20261009-book-titles-right-1",
-  "description": "Live manuscript revision guards, transactional editorial history and per-book integrity report"
+  "description": "Distinct English PDF links alongside editable translation Docs"
 }
