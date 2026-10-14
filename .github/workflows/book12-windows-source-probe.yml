@@ -43,7 +43,7 @@ jobs:
             if ($python) {
               @'
 import importlib.util
-for name in ['fitz','pymupdf','pytesseract','paddleocr','surya','torch','pypdf','PIL']:
+for name in ['fitz','pymupdf','pytesseract','pypdf','PIL']:
     print('PYTHON_MODULE_' + name.upper() + '=' + str(importlib.util.find_spec(name) is not None))
 '@ | python -
             }
