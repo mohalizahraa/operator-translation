@@ -1,0 +1,54 @@
+name: Book 12 Windows source recovery pilot
+
+on:
+  push:
+    branches:
+      - workbench/english-pdf-delivery-20261013
+    paths:
+      - '.github/workflows/book12-windows-source-probe.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect local PDF and Arabic OCR capabilities
+        shell: pwsh
+        env:
+          BOOK12_SOURCE: https://haydari-translation-workbench.pages.dev/api/pdf/12
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $pdf = Join-Path $env:RUNNER_TEMP 'book12-authoritative.pdf'
+          try {
+            Invoke-WebRequest -Uri $env:BOOK12_SOURCE -OutFile $pdf -MaximumRedirection 5 -TimeoutSec 120
+            $stream = [System.IO.File]::OpenRead($pdf)
+            try {
+              $head = New-Object byte[] 5
+              [void]$stream.Read($head,0,5)
+              if ([Text.Encoding]::ASCII.GetString($head) -ne '%PDF-') { throw 'Downloaded source is not a PDF' }
+            } finally { $stream.Dispose() }
+            "BOOK12_PDF_BYTES=$((Get-Item $pdf).Length)"
+            "BOOK12_SOURCE_SHA256=$((Get-FileHash -Path $pdf -Algorithm SHA256).Hash.ToLower())"
+            "RUNNER_NAME=$env:RUNNER_NAME"
+            foreach ($tool in @('python','py','pdftotext','pdftoppm','tesseract','ollama')) {
+              $found = Get-Command $tool -ErrorAction SilentlyContinue
+              if ($found) { "AVAILABLE_TOOL_$($tool.ToUpper())=$($found.Source)" }
+              else { "UNAVAILABLE_TOOL_$($tool.ToUpper())" }
+            }
+            $python = Get-Command python -ErrorAction SilentlyContinue
+            if ($python) {
+              @'
+import importlib.util
+for name in ['fitz','pymupdf','pytesseract','paddleocr','surya','torch','pypdf','PIL']:
+    print('PYTHON_MODULE_' + name.upper() + '=' + str(importlib.util.find_spec(name) is not None))
+'@ | python -
+            }
+            $tesseract = Get-Command tesseract -ErrorAction SilentlyContinue
+            if ($tesseract) { tesseract --list-langs 2>&1 | ForEach-Object { "OCR_LANGUAGE_$($_)" } }
+          } finally {
+            Remove-Item -Path $pdf -ErrorAction SilentlyContinue
+          }
