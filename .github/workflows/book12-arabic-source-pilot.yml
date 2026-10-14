@@ -1,0 +1,75 @@
+name: Book 12 Arabic Source Witness Pilot
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/book12-arabic-source-pilot.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  read-source:
+    runs-on: [self-hosted, operator-translation, macOS, ARM64]
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Recover first eight physical pages with PDFKit and Apple Vision
+        shell: bash
+        run: |
+          set -euo pipefail
+          source_pdf="$(mktemp /tmp/book12-source-XXXXXX.pdf)"
+          source_swift="$(mktemp /tmp/book12-ocr-XXXXXX.swift)"
+          cleanup() { rm -f "$source_pdf" "$source_swift"; }
+          trap cleanup EXIT
+          curl --fail --location --retry 3 --connect-timeout 30 \
+            'https://haydari-translation-workbench.pages.dev/api/pdf/12' \
+            --output "$source_pdf"
+          head -c 5 "$source_pdf" | grep -q '%PDF-'
+          export BOOK12_PDF="$source_pdf"
+          echo "BOOK12_SOURCE_SHA256=$(shasum -a 256 "$source_pdf" | awk '{print $1}')"
+          cat >"$source_swift" <<'SWIFT'
+          import Foundation
+          import PDFKit
+          import AppKit
+          import Vision
+          let env=ProcessInfo.processInfo.environment
+          guard let path=env["BOOK12_PDF"],
+                let doc=PDFDocument(url:URL(fileURLWithPath:path)) else {fatalError("SOURCE_NOT_OPENED")}
+          guard doc.pageCount==486 else {fatalError("WRONG_PHYSICAL_PAGE_COUNT_\(doc.pageCount)")}
+          print("BOOK12_TOTAL_PHYSICAL_PAGES=\(doc.pageCount)")
+          for pageNumber in 1...8 {
+            autoreleasepool {
+              guard let page=doc.page(at:pageNumber-1) else{return}
+              let image=page.thumbnail(of:NSSize(width:2400,height:3400),for:.mediaBox)
+              let raw=page.string ?? ""
+              print("=== BOOK12_PHYSICAL_PAGE_\(pageNumber)_START ===")
+              print("PDFKIT_CHARS=\(raw.count)")
+              guard let cg=image.cgImage(forProposedRect:nil,context:nil,hints:nil) else {
+                print("OCR_BLOCKED_NO_IMAGE")
+                print("=== BOOK12_PHYSICAL_PAGE_\(pageNumber)_END ===")
+                return
+              }
+              let req=VNRecognizeTextRequest()
+              req.recognitionLevel = .accurate
+              req.usesLanguageCorrection = true
+              let languages=(try? req.supportedRecognitionLanguages()) ?? []
+              if languages.contains("ar-SA") { req.recognitionLanguages=["ar-SA"] }
+              else if languages.contains("ar") { req.recognitionLanguages=["ar"] }
+              else { print("ARABIC_VISION_NOT_SUPPORTED_\(languages.joined(separator:","))") }
+              do {
+                try VNImageRequestHandler(cgImage:cg,options:[:]).perform([req])
+                let lines=(req.results ?? []).sorted {
+                  let ay=$0.boundingBox.midY,by=$1.boundingBox.midY
+                  if abs(ay-by)>0.012{return ay>by}
+                  return $0.boundingBox.midX>$1.boundingBox.midX
+                }.compactMap{$0.topCandidates(1).first?.string}
+                print("OCR_LINES=\(lines.count)")
+                print(lines.joined(separator:"\n"))
+              } catch {
+                print("OCR_ERROR_PAGE_\(pageNumber)=\(error)")
+              }
+              print("=== BOOK12_PHYSICAL_PAGE_\(pageNumber)_END ===")
+            }
+          }
+          SWIFT
+          swift "$source_swift"
