@@ -173,6 +173,22 @@ For reusable evidence packages, preserve enough source identity and transformati
 
 Current provider/tool findings and the recommended YouTube evidence-bridge architecture are preserved as non-canonical implementation evidence in `evidence/YOUTUBE-VIDEO-EVIDENCE-ACCESS-2026-09-13.md`; re-check those vendor capabilities when the workflow materially depends on them.
 
+### 3.1.1 Whole-transcript read gate — explicit ALL / beginning-to-end requests
+
+When the user requests **all transcripts / every word / the entire video or source from beginning to end**, or an exhaustive argument audit whose acceptance depends on *every* in-scope source, **process each source's complete available transcript in original order**, start through the actual end, **before** claiming it was fully read or its argument audit completed. This is a depth requirement, not merely a source-count requirement. Do not replace the requirement with a chapter recap, selected passages, a few beginning/middle/end windows, a topic-level classification, a keyword search, or a compressed extractor output.
+
+Separate and explicitly report, **per source**:
+- `IDENTIFIED`: exact source ID/URL located;
+- `TRANSCRIPT_RETRIEVED`: text acquired (with extent/provenance), **not yet read**;
+- `READ_PARTIAL`: only exact inspected intervals/character or timestamp ranges; other material remains OPEN;
+- `READ_COMPLETE_TEXT`: every actual transcript segment processed **in source order** from opening to ending; verify the retrieved text covers the claimed full runtime or mark truncated/incomplete;
+- `ARGUMENT_AUDIT_COMPLETE_TEXT`: **after** full reading, all materially distinct arguments, contextual reasoning, counterexamples, revisions and challenges captured, with conclusion and counterargument dispositions; no magic fixed number of takeaways;
+- `AUDIOVISUAL_VERIFIED`: original audio and relevant imagery independently checked; **never inferred** from text reading.
+
+These are separate, **non-interchangeable gates**. For very long transcripts, reading successive bounded spans is valid only when their union is gap-free, sequential and recorded; recap/extract duplication is not a second inspection. If the transcript is too large to process completely in one turn, write an exact resumable coverage ledger, mark the source **PARTIAL**, and continue on the next available turn without misreporting completion. If the access route cannot supply the full text, mark the precise gap **INACCESSIBLE**. Condensed *output* is fine only after full *input* inspection when requested; compression must not conceal unexamined objections.
+
+This gate is stricter than the usual smallest-decisive-evidence rule **only when the user explicitly requires whole-source coverage or the audit contract demands it**. Do not escalate narrow lookups or ordinary scoped research into needless full transcripts. For text-only audits the audio/visual boundary still applies.
+
 ### 3.2 Accuracy gate for captions and spoken-source research
 
 When a YouTube or other audio/video source is used for substantive quotation, attribution, translation, argument extraction, or evaluation, **do not equate a retrieved caption file with a verified transcript**. Before trusting meaning-bearing speech, apply a proportional, repeatable fidelity workflow:
