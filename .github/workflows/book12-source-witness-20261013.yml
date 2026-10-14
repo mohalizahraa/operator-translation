@@ -1,0 +1,91 @@
+name: Book 12 Arabic source witness
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/book12-source-witness-20261013.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  witness:
+    runs-on: [self-hosted, operator-translation, macOS, ARM64]
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Recover bounded source pages without committing book text
+        shell: bash
+        env:
+          SOURCE_URL: https://haydari-translation-workbench.pages.dev/api/pdf/12
+        run: |
+          set -euo pipefail
+          PDF_PATH="${RUNNER_TEMP}/book12-source.pdf"
+          OUTPUT_PATH="${RUNNER_TEMP}/book12-source-witness-1-12.txt"
+          curl --fail --location --retry 3 --connect-timeout 30 --max-time 240 "$SOURCE_URL" --output "$PDF_PATH"
+          head -c 5 "$PDF_PATH" | grep -q '%PDF-'
+          cat > "${RUNNER_TEMP}/book12-witness.swift" <<'SWIFT'
+          import Foundation
+          import PDFKit
+          import AppKit
+          import Vision
+
+          let pdf = ProcessInfo.processInfo.environment["PDF_PATH"]!
+          let output = ProcessInfo.processInfo.environment["OUTPUT_PATH"]!
+          guard let source = PDFDocument(url:URL(fileURLWithPath:pdf)) else { fatalError("SOURCE_PDF_UNREADABLE") }
+          guard source.pageCount == 486 else { fatalError("SOURCE_PHYSICAL_PAGE_COUNT_MISMATCH_\(source.pageCount)") }
+          let fm=FileManager.default
+          fm.createFile(atPath:output,contents:nil)
+          guard let writer=FileHandle(forWritingAtPath:output) else { fatalError("OUTPUT_CREATE_FAILED") }
+          defer { try? writer.close() }
+          func emit(_ text:String) { if let data=text.data(using:.utf8) { try? writer.write(contentsOf:data) } }
+          let test=VNRecognizeTextRequest()
+          let languages = (try? test.supportedRecognitionLanguages()) ?? []
+          let arabic = languages.contains("ar-SA") ? "ar-SA" : (languages.contains("ar") ? "ar" : nil)
+          print("SOURCE_PHYSICAL_PAGES=\(source.pageCount)")
+          print("VISION_ARABIC_SUPPORTED=\(arabic != nil)")
+          emit("SOURCE_PHYSICAL_PAGES=486\nSOURCE_PDF_KIND=canonical_workbench_project_12\n")
+          for physical in 1...12 {
+            autoreleasepool {
+              guard let page=source.page(at:physical-1) else { fatalError("MISSING_PAGE_\(physical)") }
+              let raw=page.string ?? ""
+              let image=page.thumbnail(of:NSSize(width:2200,height:3200),for:.mediaBox)
+              let cg=image.cgImage(forProposedRect:nil,context:nil,hints:nil)
+              var lines:[String]=[]
+              if let arabic=arabic, let cg=cg {
+                let request=VNRecognizeTextRequest()
+                request.recognitionLevel = .accurate
+                request.recognitionLanguages = [arabic]
+                request.usesLanguageCorrection = true
+                do {
+                  try VNImageRequestHandler(cgImage:cg, options:[:]).perform([request])
+                  lines = (request.results ?? []).sorted {
+                    let a=$0.boundingBox.midY,b=$1.boundingBox.midY
+                    return abs(a-b)>0.012 ? a>b : $0.boundingBox.midX>$1.boundingBox.midX
+                  }.compactMap { $0.topCandidates(1).first?.string }
+                } catch { print("VISION_OCR_ERROR_PAGE_\(physical)=\(error)") }
+              }
+              emit("\n=== PHYSICAL SOURCE PAGE \(physical) ===\n")
+              emit("== PDFKIT TEXT ==\n\(raw)\n")
+              emit("== ARABIC VISION OCR ==\n\(lines.joined(separator:"\n"))\n")
+              print("SOURCE_PAGE_\(physical)_PDFKIT_CHARS=\(raw.count)_VISION_LINES=\(lines.count)")
+            }
+          }
+          SWIFT
+          export PDF_PATH OUTPUT_PATH
+          swift "${RUNNER_TEMP}/book12-witness.swift"
+          printf 'SOURCE_SHA256=%s\n' "$(shasum -a 256 "$PDF_PATH" | awk '{print $1}')" >> "$OUTPUT_PATH"
+          grep -q '=== PHYSICAL SOURCE PAGE 12 ===' "$OUTPUT_PATH"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: book12-source-witness-1-12
+          path: ${{ runner.temp }}/book12-source-witness-1-12.txt
+          retention-days: 1
+          if-no-files-found: error
+      - name: Delete temporary source data from runner
+        if: always()
+        shell: bash
+        run: |
+          rm -f "${RUNNER_TEMP}/book12-source.pdf" "${RUNNER_TEMP}/book12-witness.swift" "${RUNNER_TEMP}/book12-source-witness-1-12.txt"
