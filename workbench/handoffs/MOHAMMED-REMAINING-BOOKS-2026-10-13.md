@@ -14,6 +14,19 @@ Status: ACTIVE / NOT COMPLETE. 2026-10-13 EDT user instruction: translate the re
 
 The detailed initial queue and initial snapshot below are **historical** where superseded by this 2026-10-14 continuation checkpoint. Re-read live endpoints and current Google Doc before any new mutation: another collaborator/agent may have edited the document concurrently.
 
+## Workbench linked-English-Doc public access audit — 2026-10-14 UTC
+
+**Founder instruction (explicit, repeated):** Every Haydari Workbench linked English Doc and newly created working manuscript should use **Anyone with the link → Editor** by default, with public accessibility independently verified and no recurring permissions question to the founder. Scope: Workbench translation/manuscript Docs; this is not a blanket instruction to share unrelated personal Drive files.
+
+Read-only Google Drive permission metadata audit: **21 linked English Docs + new book #12 draft**.
+
+- **18 of 21 linked Docs:** Google Drive explicitly reports `permissions=[{type:'anyone',role:'writer'},...]` → **verified public Editor**. Included project IDs: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 43, 78, 118, 125, 134, 156, 169.
+- **Project #47** (From a Ḥadīth-Centered Islam to a Qurʾān-Centered Islam): Drive reports `anyone:reader`, **not Editor**. URL: https://docs.google.com/document/d/1gMRPpYgbadRoG2fRHzH0Dzky079OUJZ5MUQBNNdY0Xg/edit. Connected user metadata reports `canShare=true`, but connector's `share_file` tool cannot create/update `anyone` permissions; requires a supported UI or actual permission-granting Google Drive API route.
+- **Projects #119 and #133:** Drive connector reports `shared=true` but withholds permission list and `canShare=false`; **Editor permission unverified**, not proven missing. Anonymous public Docs fetch confirms they are readable without login but does not establish Editor role. #119 https://docs.google.com/document/d/1VPKi6sV0slJxJotaT-xIgT6O6Jncj59_rtOJB_Y0YV0/edit and #133 https://docs.google.com/document/d/11lfy3M2woPFmqDsNzGJjAIgg1ecXmL1LrWnZWP1y27c/edit.
+- **Book #12 active new working Doc:** https://docs.google.com/document/d/1J4rtQ0t9bN57FG-AclGCENPbOSyGXGn0NzYkhvMGhUo/edit. Drive owner connected to this ChatGPT plugin; Drive explicitly reports `shared=false` owner-only. Anonymous Docs fetch confirms `login_required`; **public share is missing**. The Workbench must not link this Doc as a public English Book before its Anyone/Editor permission is verified.
+
+**Capability attempts and actual blocker:** Connected Google Drive plugin provides `share_file` only to a named user or `anyone_at_company`; it does not support Google permission `type=anyone,role=writer`, or permission update/delete. GitHub Mac runner capability probe found no preexisting gcloud/rclone/Drive API OAuth ADC/CLI, and a no-cost Safari UI automation probe failed with `AppleEvent timed out (-1712)` under self-hosted runner; it **did not change permissions**. The diagnostic workflows were removed after collection. TinyFish browsing automation incurs wallet charges, prohibited by founder's $0 rule; free TinyFish content extraction supports anonymous access inspection only, not authenticated sharing changes. Plugin directory search found no additional accessible Drive permission-management plugin. A user-authorized **Work mode cloud browser** with authenticated Google login or another direct Google Drive permissions API/browser operation is required to enact and verify the remaining exceptions. Do not pretend permissions were changed, and do not report global 22/22 until all required Google metadata and anonymous access checks pass.
+
 ## Scope and live queue checked 2026-10-14 UTC
 
 Production: https://haydari-translation-workbench.pages.dev
