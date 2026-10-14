@@ -1,0 +1,42 @@
+name: Book 12 Visual Source Evidence
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/book12-visual-source-evidence.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: [self-hosted, operator-translation, macOS, ARM64]
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Render bounded source pages into ephemeral image witnesses
+        shell: bash
+        run: |
+          set -euo pipefail
+          source_pdf="$(mktemp /tmp/book12-visual-XXXXXX.pdf)"
+          source_swift="$(mktemp /tmp/book12-visual-XXXXXX.swift)"
+          trap 'rm -f "$source_pdf" "$source_swift"' EXIT
+          curl -L --fail --retry 3 'https://haydari-translation-workbench.pages.dev/api/pdf/12' -o "$source_pdf"
+          export BOOK12_PDF="$source_pdf"
+          cat >"$source_swift" <<'SWIFT'
+          import Foundation
+          import PDFKit
+          import AppKit
+          guard let path=ProcessInfo.processInfo.environment["BOOK12_PDF"],
+                let doc=PDFDocument(url:URL(fileURLWithPath:path)),doc.pageCount==486
+                else {fatalError("SOURCE_MISMATCH")}
+          for physical in [2,5,7,8] {
+            let image=doc.page(at:physical-1)!.thumbnail(of:NSSize(width:1200,height:1750),for:.mediaBox)
+            guard let tiff=image.tiffRepresentation,let rep=NSBitmapImageRep(data:tiff),
+                  let jpg=rep.representation(using:.jpeg,properties:[.compressionFactor:0.47])
+                  else {fatalError("BAD_RENDER")}
+            print("BOOK12_VISUAL_\(physical)_START")
+            print(jpg.base64EncodedString())
+            print("BOOK12_VISUAL_\(physical)_END")
+          }
+          SWIFT
+          swift "$source_swift"
