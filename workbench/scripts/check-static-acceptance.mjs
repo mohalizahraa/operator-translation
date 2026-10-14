@@ -121,6 +121,7 @@ assert(schemaSource.includes('english_pdf_url TEXT') && libSource.includes("['en
 assert(projectPatchSource.includes('body.english_pdf_url') && appSource.includes('englishPdfLinkMarkup(p)') && indexSource.includes('id="english-pdf-url"'), 'English PDF editing and per-book action required.');
 assert(projectCreateSource.includes('const englishPdfUrl = normalizeHttpUrl(body.english_pdf_url)') && projectCreateSource.includes('pdfNote, googleDocUrl, englishPdfUrl, coverUrl'), 'English PDF must survive initial project creation, not only edits.');
 assert(appSource.includes("p.google_doc_url,p.english_pdf_url,p.cover_url"), 'English PDF URL must invalidate the shared-state signature.');
+assert(appSource.includes('return p.english_pdf_url') && appSource.includes('escapeHtml(p.english_pdf_url)'), 'Unlinked books must hide the English PDF action; linked URLs must be escaped.');
 assert(appSource.includes('openEnglishBookDialog(id,true)'), 'Work on Book auto-continue into English Book linking is missing.');
 assert(appSource.includes('reservedPdfWindow'), 'Work on Book post-link popup-safe continuation is missing.');
 assert(indexSource.includes('Anyone with the link → Editor') && indexSource.includes('public Editor links'), 'English Book sharing requirement/boundary is missing from the UI.');
