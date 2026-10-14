@@ -2,7 +2,7 @@ import { actorFromRequest, ensureCatalog, json, normalizeGoogleDocUrl, normalize
 import { syncTranslationFocusForProject,verifyLiveEnglishDocumentRevision } from '../../_translation.js';
 
 const fields = new Set([
-  'title_ar','title_en','assignee','status','source_url','source_pdf_url','google_doc_url','cover_url',
+  'title_ar','title_en','assignee','status','source_url','source_pdf_url','google_doc_url','english_pdf_url','cover_url',
   'start_date','due_date','notes'
 ]);
 const statusOrder = ['not_started','in_progress','review','completed','published'];
@@ -102,6 +102,13 @@ export async function onRequestPatch(context) {
       }
     }
     body.google_doc_url = normalized || '';
+  }
+  if (body.english_pdf_url !== undefined) {
+    const normalized = normalizeHttpUrl(body.english_pdf_url);
+    if (normalized === false || (normalized && !normalized.startsWith('https://'))) {
+      return json({ error: 'English PDF must be a secure HTTPS link to a publicly readable PDF.' }, 400);
+    }
+    body.english_pdf_url = normalized || '';
   }
   if (body.cover_url !== undefined) {
     const normalized = normalizeHttpUrl(body.cover_url);

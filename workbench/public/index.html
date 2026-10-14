@@ -250,6 +250,7 @@
         <div class="field-group"><label for="translated-pages">Verified translation progress <span class="field-note">synced from source→Doc checkpoints</span></label><div class="translation-page-input"><input id="translated-pages" type="number" min="0" step="1" readonly aria-readonly="true" /><span id="translated-pages-total">source pages</span></div></div>
         <div class="field-group"><label for="due-date">Deadline</label><div class="date-input-actions"><input id="due-date" type="date" /><button id="clear-due-date" type="button" class="text-button date-clear-button">Remove deadline</button></div><span id="due-date-warning" class="date-warning" role="status" aria-live="polite" hidden></span></div>
         <label class="full">English Book — Google Doc<input id="google-doc-url" type="url" placeholder="https://docs.google.com/document/..." /></label>
+        <label class="full">English PDF — finished edition <span class="field-note">Anyone with the link → Viewer</span><input id="english-pdf-url" type="url" placeholder="https://.../english-book.pdf" /></label>
         <label class="full">Book cover image URL <span class="field-note">optional override</span><input id="cover-url" type="url" placeholder="https://.../cover.jpg" /></label>
         <label class="full">Import cover photo from device <span class="field-note">JPEG, PNG, or WebP</span><input id="cover-file" type="file" accept="image/jpeg,image/png,image/webp" /></label>
         <div class="full cover-upload-actions">
@@ -307,6 +308,6 @@
 
   <div id="toast" role="status" aria-live="polite"></div>
   <script src="/model-core.js?v=20261006-full-audit-repair"></script>
-  <script type="module" src="/app.js?v=20261009-integrity-revision-1"></script>
+  <script type="module" src="/app.js?v=20261013-english-pdf-links-1"></script>
 </body>
 </html>

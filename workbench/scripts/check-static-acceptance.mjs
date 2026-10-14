@@ -20,6 +20,7 @@ assert(indexSource.includes('/styles.css?v='+release.css_version),'Production CS
 assert(indexSource.includes('id="theme-toggle"') && indexSource.includes("localStorage.getItem('haydariTheme')") && indexSource.includes("prefers-color-scheme: dark"), 'Theme toggle or flash-free saved/system initial state is missing.');
 assert(appSource.includes("localStorage.setItem('haydariTheme', next)") && appSource.includes('syncThemeToggle()'), 'Theme switcher or local persistence is missing.');
 const libSource = await fs.readFile(new URL('functions/_lib.js', root), 'utf8');
+const schemaSource = await fs.readFile(new URL('schema.sql', root), 'utf8');
 const coverProxySource = await fs.readFile(new URL('functions/api/official-cover/[id].js', root), 'utf8');
 const coverSourcesSource = await fs.readFile(new URL('functions/_cover_sources.js', root), 'utf8');
 const stylesSource = await fs.readFile(new URL('public/styles.css', root), 'utf8');
@@ -39,6 +40,7 @@ assert(stylesSource.includes('--oxblood:#BA9194;') && stylesSource.includes('--g
 assert(!['rgba(247,245,239,','rgba(154,131,95,','rgba(38,49,45,','rgba(89,104,97,','rgba(109,67,71,'].some(fragment => stylesSource.includes(fragment)), 'Hardcoded light-theme surface colors remain outside theme tokens.');
 const headersSource = await fs.readFile(new URL('public/_headers', root), 'utf8');
 const projectPatchSource = await fs.readFile(new URL('functions/api/projects/[id].js', root), 'utf8');
+const projectCreateSource = await fs.readFile(new URL('functions/api/projects/index.js', root), 'utf8');
 const revisionSource = await fs.readFile(new URL('functions/api/revision.js', root), 'utf8');
 const progressSyncSource = await fs.readFile(new URL('functions/api/projects/[id]/progress-sync.js', root), 'utf8');
 const translationSource = await fs.readFile(new URL('functions/_translation.js', root), 'utf8');
@@ -115,6 +117,11 @@ assert(appSource.includes('data-work-on-book'), 'Work on Book action is missing 
 assert(appSource.includes("function sortProjects(projects, sort='updated')"), 'Projects sorting behavior is missing.');
 assert(indexSource.includes('id="sort-projects"'), 'Projects sort control is missing.');
 assert(appSource.includes("localStorage.setItem('haydariProjectSort'"), 'Projects sort persistence is missing.');
+assert(schemaSource.includes('english_pdf_url TEXT') && libSource.includes("['english_pdf_url','TEXT']"), 'English PDF schema and migration required.');
+assert(projectPatchSource.includes('body.english_pdf_url') && appSource.includes('englishPdfLinkMarkup(p)') && indexSource.includes('id="english-pdf-url"'), 'English PDF editing and per-book action required.');
+assert(projectCreateSource.includes('const englishPdfUrl = normalizeHttpUrl(body.english_pdf_url)') && projectCreateSource.includes('pdfNote, googleDocUrl, englishPdfUrl, coverUrl'), 'English PDF must survive initial project creation, not only edits.');
+assert(appSource.includes("p.google_doc_url,p.english_pdf_url,p.cover_url"), 'English PDF URL must invalidate the shared-state signature.');
+assert(appSource.includes('return p.english_pdf_url') && appSource.includes('escapeHtml(p.english_pdf_url)'), 'Unlinked books must hide the English PDF action; linked URLs must be escaped.');
 assert(appSource.includes('openEnglishBookDialog(id,true)'), 'Work on Book auto-continue into English Book linking is missing.');
 assert(appSource.includes('reservedPdfWindow'), 'Work on Book post-link popup-safe continuation is missing.');
 assert(indexSource.includes('Anyone with the link → Editor') && indexSource.includes('public Editor links'), 'English Book sharing requirement/boundary is missing from the UI.');
