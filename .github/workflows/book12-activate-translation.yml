@@ -1,0 +1,46 @@
+name: Book 12 Live Translating Stage
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/book12-activate-translation.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  stage:
+    runs-on: [self-hosted, operator-translation, macOS, ARM64]
+    timeout-minutes: 5
+    steps:
+      - name: Mark active translation only after exact-state preflight and live readback
+        shell: bash
+        env:
+          URL: https://haydari-translation-workbench.pages.dev/api/projects/12
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, os, urllib.request
+          url=os.environ['URL']
+          def get():
+              with urllib.request.urlopen(urllib.request.Request(url,headers={'Accept':'application/json'}),timeout=18) as resp:
+                  return json.load(resp)['project']
+          before=get()
+          print('BEFORE',json.dumps({k:before.get(k) for k in ('id','status','assignee','translated_pages','pages','google_doc_url')},ensure_ascii=False))
+          if before['id']!=12 or before['assignee']!='Mohammed' or before['pages']!=486:
+              raise RuntimeError('book identity differs; no mutation')
+          if before['status']=='in_progress':
+              print('ALREADY_TRANSLATING_NO_CHANGE')
+          elif before['status']=='not_started':
+              req=urllib.request.Request(url,data=b'{"status":"in_progress"}',headers={'Content-Type':'application/json','X-Workbench-Actor':'System'},method='PATCH')
+              with urllib.request.urlopen(req,timeout=30) as resp:
+                  result=json.load(resp)['project']
+              if result.get('status')!='in_progress':
+                  raise RuntimeError('PATCH reply did not confirm Translating')
+              print('TRANSITION_ACCEPTED')
+          else:
+              raise RuntimeError('unexpected workflow stage; did not override')
+          after=get()
+          if after['id']!=12 or after['status']!='in_progress' or after['translated_pages']!=before['translated_pages']:
+              raise RuntimeError('readback did not confirm safe stage change')
+          print('LIVE_READBACK',json.dumps({k:after.get(k) for k in ('id','status','translated_pages','pages','google_doc_url')},ensure_ascii=False))
+          PY
