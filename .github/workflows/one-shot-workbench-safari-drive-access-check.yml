@@ -1,0 +1,51 @@
+name: Workbench Google Docs Safari Access Check
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/one-shot-workbench-safari-drive-access-check.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: [self-hosted, operator-translation, macOS, ARM64]
+    timeout-minutes: 4
+    steps:
+      - name: Test current Google Docs UI access using Safari only
+        shell: bash
+        run: |
+          set -euo pipefail
+          osascript <<'APPLESCRIPT'
+          set docURL to "https://docs.google.com/document/d/1J4rtQ0t9bN57FG-AclGCENPbOSyGXGn0NzYkhvMGhUo/edit"
+          tell application "Safari"
+            activate
+            make new document with properties {URL:docURL}
+            delay 8
+            try
+              set titleValue to name of front document
+              set urlValue to URL of front document
+              if urlValue starts with "https://docs.google.com/document/" then
+                log "SAFARI_ON_TARGET_DOCUMENT=true"
+              else
+                log "SAFARI_ON_TARGET_DOCUMENT=false"
+              end if
+              if titleValue contains "The Ethics of" then
+                log "SAFARI_LOADED_ENGLISH_DOC_TITLE=true"
+              else
+                log "SAFARI_LOADED_ENGLISH_DOC_TITLE=false"
+              end if
+            on error errMsg number errNum
+              log "SAFARI_DOCUMENT_READ_ERROR=" & errNum
+            end try
+            try
+              set resultValue to do JavaScript "Boolean(document.querySelector('[aria-label*=Share], [aria-label*=share]'))" in front document
+              log "SAFARI_DOCUMENT_JS_ACCESS=true"
+              log "SAFARI_SHARE_UI_PRESENT=" & resultValue
+            on error errMsg number errNum
+              log "SAFARI_DOCUMENT_JS_ACCESS=false"
+              log "SAFARI_DOCUMENT_JS_ERROR_CODE=" & errNum
+            end try
+            close front document
+          end tell
+          APPLESCRIPT
