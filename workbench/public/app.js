@@ -281,6 +281,11 @@ function googleDocLinkMarkup(p) {
     ? `<button class="mini-link secondary-link english-book-link" type="button" data-open-english="${p.id}">English Book</button>`
     : `<button class="mini-link secondary-link english-book-button" type="button" data-link-english="${p.id}">English Book · link</button>`;
 }
+function englishPdfLinkMarkup(p) {
+  return p.english_pdf_url
+    ? `<a class="mini-link secondary-link" href="${escapeHtml(p.english_pdf_url)}" target="_blank" rel="noopener">English PDF ↗</a>`
+    : '';
+}
 function questionsDocLinkMarkup(p) {
   return p.questions_doc_url
     ? `<button class="mini-link secondary-link" type="button" data-open-questions="${p.id}">Questions</button>`
@@ -467,6 +472,7 @@ function projectMarkup(p, compact=false, selectable=false) {
         ${workOnBookMarkup(p)}
         ${p.pdf_available ? `<a class="mini-link pdf" href="/api/pdf/${p.id}" target="_blank" rel="noopener">Arabic PDF</a>` : ''}
         ${googleDocLinkMarkup(p)}
+        ${englishPdfLinkMarkup(p)}
         ${questionsDocLinkMarkup(p)}
         ${humanReviewMarkup(p)}
         ${integrityMarkup(p)}
@@ -495,6 +501,7 @@ function projectMarkup(p, compact=false, selectable=false) {
         ${workOnBookMarkup(p)}
         ${p.pdf_available ? `<a class="mini-link pdf" href="/api/pdf/${p.id}" target="_blank" rel="noopener">Arabic PDF</a>` : (p.pdf_missing ? '<span class="pill pdf-missing">PDF missing</span>' : '<span class="pill">PDF checking…</span>')}
         ${googleDocLinkMarkup(p)}
+        ${englishPdfLinkMarkup(p)}
         ${questionsDocLinkMarkup(p)}
         ${humanReviewMarkup(p)}
         ${integrityMarkup(p)}
@@ -902,6 +909,7 @@ function assignedProjectMarkup(p) {
       <div class="entry-actions assigned-actions">
         ${workOnBookMarkup(p)}
         ${googleDocLinkMarkup(p)}
+        ${englishPdfLinkMarkup(p)}
         ${questionsDocLinkMarkup(p)}
         ${humanReviewMarkup(p)}
         ${integrityMarkup(p)}
@@ -1603,6 +1611,7 @@ function openProject(id) {
     ? 'historical completion · page checkpoint unavailable'
     : (p?.page_count_verified && p?.pages ? `/ ${p.pages} verified source pages` : 'verified total unavailable');
   $('google-doc-url').value = p?.google_doc_url || '';
+  $('english-pdf-url').value = p?.english_pdf_url || '';
   $('cover-url').value = p?.cover_url || '';
   $('cover-file').value = '';
   $('upload-cover').disabled = !p?.id;
@@ -1634,7 +1643,7 @@ async function saveProject(event) {
   const payload = {
     title_ar: $('title-ar').value.trim(), title_en: $('title-en').value.trim(), assignee: $('assignee').value,
     status: $('status').value, start_date: $('start-date').value, due_date: $('due-date').value,
-    google_doc_url: $('google-doc-url').value.trim(), cover_url: $('cover-url').value.trim(), source_pdf_url: $('source-pdf-url').value.trim(),
+    google_doc_url: $('google-doc-url').value.trim(), english_pdf_url: $('english-pdf-url').value.trim(), cover_url: $('cover-url').value.trim(), source_pdf_url: $('source-pdf-url').value.trim(),
     published: $('published').checked, notes: $('notes').value.trim(),
   };
   const currentProject=id ? state.projects.find(p=>p.id===id) : null;
@@ -1841,7 +1850,7 @@ function sharedDataSignature(projects, activity, paceEvents) {
     p.translated_pages,p.translation_progress_at,p.completed_at,p.completed_by,
     p.published,p.published_at,p.published_by,
     p.source_url,p.source_pdf_url,p.pdf_status,p.pdf_checked_at,p.pdf_check_note,p.page_count_verified,p.page_count_basis,
-    p.google_doc_url,p.cover_url,p.has_uploaded_cover
+    p.google_doc_url,p.english_pdf_url,p.cover_url,p.has_uploaded_cover
   ]);
   return JSON.stringify([
     projectState,
