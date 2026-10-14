@@ -19,11 +19,12 @@ jobs:
         run: |
           set -euo pipefail
           python3 - <<'PY'
-          import json, os, urllib.request
+          import json, os, subprocess
           url=os.environ['URL']
+          def curl(*args):
+              return subprocess.check_output(['curl','--fail','--silent','--show-error','--location','--connect-timeout','18',*args],text=True,timeout=35)
           def get():
-              with urllib.request.urlopen(urllib.request.Request(url,headers={'Accept':'application/json'}),timeout=18) as resp:
-                  return json.load(resp)['project']
+              return json.loads(curl('-H','Accept: application/json',url))['project']
           before=get()
           print('BEFORE',json.dumps({k:before.get(k) for k in ('id','status','assignee','translated_pages','pages','google_doc_url')},ensure_ascii=False))
           if before['id']!=12 or before['assignee']!='Mohammed' or before['pages']!=486:
@@ -31,9 +32,8 @@ jobs:
           if before['status']=='in_progress':
               print('ALREADY_TRANSLATING_NO_CHANGE')
           elif before['status']=='not_started':
-              req=urllib.request.Request(url,data=b'{"status":"in_progress"}',headers={'Content-Type':'application/json','X-Workbench-Actor':'System'},method='PATCH')
-              with urllib.request.urlopen(req,timeout=30) as resp:
-                  result=json.load(resp)['project']
+              result=json.loads(curl('-X','PATCH','-H','Content-Type: application/json',
+                                     '-H','X-Workbench-Actor: System','--data-binary','{"status":"in_progress"}',url))['project']
               if result.get('status')!='in_progress':
                   raise RuntimeError('PATCH reply did not confirm Translating')
               print('TRANSITION_ACCEPTED')
