@@ -40,6 +40,7 @@ assert(stylesSource.includes('--oxblood:#BA9194;') && stylesSource.includes('--g
 assert(!['rgba(247,245,239,','rgba(154,131,95,','rgba(38,49,45,','rgba(89,104,97,','rgba(109,67,71,'].some(fragment => stylesSource.includes(fragment)), 'Hardcoded light-theme surface colors remain outside theme tokens.');
 const headersSource = await fs.readFile(new URL('public/_headers', root), 'utf8');
 const projectPatchSource = await fs.readFile(new URL('functions/api/projects/[id].js', root), 'utf8');
+const projectCreateSource = await fs.readFile(new URL('functions/api/projects/index.js', root), 'utf8');
 const revisionSource = await fs.readFile(new URL('functions/api/revision.js', root), 'utf8');
 const progressSyncSource = await fs.readFile(new URL('functions/api/projects/[id]/progress-sync.js', root), 'utf8');
 const translationSource = await fs.readFile(new URL('functions/_translation.js', root), 'utf8');
@@ -118,6 +119,7 @@ assert(indexSource.includes('id="sort-projects"'), 'Projects sort control is mis
 assert(appSource.includes("localStorage.setItem('haydariProjectSort'"), 'Projects sort persistence is missing.');
 assert(schemaSource.includes('english_pdf_url TEXT') && libSource.includes("['english_pdf_url','TEXT']"), 'English PDF schema and migration required.');
 assert(projectPatchSource.includes('body.english_pdf_url') && appSource.includes('englishPdfLinkMarkup(p)') && indexSource.includes('id="english-pdf-url"'), 'English PDF editing and per-book action required.');
+assert(projectCreateSource.includes('const englishPdfUrl = normalizeHttpUrl(body.english_pdf_url)') && projectCreateSource.includes('pdfNote, googleDocUrl, englishPdfUrl, coverUrl'), 'English PDF must survive initial project creation, not only edits.');
 assert(appSource.includes("p.google_doc_url,p.english_pdf_url,p.cover_url"), 'English PDF URL must invalidate the shared-state signature.');
 assert(appSource.includes('openEnglishBookDialog(id,true)'), 'Work on Book auto-continue into English Book linking is missing.');
 assert(appSource.includes('reservedPdfWindow'), 'Work on Book post-link popup-safe continuation is missing.');
