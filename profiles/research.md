@@ -173,6 +173,18 @@ For reusable evidence packages, preserve enough source identity and transformati
 
 Current provider/tool findings and the recommended YouTube evidence-bridge architecture are preserved as non-canonical implementation evidence in `evidence/YOUTUBE-VIDEO-EVIDENCE-ACCESS-2026-09-13.md`; re-check those vendor capabilities when the workflow materially depends on them.
 
+### 3.2 Accuracy gate for captions and spoken-source research
+
+When a YouTube or other audio/video source is used for substantive quotation, attribution, translation, argument extraction, or evaluation, **do not equate a retrieved caption file with a verified transcript**. Before trusting meaning-bearing speech, apply a proportional, repeatable fidelity workflow:
+
+1. Identify the **best available source path** and label it (creator-provided/manual captions, platform auto-captions, independently transcribed original audio, derivative transcript, or summary). Preserve the source video ID and timestamps; check completeness against the declared runtime/chapter denominator before using a transcript for whole-video claims.
+2. Scan for probable transcription defects, especially **names, domain terms, negations, speaker boundaries, dates/numbers, sarcasm, repetitions, omissions, and clipped sentence boundaries**. Where meaning-bearing, compare with the primary audio; use creator terminology/context to suggest candidate corrections **without fabricating words**.
+3. If uncertain content materially affects the conclusion, use a second materially independent recognition/access path **when available and affordable under the project's cost constraints**. Agreement between caption mirrors sourcing the same upstream caption is **not independent proof**. Listen to decisive audio intervals or keep the exact wording and conclusion explicitly uncertain.
+4. Preserve **verbatim versus edited-for-readability versus paraphrase** as different statuses. Correct clear transcription mistakes transparently; do not silently rewrite a speaker's grammatical/content mistakes or change their meaning. For direct quotations, verify exact audible wording (or label source-provided captions as such) with timestamps.
+5. If complete original speech/audio cannot be inspected, **label the resulting audit bounded** and record which speech/visual/timing surfaces were actually checked. Do not call captions “perfect,” “fully verified,” or a video “watched” merely because subtitles or derivative summaries exist. No public automatic recognition tool guarantees error-free transcription; manual/audio verification can raise confidence but unintelligible speech may remain unresolved.
+
+Use the **smallest decisive evidence pass**; do not require expensive external services or bulk media retention to apply this gate. Retain material uncertainty and access failures as actionable retrieval gaps, not invented certainty. This gate is a reusable standard for future audio/video research; it does not create an always-running transcriber or imply video access where the available tools cannot obtain it.
+
 ## 4. Retain only decisive durable reference evidence
 
 When text alone would make a material conclusion unreconstructable, retain a **small representative reference set** in the appropriate durable evidence store when capability, licensing, privacy, and repository policy allow it.
