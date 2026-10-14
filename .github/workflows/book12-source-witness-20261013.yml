@@ -78,12 +78,12 @@ jobs:
           swift "${RUNNER_TEMP}/book12-witness.swift"
           printf 'SOURCE_SHA256=%s\n' "$(shasum -a 256 "$PDF_PATH" | awk '{print $1}')" >> "$OUTPUT_PATH"
           grep -q '=== PHYSICAL SOURCE PAGE 12 ===' "$OUTPUT_PATH"
-      - uses: actions/upload-artifact@v4
-        with:
-          name: book12-source-witness-1-12
-          path: ${{ runner.temp }}/book12-source-witness-1-12.txt
-          retention-days: 1
-          if-no-files-found: error
+      - name: Print bounded private OCR witness (no artifact quota usage)
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s "${RUNNER_TEMP}/book12-source-witness-1-12.txt"
+          cat "${RUNNER_TEMP}/book12-source-witness-1-12.txt"
       - name: Delete temporary source data from runner
         if: always()
         shell: bash
