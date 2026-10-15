@@ -44,6 +44,21 @@ jobs:
             console.log('TOC_CONTROLS='+JSON.stringify(controls));
             const table=page.getByText('Table of contents',{exact:true}).first();
             console.log('TOC_LABEL_VISIBLE='+(await table.isVisible().catch(()=>false)));
+            const visiblePages=page.locator('.kix-page-paginated:visible');
+            console.log('VISIBLE_PAGES='+await visiblePages.count());
+            let found=false;
+            for(let i=0;i<Math.min(3,await visiblePages.count())&&!found;i++){
+              const box=await visiblePages.nth(i).boundingBox().catch(()=>null);
+              if(!box)continue;
+              console.log('PAGE_BOX_'+i+'='+JSON.stringify(box));
+              for(const yr of [0.22,0.35,0.50,0.65]){
+                await page.mouse.click(box.x+box.width*0.28,box.y+box.height*yr);
+                await sleep(550);
+                const opt=await page.locator('[aria-label], [role="button"]').evaluateAll(nodes=>nodes.map(n=>({aria:n.getAttribute('aria-label'),title:n.getAttribute('title'),text:(n.textContent||'').trim().slice(0,55)})).filter(v=>/table of contents|toc options|update table|refresh table/i.test(Object.values(v).join(' '))).slice(0,12));
+                console.log('TOC_AFTER_CLICK '+i+':'+yr+' '+JSON.stringify(opt));
+                if(opt.length){found=true;break}
+              }
+            }
             console.log('PROBE_NO_MUTATION_DONE');
           }finally{await browser.close();}
           NODE
