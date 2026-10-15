@@ -1,0 +1,53 @@
+name: Fiqh TOC page-number-mode WebKit probe
+on:
+  push:
+    paths:
+      - '.github/workflows/one-shot-fiqh-toc-webkit-probe-20261015.yml'
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: [self-hosted, operator-translation, macOS, ARM64]
+    timeout-minutes: 12
+    env:
+      DOC_URL: https://docs.google.com/document/d/1VFPO5MKAqqcCVq7FRL11BIrnJOnx0DQpgBg9Il9Ux0g/edit
+      PLAYWRIGHT_BROWSERS_PATH: /tmp/fiqh-toc-webkit-probe
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install ephemeral WebKit, not Chrome
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install webkit
+      - name: Read-only discovery of existing native TOC options in safety copy
+        shell: bash
+        run: |
+          cat >/tmp/fiqh-toc-probe.mjs <<'NODE'
+          import { webkit } from "playwright";
+          const sleep=t=>new Promise(r=>setTimeout(r,t));
+          const browser=await webkit.launch({headless:true});
+          const page=await browser.newPage({viewport:{width:1440,height:900},locale:'en-US'});
+          try{
+            await page.goto(process.env.DOC_URL,{waitUntil:'domcontentloaded',timeout:100000});
+            await sleep(12000);
+            console.log('SAFE_COPY_DOC_URL='+page.url());
+            console.log('DOC_TITLE='+await page.title());
+            if(page.url().includes('accounts.google.com'))throw Error('GOOGLE_LOGIN_REQUIRED');
+            const editor=page.locator('.kix-appview-editor').first();
+            if(await editor.count())await editor.click({position:{x:200,y:180},force:true,timeout:6000});
+            await page.keyboard.press('Meta+f');
+            await sleep(300);await page.keyboard.type('Contents');await sleep(1400);
+            const close=page.getByLabel('Close',{exact:true}).first();
+            if(await close.isVisible({timeout:1000}).catch(()=>false))await close.click();else await page.keyboard.press('Escape');
+            await sleep(1200);
+            await page.keyboard.press('ArrowRight');await sleep(800);
+            const controls=await page.locator('[aria-label], [role="button"], [role="checkbox"]').evaluateAll(els=>els.map(el=>({aria:el.getAttribute('aria-label'),title:el.getAttribute('title'),role:el.getAttribute('role'),text:(el.textContent||'').trim().slice(0,70)})).filter(x=>/contents|page num|format|more options|refresh|update|toc|leader/i.test(Object.values(x).join(' '))).slice(0,75));
+            console.log('TOC_CONTROLS='+JSON.stringify(controls));
+            const table=page.getByText('Table of contents',{exact:true}).first();
+            console.log('TOC_LABEL_VISIBLE='+(await table.isVisible().catch(()=>false)));
+            console.log('PROBE_NO_MUTATION_DONE');
+          }finally{await browser.close();}
+          NODE
+          node /tmp/fiqh-toc-probe.mjs
+      - name: Remove ephemeral contents and browser
+        if: always()
+        run: rm -rf /tmp/fiqh-toc-probe.mjs /tmp/fiqh-toc-webkit-probe node_modules/playwright node_modules/playwright-core node_modules/.bin/playwright
