@@ -1,8 +1,10 @@
 name: Link recovered Fiqh al-Aqidah manuscript to Workbench #95
 on:
+  workflow_dispatch:
   push:
     paths:
       - '.github/workflows/one-shot-fiqh-link-existing-doc-20261015.yml'
+# 2026-10-15: retry activation on self-hosted macOS only; no paid hosted fallback.
 permissions:
   contents: read
 jobs:
