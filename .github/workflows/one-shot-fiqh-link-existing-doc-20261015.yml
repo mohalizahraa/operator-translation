@@ -1,0 +1,49 @@
+name: Link recovered Fiqh al-Aqidah manuscript to Workbench #95
+on:
+  push:
+    paths:
+      - '.github/workflows/one-shot-fiqh-link-existing-doc-20261015.yml'
+permissions:
+  contents: read
+jobs:
+  link:
+    runs-on: [self-hosted, operator-translation, macOS, ARM64]
+    timeout-minutes: 5
+    steps:
+      - name: Link only the verified existing editable English Book
+        env:
+          BASE: https://haydari-translation-workbench.pages.dev
+          DOC: https://docs.google.com/document/d/1jMkWQfto0obfAQltSZ6Mi-YJex0-ywuzh9K-UeuhZJE/edit
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, os, urllib.request, urllib.error
+          url = os.environ['BASE'] + '/api/projects/95'
+          intended = os.environ['DOC']
+          def api(method, data=None):
+              headers = {'Accept':'application/json'}
+              if data is not None: headers['Content-Type']='application/json'
+              request = urllib.request.Request(url, data=json.dumps(data).encode() if data is not None else None, headers=headers, method=method)
+              with urllib.request.urlopen(request, timeout=30) as response:
+                  return json.load(response)
+          before = api('GET')
+          book = before.get('project', before)
+          if book.get('id') != 95 or book.get('catalog_id') != 'book-88':
+              raise SystemExit('PROJECT_IDENTITY_MISMATCH')
+          if book.get('status') != 'review' or int(book.get('translated_pages') or 0) != 408 or int(book.get('pages') or 0) != 408:
+              raise SystemExit('PROJECT_STATE_CHANGED_NO_WRITE')
+          current = book.get('google_doc_url') or ''
+          if current and current.rstrip('/') != intended.rstrip('/'):
+              raise SystemExit('CONFLICTING_ENGLISH_BOOK_LINK_NO_WRITE')
+          if not current:
+              api('PATCH', {'google_doc_url': intended})
+          after = api('GET')
+          post = after.get('project', after)
+          link = post.get('google_doc_url') or ''
+          if '1jMkWQfto0obfAQltSZ6Mi-YJex0-ywuzh9K-UeuhZJE' not in link:
+              raise SystemExit('LINK_NOT_PRESENT_ON_D1_READBACK')
+          if post.get('status') != 'review' or int(post.get('translated_pages') or 0) != 408:
+              raise SystemExit('STATUS_OR_PROGRESS_DRIFT')
+          print('FIQH_LINK_VERIFIED project=95 status=review verified_pages=408')
+          PY
