@@ -21,7 +21,7 @@ jobs:
       - name: Read-only discovery of existing native TOC options in safety copy
         shell: bash
         run: |
-          cat >/tmp/fiqh-toc-probe.mjs <<'NODE'
+          cat >./fiqh-toc-probe.mjs <<'NODE'
           import { webkit } from "playwright";
           const sleep=t=>new Promise(r=>setTimeout(r,t));
           const browser=await webkit.launch({headless:true});
@@ -47,7 +47,7 @@ jobs:
             console.log('PROBE_NO_MUTATION_DONE');
           }finally{await browser.close();}
           NODE
-          node /tmp/fiqh-toc-probe.mjs
+          node ./fiqh-toc-probe.mjs
       - name: Remove ephemeral contents and browser
         if: always()
-        run: rm -rf /tmp/fiqh-toc-probe.mjs /tmp/fiqh-toc-webkit-probe node_modules/playwright node_modules/playwright-core node_modules/.bin/playwright
+        run: rm -rf ./fiqh-toc-probe.mjs /tmp/fiqh-toc-webkit-probe node_modules/playwright node_modules/playwright-core node_modules/.bin/playwright
