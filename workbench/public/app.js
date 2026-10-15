@@ -2081,16 +2081,23 @@ async function loadWorkspace() {
   const retry=$('retry-workspace');
   if (retry) retry.disabled=true;
   try {
-    const health = await api('/api/health');
-    state.pdfAudit = health.pdfs || null;
+    // Book data is the only critical bootstrap dependency. Health is optional
+    // metadata: a transient /api/health 503 must never hide readable projects.
     await Promise.all([loadCoverMap(),loadSeriesMap()]);
     await loadData();
+    void api('/api/health').then(health => {
+      state.pdfAudit = health.pdfs || null;
+      if (state.pdfAudit?.unchecked) {
+        void auditPdfs().catch(error => toast(`PDF verification paused: ${error.message}`));
+      }
+    }).catch(() => {
+      // Project and activity views remain usable; retry on the next page load.
+    });
     if (workspaceRecoveryTimer) clearTimeout(workspaceRecoveryTimer);
     workspaceRecoveryTimer=null;
     workspaceRecoveryDelayMs=5000;
     setWorkspaceError('');
     startLiveSync();
-    if (state.pdfAudit?.unchecked) auditPdfs().catch(error => toast(`PDF verification paused: ${error.message}`));
     return true;
   } catch (error) {
     const firstFailure=!document.body.classList.contains('workspace-data-unavailable');
@@ -2104,12 +2111,16 @@ async function loadWorkspace() {
   }
 }
 
-document.addEventListener('visibilitychange',()=>{
+function reconnectUnavailableWorkspace() {
   if (document.hidden || !document.body.classList.contains('workspace-data-unavailable')) return;
   if (workspaceRecoveryTimer) clearTimeout(workspaceRecoveryTimer);
   workspaceRecoveryTimer=null;
-  loadWorkspace();
-});
+  void loadWorkspace();
+}
+
+document.addEventListener('visibilitychange', reconnectUnavailableWorkspace);
+window.addEventListener('online', reconnectUnavailableWorkspace);
+window.addEventListener('focus', reconnectUnavailableWorkspace);
 
 async function init() {
   clearLegacyAccessKey();
