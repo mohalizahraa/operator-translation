@@ -4,7 +4,6 @@ on:
   push:
     paths:
       - '.github/workflows/one-shot-fiqh-link-existing-doc-20261015.yml'
-# 2026-10-15: retry activation on self-hosted macOS only; no paid hosted fallback.
 permissions:
   contents: read
 jobs:
@@ -12,40 +11,59 @@ jobs:
     runs-on: [self-hosted, operator-translation, macOS, ARM64]
     timeout-minutes: 5
     steps:
-      - name: Link only the verified existing editable English Book
+      - name: Link actual verified English Book without altering progress
         env:
           BASE: https://haydari-translation-workbench.pages.dev
           DOC: https://docs.google.com/document/d/1jMkWQfto0obfAQltSZ6Mi-YJex0-ywuzh9K-UeuhZJE/edit
         shell: bash
         run: |
           set -euo pipefail
-          python3 - <<'PY'
-          import json, os, urllib.request, urllib.error
-          url = os.environ['BASE'] + '/api/projects/95'
-          intended = os.environ['DOC']
-          def api(method, data=None):
-              headers = {'Accept':'application/json'}
-              if data is not None: headers['Content-Type']='application/json'
-              request = urllib.request.Request(url, data=json.dumps(data).encode() if data is not None else None, headers=headers, method=method)
-              with urllib.request.urlopen(request, timeout=30) as response:
-                  return json.load(response)
-          before = api('GET')
-          book = before.get('project', before)
-          if book.get('id') != 95 or book.get('catalog_id') != 'book-88':
+          # Use the runner's system curl trust store. The prior Python 3.14
+          # urllib path failed on missing local CA certificates; never -k.
+          work=$(mktemp -d)
+          trap 'rm -rf "$work"' EXIT
+          api="$BASE/api/projects/95"
+          curl --fail-with-body --silent --show-error --location --retry 2 \
+            --connect-timeout 20 --max-time 45 --header "Accept: application/json" \
+            "$api" --output "$work/before.json"
+          python3 - "$work/before.json" "$work/should_patch" "$DOC" <<'PY'
+          import json,sys
+          state=json.load(open(sys.argv[1]))
+          b=state.get('project',state)
+          if str(b.get('id'))!='95' or b.get('catalog_id')!='book-88':
               raise SystemExit('PROJECT_IDENTITY_MISMATCH')
-          if book.get('status') != 'review' or int(book.get('translated_pages') or 0) != 408 or int(book.get('pages') or 0) != 408:
+          if b.get('status')!='review' or int(b.get('translated_pages') or 0)!=408 or int(b.get('pages') or 0)!=408:
               raise SystemExit('PROJECT_STATE_CHANGED_NO_WRITE')
-          current = book.get('google_doc_url') or ''
-          if current and current.rstrip('/') != intended.rstrip('/'):
+          existing=b.get('google_doc_url') or ''
+          doc_id='1jMkWQfto0obfAQltSZ6Mi-YJex0-ywuzh9K-UeuhZJE'
+          if existing and doc_id not in existing:
               raise SystemExit('CONFLICTING_ENGLISH_BOOK_LINK_NO_WRITE')
-          if not current:
-              api('PATCH', {'google_doc_url': intended})
-          after = api('GET')
-          post = after.get('project', after)
-          link = post.get('google_doc_url') or ''
+          with open(sys.argv[2],'w') as f: f.write('0' if existing else '1')
+          print('PREFLIGHT_IDENTITY_AND_STATE_VERIFIED')
+          PY
+          if [ "$(cat "$work/should_patch")" = 1 ]; then
+            python3 - "$work/patch.json" "$DOC" <<'PY'
+          import json,sys
+          with open(sys.argv[1],'w') as f: json.dump({'google_doc_url':sys.argv[2]},f)
+          PY
+            curl --fail-with-body --silent --show-error --location --retry 0 \
+              --connect-timeout 20 --max-time 60 -X PATCH \
+              --header "Content-Type: application/json" \
+              --header "Accept: application/json" \
+              --header "x-workbench-actor: Mohammed" \
+              --data-binary "@$work/patch.json" "$api" --output "$work/patch-response.json"
+          fi
+          curl --fail-with-body --silent --show-error --location --retry 2 \
+            --connect-timeout 20 --max-time 45 --header "Accept: application/json" \
+            "$api" --output "$work/after.json"
+          python3 - "$work/after.json" <<'PY'
+          import json,sys
+          response=json.load(open(sys.argv[1]))
+          p=response.get('project',response)
+          link=p.get('google_doc_url') or ''
           if '1jMkWQfto0obfAQltSZ6Mi-YJex0-ywuzh9K-UeuhZJE' not in link:
               raise SystemExit('LINK_NOT_PRESENT_ON_D1_READBACK')
-          if post.get('status') != 'review' or int(post.get('translated_pages') or 0) != 408:
+          if p.get('status')!='review' or int(p.get('translated_pages') or 0)!=408 or int(p.get('pages') or 0)!=408:
               raise SystemExit('STATUS_OR_PROGRESS_DRIFT')
           print('FIQH_LINK_VERIFIED project=95 status=review verified_pages=408')
           PY
