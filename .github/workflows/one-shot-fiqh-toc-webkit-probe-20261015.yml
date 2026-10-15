@@ -10,7 +10,7 @@ jobs:
     runs-on: [self-hosted, operator-translation, macOS, ARM64]
     timeout-minutes: 12
     env:
-      DOC_URL: https://docs.google.com/document/d/1VFPO5MKAqqcCVq7FRL11BIrnJOnx0DQpgBg9Il9Ux0g/edit
+      DOC_URL: https://docs.google.com/document/d/1jMkWQfto0obfAQltSZ6Mi-YJex0-ywuzh9K-UeuhZJE/edit
       PLAYWRIGHT_BROWSERS_PATH: /tmp/fiqh-toc-webkit-probe
     steps:
       - uses: actions/checkout@v4
@@ -18,7 +18,7 @@ jobs:
         run: |
           npm install --no-save playwright@1.55.0
           npx playwright install webkit
-      - name: Read-only discovery of existing native TOC options in safety copy
+      - name: Read-only discovery of existing native TOC options in public original
         shell: bash
         run: |
           cat >./fiqh-toc-probe.mjs <<'NODE'
@@ -29,7 +29,7 @@ jobs:
           try{
             await page.goto(process.env.DOC_URL,{waitUntil:'domcontentloaded',timeout:100000});
             await sleep(12000);
-            console.log('SAFE_COPY_DOC_URL='+page.url());
+            console.log('READONLY_PUBLIC_DOC_URL='+page.url());
             console.log('DOC_TITLE='+await page.title());
             if(page.url().includes('accounts.google.com'))throw Error('GOOGLE_LOGIN_REQUIRED');
             const editor=page.locator('.kix-appview-editor').first();
