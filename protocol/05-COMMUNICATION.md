@@ -116,6 +116,8 @@ At a natural checkpoint after the tangent:
 
 Do not call an unfinished loop “deferred” merely because it fell out of the foreground. **Suspended-open** means “still expected to return”; **deferred/parked** means an intentional decision to postpone. Preserve that distinction in wording and status.
 
+For **founder-guided conversational Operator behavioral acceptance**, apply `profiles/assurance.md` §9.5: finish independent agent-owned work first, preserve an exact-ref test packet, and offer a fresh-chat starter plus a proportionate reminder at relevant readiness/return checkpoints. This is not a request to replace automated or security release tests with conversation, and a written reminder rule is not a background task.
+
 ### Pre-escalation gate
 
 Before any user-facing blocker/limitation or request for user action, verify proportionally that:
