@@ -1,5 +1,5 @@
 import { actorFromRequest, ensureCatalog, json, normalizeProject } from '../../../_lib.js';
-import { syncTranslationFocusForProject } from '../../../_translation.js';
+import { missingEnglishBook, syncTranslationFocusForProject } from '../../../_translation.js';
 
 function idFrom(context) {
   const n = Number(context.params.id);
@@ -69,6 +69,10 @@ export async function onRequestPatch(context) {
   }
   if (!googleDocRevision) {
     return json({ error: 'google_doc_revision is required so the checkpoint is tied to an exact verified target state (native Docs revision or public-export-sha256 identity).' }, 400);
+  }
+
+  if (translatedPages > expectedPrevious && missingEnglishBook('in_progress', before.google_doc_url)) {
+    return json({ error: 'A linked English Book is required before verified translation progress can advance.', code: 'english_book_required' }, 409);
   }
 
   // Strict acceptance is opt-in until the editor key and end-to-end QA writer
