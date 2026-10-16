@@ -1,5 +1,11 @@
 import { googleDocIdFromUrl, normalizeProject } from './_lib.js';
 
+// A missing English Book is a setup blocker, not evidence that translation can start.
+export function missingEnglishBook(status, url) {
+  return ['in_progress','review','completed','published'].includes(status) &&
+    !(typeof url === 'string' && url.trim());
+}
+
 export const TRANSLATORS = new Set(['Zahraa','Mohammed','Brother']);
 
 function textOrNull(value) {
@@ -207,6 +213,9 @@ function translationResumeInstruction(project, nextSourcePage, totalPages) {
     return 'Translation has not started. Link/open the English Book, verify source identity and the canonical PDF, then begin at physical source page 1.';
   }
   if (project?.status === 'in_progress') {
+    if (missingEnglishBook(project.status, project.google_doc_url)) {
+      return 'The English Book is missing. Create or locate the persistent Google Doc, verify Anyone with the link → Editor in Drive metadata, attach it through the Workbench, and confirm live link readback before translating or publishing progress.';
+    }
     if (Number.isInteger(nextSourcePage) && nextSourcePage > 0) {
       return `Open the linked English Doc, confirm the highest verified WBPROGRESS marker and [[NEXT_BATCH]] sentinel, then continue from physical source page ${nextSourcePage} using the canonical PDF plus any stored recovery witness.`;
     }

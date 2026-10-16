@@ -1,6 +1,6 @@
 {
-  "release_id": "20261015-api-recovery-1",
+  "release_id": "20261016-english-target-guard-1",
   "app_version": "20261015-api-recovery-1",
   "css_version": "20261009-book-titles-right-1",
-  "description": "Resilient Workbench bootstrap when health API fails and reconnection on network recovery"
+  "description": "Block missing English Book targets and keep Board stage navigation current"
 }

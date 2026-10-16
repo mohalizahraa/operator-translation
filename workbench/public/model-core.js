@@ -33,6 +33,7 @@
   function workflowTransitionAllowed(statusOrder, project, to) {
     const from=project?.status;
     if (!statusTransitionAllowed(statusOrder,from,to)) return false;
+    if (statusOrder.indexOf(to)>statusOrder.indexOf(from) && to!=='not_started' && !project?.google_doc_url) return false;
     if (from==='in_progress' && to==='review' && project?.page_count_verified) {
       const total=Number(project.pages || 0);
       const done=Number(project.translated_pages || 0);
