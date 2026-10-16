@@ -15,6 +15,8 @@ const core=context.WorkbenchCore;
 assert(!core.workflowTransitionAllowed(stages,{status:'not_started',google_doc_url:null},'in_progress'),'Board must block premature start.');
 assert(core.workflowTransitionAllowed(stages,{status:'not_started',google_doc_url:'linked-doc'},'in_progress'),'Board must allow ready start.');
 assert(core.workflowTransitionAllowed(stages,{status:'in_progress',google_doc_url:null},'not_started'),'Legacy inconsistent projects must be recoverable.');
+assert(!core.workflowTransitionAllowed(stages,{status:'in_progress',google_doc_url:null,page_count_verified:true,pages:5,translated_pages:5},'review'),'Board must block advancing an active project with no English target.');
+assert(core.workflowTransitionAllowed(stages,{status:'in_progress',google_doc_url:'linked-doc',page_count_verified:true,pages:5,translated_pages:5},'review'),'Board must allow a verified completed translation to enter formatting when linked.');
 const guards = [
   ['../functions/api/projects/index.js', 'missingEnglishBook(status, googleDocUrl)'],
   ['../functions/api/projects/[id].js', 'missingEnglishBook(targetStatus, targetDoc)'],
