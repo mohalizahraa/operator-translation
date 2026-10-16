@@ -59,9 +59,9 @@ assert(core.statusTransitionAllowed(order,'in_progress','review'),'Adjacent forw
 assert(core.statusTransitionAllowed(order,'review','in_progress'),'Adjacent rewind should pass.');
 assert(!core.statusTransitionAllowed(order,'not_started','completed'),'Workflow jumps must fail.');
 assert(!core.statusTransitionAllowed(order,'in_progress','published'),'Publish Ready jump must fail.');
-assert(!core.workflowTransitionAllowed(order,{status:'in_progress',page_count_verified:true,pages:100,translated_pages:99},'review'),'Verified incomplete translation must not enter Needs Formatting.');
-assert(core.workflowTransitionAllowed(order,{status:'in_progress',page_count_verified:true,pages:100,translated_pages:100},'review'),'Verified complete translation may enter Needs Formatting.');
-assert(core.workflowTransitionAllowed(order,{status:'in_progress',page_count_verified:false,pages:999,translated_pages:0},'review'),'Missing/unverified PDF denominator must preserve manual stage advancement.');
+assert(!core.workflowTransitionAllowed(order,{status:'in_progress',google_doc_url:'linked-doc',page_count_verified:true,pages:100,translated_pages:99},'review'),'Verified incomplete translation must not enter Needs Formatting.');
+assert(core.workflowTransitionAllowed(order,{status:'in_progress',google_doc_url:'linked-doc',page_count_verified:true,pages:100,translated_pages:100},'review'),'Verified complete translation may enter Needs Formatting.');
+assert(core.workflowTransitionAllowed(order,{status:'in_progress',google_doc_url:'linked-doc',page_count_verified:false,pages:999,translated_pages:0},'review'),'Missing/unverified PDF denominator must preserve manual stage advancement.');
 
 const history=core.completionHistory([
   {id:1,created_at:'2026-09-01',date_key:'2026-09-01',delta:1},
