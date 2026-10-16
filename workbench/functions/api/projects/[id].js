@@ -1,5 +1,5 @@
 import { actorFromRequest, ensureCatalog, json, normalizeGoogleDocUrl, normalizeHttpUrl, normalizeProject, recordActivity, validDateRange, validIsoDate, verifyGoogleDocLinkAccess } from '../../_lib.js';
-import { syncTranslationFocusForProject,verifyLiveEnglishDocumentRevision } from '../../_translation.js';
+import { missingEnglishBook, syncTranslationFocusForProject,verifyLiveEnglishDocumentRevision } from '../../_translation.js';
 
 const fields = new Set([
   'title_ar','title_en','assignee','status','source_url','source_pdf_url','google_doc_url','english_pdf_url','cover_url',
@@ -102,6 +102,13 @@ export async function onRequestPatch(context) {
       }
     }
     body.google_doc_url = normalized || '';
+  }
+  const targetStatus = body.status ?? before.status;
+  const targetDoc = body.google_doc_url !== undefined ? body.google_doc_url : before.google_doc_url;
+  const movingForward = body.status !== undefined && statusOrder.indexOf(targetStatus) > statusOrder.indexOf(before.status);
+  const removingTarget = body.google_doc_url !== undefined && !targetDoc;
+  if ((movingForward || removingTarget) && missingEnglishBook(targetStatus, targetDoc)) {
+    return json({ error: 'Link a publicly accessible English Book before advancing this workflow stage or unlinking an active manuscript.', code: 'english_book_required' }, 409);
   }
   if (body.english_pdf_url !== undefined) {
     const normalized = normalizeHttpUrl(body.english_pdf_url);
