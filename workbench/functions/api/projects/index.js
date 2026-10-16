@@ -1,5 +1,5 @@
 import { actorFromRequest, ensureCatalog, json, normalizeGoogleDocUrl, normalizeHttpUrl, normalizeProject, recordActivity, validDateRange, validIsoDate, verifyGoogleDocLinkAccess } from '../../_lib.js';
-import { syncTranslationFocusForProject } from '../../_translation.js';
+import { missingEnglishBook, syncTranslationFocusForProject } from '../../_translation.js';
 const validStatuses = new Set(['not_started','in_progress','review','completed','published']);
 const validAssignees = new Set(['Zahraa','Mohammed','Brother','Both','Unassigned']);
 
@@ -20,6 +20,9 @@ export async function onRequestPost(context) {
   if (body.published) return json({ error: 'A new project cannot begin Published.' }, 409);
   const googleDocUrl = normalizeGoogleDocUrl(body.google_doc_url);
   if (googleDocUrl === false) return json({ error: 'English Book must be a Google Docs document link.' }, 400);
+  if (missingEnglishBook(status, googleDocUrl)) {
+    return json({ error: 'Link a publicly accessible English Book before entering Translating.', code: 'english_book_required' }, 409);
+  }
   if (googleDocUrl) {
     const access = await verifyGoogleDocLinkAccess(googleDocUrl);
     if (!access.accessible) return json({ error: 'English Book must be shared as Anyone with the link → Editor before it can be linked.' }, 400);
