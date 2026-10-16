@@ -49,6 +49,8 @@ When a conclusion materially depends on a concept, taxonomy, translation, or fra
 
 A valid argument about a malformed concept can be precise and still answer the wrong question. Conversely, unfamiliar/native vocabulary does not earn a truth premium merely by being indigenous or different. Preserve the representation that best fits the target and exposes decisive structure.
 
+**Example-to-concept validity check (when a concrete example carries an inference).** Before using an example to prove, disprove, rank, or teach a claim, verify that it *actually instantiates the claimed concept at the correct level*: distinguish an actor's statement from the narration's presentation, a description of behavior from the behavior itself, a process from its outcome, and preference for a technique from a demonstrated defect. Test one genuine instance and, when useful, a close non-instance or boundary reversal. If an example misses the category, repair or discard the inference rather than debating the mislabeled example. For recommendations in art, design, and other value-laden domains, distinguish **a technique's effect**, **its fitness to a specified objective/contract**, and **mere stylistic preference** before calling a choice bad or universally superior. This operationalizes the existing conceptual-adequacy and counterexample duties; it is **not a new DMSC stage or a mandatory ceremony for trivial illustrations**.
+
 ### 1.2 Separate prototype, frequency, necessity, sufficiency and definition
 
 Do not let an exception erase a real prototype, and do not let a common prototype masquerade as a definition.
