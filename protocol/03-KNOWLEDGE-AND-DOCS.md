@@ -111,6 +111,14 @@ When the loop is completed, cancelled, superseded, made moot, or deliberately pa
 
 **Queue/status completeness includes suspended-open work.** A queue, handoff, roadmap, or “what remains?” projection that reports only the current foreground branch while omitting materially live suspended loops is incomplete.
 
+### 1.2 Independently elicited cases are a standing comparison set for imported models
+
+When a user and agent have independently examined concrete cases—works, incidents, prototypes, experiments, observed outcomes, or reactions—and derived distinctions or conditional judgments from them, **retrieve the materially relevant case evidence before evaluating or adopting an outside author/framework**. The comparison set is not limited to examples chosen by that author. Preserve provenance and epistemic status separately: direct user observation, first-hand reaction/preference, verified source fact, case-specific interpretation, agent-derived hypothesis, and user-endorsed generalization are not interchangeable.
+
+Test what the incoming account **explains, predicts, contradicts, refines, and leaves unaddressed** relative to the standing cases. An omission is a **coverage gap for the user's research objective** when that case is in scope; it is not automatically a false claim by the outside author, an intentional denial, or evidence that the author purported to cover the whole domain. If an existing case conflicts, re-examine both case interpretation and incoming theory rather than defending older conclusions automatically. Keep a case-specific positive observation from being laundered into a universal artistic law; keep an imported attractive rule from erasing independently witnessed counterexamples.
+
+Use the case-to-theory coverage procedure in `profiles/reconciliation.md` for nontrivial audits. Do not ask the user to repeat recorded case judgments that can be retrieved, or make them reconstruct an entire earlier framework just to expose an omission.
+
 ## 2. Extract before compressing
 
 When persistent knowledge is being reconciled, extract the task-relevant source propositions before summarizing them away.
