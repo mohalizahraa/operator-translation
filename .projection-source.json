@@ -1,7 +1,7 @@
 {
   "projection": "operator-translation",
   "canonical_repository": "mohalizahraa/operator-protocol",
-  "canonical_commit": "eba70069d79e72f7429c589025aaef756ebc6d62",
+  "canonical_commit": "dec8e4252abb84572eaaf7c5ab75aa61f9f8c902",
   "projected_content_sha256": "da57e94109d039b0cbddfccf929f8a13cfb4cf218bc11ef1777132a476e71de7",
   "projected_files": 21,
   "destination_repository": "mohalizahraa/operator-translation",
