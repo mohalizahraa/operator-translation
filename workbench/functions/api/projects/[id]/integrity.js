@@ -41,7 +41,7 @@ export async function onRequestGet(context){
     note:'Presence checks, not independent Arabic accuracy certification.'},
   review:{attestation_present:Boolean(approval),reviewer:approval?.reviewer_name||null,revision:approval?.google_doc_revision||null,
     status:approvalState,live_check:liveRevision.code},
-  deployment:{editor_protection:typeof context.env?.WORKBENCH_EDITOR_KEY==='string'&&context.env.WORKBENCH_EDITOR_KEY.length>=32?'enforced':'unprotected_legacy',
+  deployment:{editor_protection:'public_collaboration',
     qa_gate:context.env?.WORKBENCH_REQUIRE_QA_EVIDENCE==='1'?'enforced':'legacy'},
   warnings:[
    !norm.page_count_verified?'Source page count unverified':null,

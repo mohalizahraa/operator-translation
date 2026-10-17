@@ -71,7 +71,7 @@ export async function onRequestPatch(context) {
       const attestation=qa?await context.env.DB.prepare(`SELECT id FROM translation_human_review_attestations
         WHERE project_id=? AND source_pdf_sha256=? AND google_doc_revision=? ORDER BY id DESC LIMIT 1`)
         .bind(id,qa.source_pdf_sha256,qa.google_doc_revision).first():null;
-      if(!attestation)return json({error:'Publish Ready requires a reviewer-only credential-backed human attestation tied to this exact post-QA manuscript.',code:'human_review_attestation_required'},409);
+      if(!attestation)return json({error:'Publish Ready requires an explicit human review declaration tied to this exact post-QA manuscript.',code:'human_review_attestation_required'},409);
       const liveRevision=await verifyLiveEnglishDocumentRevision(before,qa.google_doc_revision);
       if(!liveRevision.ok)return json({error:liveRevision.reason,code:liveRevision.code},409);
     }

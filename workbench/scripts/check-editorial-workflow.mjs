@@ -19,17 +19,17 @@ for(const owner of [schema,migration]){
    assert(owner.includes(entity),'Missing '+entity+' from schema or runtime migration');
  }
 }
-assert(questions.includes('requireEditorCapability'),'Questions writes must be authorized');
+assert(questions.includes('requireEditorCapability'),'Questions writes reuse the open-collaboration middleware without a key.');
 assert(questions.includes('question_key'),'Questions require stable idempotency keys');
-assert(questions.includes('requireHumanReviewerCapability'),'Question answers must be reviewer-only, not automatically forged by editor');
+assert(questions.includes('requireHumanReviewerCapability'),'Question answers carry human-declared decisions, not automatic model answers.');
 assert(questions.includes('The automated manuscript writer cannot replace the human reviewer answer'),'Applying questions cannot rewrite reviewer decisions');
 assert(questions.includes('translation_question_events'),'Questions preserve decision history');
 assert(questions.includes('recordActivity'),'Questions must advance shared revision token');
 assert(quality.includes('assessTranslationEvidence'),'QA receipts require deterministic preflight');
-assert(quality.includes('requireEditorCapability'),'QA writes require editor capability');
+assert(quality.includes('requireEditorCapability'),'QA writes pass through the open-collaboration guard.');
 assert(quality.includes('recordActivity'),'QA receipts must trigger live UI sync');
-assert(humanReview.includes('requireHumanReviewerCapability'),'Human approval must have separate reviewer key');
-assert(humanReview.includes('requireEditorCapability'),'Human approval must require existing edit capability');
+assert(humanReview.includes('requireHumanReviewerCapability'),'Human approval must require explicit self-declaration, not an inferred AI approval.');
+assert(humanReview.includes('requireEditorCapability'),'Human review uses the documented open editing model.');
 assert(humanReview.includes('translation_quality_evidence'),'Human approval must bind to final QA revision');
 assert(humanReview.includes('translation_questions'),'Blocking open translation questions must prevent approval');
 assert(humanReview.includes('recordActivity'),'Human approval must update revision token');
@@ -39,10 +39,10 @@ assert(progress.includes('qa_receipt_required'),'Marker-only updates must fail w
 assert(project.includes('qa_coverage_incomplete')&&project.includes('whole_book_qa_required'),'Stage changes must guard formatting and whole-book QA');
 assert(project.includes('human_review_attestation_required'),'Human review cannot be inferred from automatic status');
 assert(app.includes('data-link-questions')&&app.includes('data-open-questions'),'Questions Doc needs UI actions');
-assert(app.includes('data-human-review')&&app.includes('x-workbench-reviewer-key'),'Review action must use reviewer-only secret per submission');
-assert(app.includes("sessionStorage.getItem('workbench-editor-key')"),'Editor key should stay tab-session scoped');
-assert(middleware.includes('WORKBENCH_EDITOR_KEY'),'Security policy must cover API mutations');
-assert(health.includes('UNPROTECTED_LEGACY')&&health.includes('LEGACY_MARKER_ONLY'),'Do not claim security and QA are enabled by mere code presence');
+assert(app.includes('data-human-review')&&!app.includes('x-workbench-reviewer-key'),'Human review must not ask for a credential key.');
+assert(!app.includes("sessionStorage.getItem('workbench-editor-key')"),'Browser must not read an editor key to edit.');
+assert(middleware.includes('Cross-origin edit requests')&&!middleware.includes('WORKBENCH_EDITOR_KEY'),'Open collaboration must retain cross-origin browser guard without any editor key.');
+assert(health.includes('public_collaboration')&&health.includes('LEGACY_MARKER_ONLY'),'Public edits must be explicit and QA enforcement claims must remain evidence-bound.');
 assert(revision.includes('FROM activity'),'Question/QA writes must be visible through activity revision');
 assert(humanReview.includes('verifyLiveEnglishDocumentRevision'),'Human review requires live Google Doc revision check');
 assert(project.includes('verifyLiveEnglishDocumentRevision'),'Publish Ready requires live Google Doc revision check');

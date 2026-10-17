@@ -64,6 +64,7 @@ const els = {
 
 function clearLegacyAccessKey() {
   localStorage.removeItem('haydariWorkbenchKey');
+  sessionStorage.removeItem('workbench-editor-key');
   if (location.hash.startsWith('#key=')) history.replaceState(null, '', location.pathname + location.search);
 }
 
@@ -86,7 +87,6 @@ async function api(path, options = {}) {
         headers: {
           'content-type': 'application/json',
           'x-workbench-actor': state.actor,
-          ...(sessionStorage.getItem('workbench-editor-key') ? {'x-workbench-editor-key':sessionStorage.getItem('workbench-editor-key')} : {}),
           ...(options.headers || {}),
         },
       });
@@ -100,12 +100,6 @@ async function api(path, options = {}) {
     if (canRetry && attempt<2 && retryable.has(response.status)) {
       await new Promise(resolve=>setTimeout(resolve,350*(2**attempt)));
       continue;
-    }
-    if (response.status===401 && data.code==='editor_access_required' && !options.__editorKeyRetry) {
-      const key=window.prompt('Enter the shared Workbench editor key to save this change. It stays in this browser tab session only.');
-      if (!key) throw new Error('Editor key required. No changes saved.');
-      sessionStorage.setItem('workbench-editor-key',key);
-      return api(path,{...options,__editorKeyRetry:true});
     }
     throw new Error(data.error || `Request failed (${response.status})`);
   }
@@ -608,11 +602,8 @@ function bindQuickActions(root=document) {
       if(!receipt){toast('Whole-book revision-bound QA evidence is required before human approval.');return;}
       const declared=window.confirm(`Only confirm after PERSONALLY reading and reviewing the complete final English manuscript against the source, including unresolved questions.\n\nBook: ${project.title_en||project.title_ar}\nRevision: ${receipt.google_doc_revision}\n\nHave you personally completed this review?`);
       if(!declared)return;
-      const reviewerKey=window.prompt('Enter your separate HUMAN reviewer key. This must not be shared with the translation automation.');
-      if(!reviewerKey)return;
       await api(`/api/projects/${id}/human-review`,{
         method:'POST',
-        headers:{'x-workbench-reviewer-key':reviewerKey},
         body:JSON.stringify({approved:true,declared_scope:'entire final manuscript',reviewer_name:state.actor,
           google_doc_revision:receipt.google_doc_revision,source_pdf_sha256:receipt.source_pdf_sha256})
       });

@@ -1,6 +1,6 @@
 {
-  "release_id": "20261016-english-target-guard-1",
-  "app_version": "20261015-api-recovery-1",
+  "release_id": "20261016-open-editor-questions-1",
+  "app_version": "20261016-open-editor-questions-1",
   "css_version": "20261009-book-titles-right-1",
-  "description": "Block missing English Book targets and keep Board stage navigation current"
+  "description": "Open collaborative editing without editor or reviewer keys; keep revision-bound question and human-review validation"
 }
