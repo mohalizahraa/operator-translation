@@ -4,9 +4,15 @@
 
 Internal collaborative work manager for translating Sayyid Kamal al-Haydari's books. This is intentionally separate from the public archive/publication surface.
 
-## Editor access and verifiable QA deployment boundary
+## Open collaborator access and verifiable QA deployment boundary
 
-[Security and quality activation](SECURITY-AND-QUALITY-ROLLOUT.md) owns the live rollout contract for the shared editor capability, per-book Questions Docs, exact-revision source-coverage QA receipts, and stricter progress/review gates. Current repository code cannot certify that the Cloudflare editor secret is set or that the real manuscript runner is emitting verified evidence. The existing unauthenticated legacy mutation mode must be considered **unprotected** until live API denials are observed; see `GET /api/health` for the deployed `write_protection` and `quality_gate` states. The agent router `AGENTS.md` → `workbench/AGENTS.md` routes through that deployment contract when applicable.
+[Editorial quality and public-collaboration contract](SECURITY-AND-QUALITY-ROLLOUT.md) governs Questions Docs, revision-bound QA receipts, and progress/review gates. **The founder's 2026-10-16 decision is no editor keys, reviewer keys, sign-in, or passwords for Workbench interaction.** Reading and writing the Workbench are open to anyone with the site URL. This is intentionally not authenticated collaboration: names chosen under **Editing as** are self-reported; publication and human-review records must not be described as identity-verified. Cloudflare D1 validation, same-origin browser guard, immutable editorial history, and strict document revision checks remain mandatory. `GET /api/health` must report `write_protection: public_collaboration` after rollout. Review live release readback before claiming deployment completed.
+
+## Per-book Questions & Evidence Logs
+
+- Every book that has begun translation must have its own persistent Google **Questions & Evidence Log** linked in `questions_doc_url` alongside English Book and English PDF. Create/reuse the doc exactly once; never invent a URL or link an unrelated book's questions. A book with no questions still retains the separate document as a review/checkpoint record once work begins.
+- The document writer establishes anonymous access (at least Anyone with link → Viewer) and checks Drive metadata. After creating or finding a document, PATCH the book's `/api/projects/:id/questions` link, GET the same project to verify the exact persisted URL, and ensure the **Questions** action opens it. This is part of the same work unit, not a deferred manual website chore.
+- Do not create 176 empty files for books that have not started. Preserve their null URL until a real book-work context exists. If link sync fails, preserve the existing document, mark the Workbench attachment OPEN, and retry rather than duplicating the file.
 
 ## Book-processing workflow
 
@@ -19,8 +25,8 @@ Internal collaborative work manager for translating Sayyid Kamal al-Haydari's bo
 ## Product contract
 
 - One shared workspace and database for Zahraa + Mohammed (Brother).
-- No per-person account or sign-in flow is required to **read** the shared Workbench. When Cloudflare editor protection is activated, the first edit prompts for a **shared editor capability key**, kept only for that tab session; human manuscript approval requires a **separate reviewer-only key**. This is a deliberately small access-control step, not verified collaborator identity.
-- The deployed Workbench URL opens the workspace directly. An unlisted URL is not an authorization boundary; edit access must not be described as private or protected until Cloudflare secrets and actual denial tests pass.
+- No account, sign-in, password, editor key, or reviewer key is required for the shared Workbench, including edits. Public mutation capability is an explicit user choice, not verified collaborator identity or protection from vandalism.
+- The deployed Workbench URL opens the workspace directly and permits public edits. An unlisted URL, selected collaborator name, and browser Origin check are not authentication; do not present this shared D1 workspace as private or authenticated. Backups, validation, and activity history are essential recovery controls.
 - Either collaborator may edit or reassign any project. Assignee is organizational metadata, not an ACL.
 - Device identity is selected as `Zahraa` or `Mohammed` under the explicit **Editing as** control. It is used for mutation/activity attribution **and** to personalize the Dashboard's **My assigned projects** surface; `Both` assignments appear for either collaborator.
 - Board and Timeline share one independent, locally remembered collaboration viewing scope: **Zahraa / Mohammed / Shared**. Individual scopes show that person's assignments plus `Both`; Shared shows Zahraa + Mohammed + `Both` and keeps `Unassigned` work visibly distinct rather than silently dropping it. Because the catalogue can contain a large Unassigned backlog, Timeline exposes it as a counted disclosure collapsed by default; Board shows it directly in status columns; a matching search (or an otherwise empty assigned scope) automatically opens it so relevant Unassigned results never appear hidden. Changing viewing scope never changes actor identity or assignment.
