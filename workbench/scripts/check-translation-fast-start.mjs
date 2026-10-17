@@ -37,6 +37,7 @@ assert(helper.includes("sentinel: '[[NEXT_BATCH]]'"), 'Context is missing the ex
 assert(helper.includes("project.assignee === 'Both' && TRANSLATORS.has(actor)"), 'Shared-book focus preservation is missing.');
 
 assert(context.includes('getTranslationContext'), 'Per-project translation-context endpoint is not wired to the composite owner.');
+assert(translator.includes('needs_link: Boolean(project.google_doc_url) && !project.questions_doc_url') && translator.includes('PATCH questions_doc_url'), 'Fast-start response must expose and operationalize a missing per-book Questions Doc link.');
 assert(sourcePack.includes('translation_source_packs') && sourcePack.includes('recovery_routes'), 'Source-pack persistence endpoint is incomplete.');
 assert(sourcePack.includes("recordActivity") && sourcePack.includes("'updated translation source pack'"), 'Source-pack mutations must participate in shared live revision via Activity.');
 assert(current.includes('resolveCurrentTranslation') && current.includes('getTranslationContext'), 'Current-translation endpoint does not resolve and return a one-hop context.');
