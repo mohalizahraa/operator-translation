@@ -298,6 +298,14 @@ export async function getTranslationContext(db, request, projectId) {
       google_doc_id: googleDocIdFromUrl(project.google_doc_url),
       last_checkpoint_revision: checkpoint?.google_doc_revision || null,
     },
+    questions: {
+      doc_url: project.questions_doc_url || null,
+      link_endpoint: `${origin}/api/projects/${project.id}/questions`,
+      needs_link: Boolean(project.google_doc_url) && !project.questions_doc_url,
+      instruction: project.questions_doc_url
+        ? 'Open the linked Questions & Evidence Log and maintain source-aligned decisions for this book.'
+        : 'Create or reuse a separate Google Questions & Evidence Log for this started book; verify public readability, PATCH questions_doc_url through the link endpoint, and GET/read back the exact persisted project before advancing. Do not duplicate an existing Doc.',
+    },
     progress: {
       stored_translated_pages: storedPages,
       live_marker_pages: markerPages,
