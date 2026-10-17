@@ -23,6 +23,14 @@ Do not mark a source complete unless the whole relevant source was processed.
 
 When the observed source set itself may be biased, also track enough to understand the **selection/dependence mechanism**: supplied-only vs discovered, success/failure coverage, primary vs derivative source, copied/shared upstream evidence, and relevant missing classes.
 
+### Case-to-theory coverage check
+
+In a cumulative research or framework audit, retrieve earlier user–assistant worked cases and observations that materially bear on the new theory, not only the theorist's own examples. Build a bounded comparison of what each case actually shows, what the user explicitly judged, and what remains an agent inference. Keep analysis levels separate (scene, episode, season, series, whole work).
+
+For each case, determine whether the new theory explains it, refines it, conflicts under matched assumptions, leaves it unaddressed, or lacks adequate case evidence. Unaddressed does not mean denied or false, especially where the author intended narrower scope. Independently recheck surprising conflicts rather than either privileging personal history automatically or discarding it in favor of a novel model.
+
+Before claiming a model complete relative to the user's objective, account for relevant prior cases and open omissions. Avoid repeating questions answered by source or existing case authority. Ask for new user observations or choices only where they could resolve a live distinction. Preserve evidence and interpretation provenance.
+
 ### 1.1 Repository archaeology: establish topology before narrating history
 
 When Git/repository history is material to reconstruction, do **not** begin from current `main` and silently treat its ancestry as the whole project.
