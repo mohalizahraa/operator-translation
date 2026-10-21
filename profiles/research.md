@@ -128,6 +128,10 @@ Use the discriminative question rather than a slogan:
 
 If both `H` and `not-H` predict the same public silence, that silence does not materially separate them. If `H` predicts a record in a near-complete mandatory detector and the record is absent, the null can be strong negative evidence. Do not give “not publicly confirmed” evidential weight merely because public confirmation would have been convenient support.
 
+### Founder-supplied whole-source consumption rule (2026-10-21)
+
+When the founder **supplies a paper, PDF, book, article, lecture or other source with intent that its claims or method be audited, extracted, assimilated or used to build reusable knowledge**, treat **the whole in-scope source** as the reading denominator by default: beginning through conclusion plus all notes, captions, material figures/tables, supplements and bibliography/reference surfaces. Do not take an abstract or selected preview as adequate research input, and do not proceed from an unfinished excerpt to an exhaustive method or conclusion. If a user explicitly narrows the source scope, record that bounded contract; otherwise seek the complete artifact using the appropriate Public Source Access routes or original user upload. An entire extracted PDF text layer may still omit blank/lazy-loaded figures, collapsed references or other content: distinguish **complete text pass, component-complete reading, external source verification and full independent audit**. If an essential component remains inaccessible, identify the exact gap, do not claim completion, and carry the unfinished denominator forward as an actionable dependency. General audit acceptance and source-level statuses remain owned by ASSURANCE; Arabic literary, lexical and legal tests are specialized under the Quranic Exegesis profile when applicable.
+
 ## 3. Preserve the modality that carries the evidence
 
 Do not collapse a multimodal primary source into one extraction modality when another modality can materially change the conclusion.
