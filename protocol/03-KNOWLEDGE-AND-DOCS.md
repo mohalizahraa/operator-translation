@@ -275,6 +275,22 @@ Use progressive disclosure:
 
 Budget the **loaded context**, not file count. Metadata/routing text also consumes attention and should remain discriminative.
 
+### Associative model-retrieval preflight — before introducing reusable categories (2026-10-21)
+
+When a task proposes, revises, DMSCs, ranks or visualizes a **reusable taxonomy, causal model, compatibility rubric, dimension set, framework, or other broad conceptual structure**, **do not infer that the active topic's nearest files exhaust earlier work**. This trigger applies to homegrown frameworks as well as outside authors. Treat it as **retrieval before model creation**, not merely case comparison after creating the model.
+
+Before committing a substantive model or claiming the scoped DMSC floor:
+
+1. **Name the primitives and likely adjacent owners** without presupposing the proposed answer. Follow the project router, starting with the target canonical owner and traversing parent, sibling, typed semantic dependencies and neighboring domains whose concepts supply the model's inputs, mechanisms, outcomes or counterexamples. A story-romance rubric, for example, can depend on previously synthesized general friendship, partner-selection and relationship-system primitives even if the current case titles mention only fiction.
+2. **Search available source surfaces proportionally**, not merely the active folder: relevant repository `sources/ → cases/ → domains/ → self/` (or the owning project's equivalent), existing indexes/handoffs/source ledgers, and authorized prior user files/Library or connected work when potentially material and accessible. Search both **explicit names/aliases** and **underlying ideas/relations**; a source with a different title or ownership folder can be the most relevant antecedent. Do not search all repositories and personal files indiscriminately when there is no plausible dependency. A claim of "not integrated"/"not available" requires checking appropriate routed owners before inferring absence from a failed narrow lookup.
+3. **Perform an upstream crosswalk** before canonizing a new factor set: for each surviving relevant prior model, mark what the new model reuses, refines, splits, contradicts, overlooks, or leaves independent. Respect source vs user-owned truth, actual status, uncertainty, prior rejected variants and current founder decisions. If earlier owners answer the question, reuse them; if their representation is inadequate, explain the demonstrated gap. Do not invent a redundant parallel ontology because its title, file path or current project differs.
+4. **Seek a defensible unexpected relation, not a forced analogy.** Expand beyond obvious lexical neighbors only where shared primitives, dependencies, counterexamples or user history make an association material. The desired "second mind"/Zettelkasten effect is proactive, source-grounded re-encounter and previously unprompted conceptual connection, **not** automatic link inflation or claim that an LLM has human recall. Distinguish retrieval discovery from the evidence that the connection is valid.
+5. **Test reconstruction, not ceremony.** Before reporting saturation, ask whether a future user could identify the important older source/model from this artifact without supplying its title, and whether a materially applicable already-stored countermodel was omitted. A documented negative search can qualify when no relevant antecedent exists. If retrieval is blocked, mark the exact surface/gap and avoid declaring a floor that depends on unseen evidence.
+
+This is a **bounded neighbor-expansion gate**, not a command to full-scan every corpus on every question. A found prior model does not automatically override a better new one; it receives a proposition-level disposition under THINK and Reconciliation. Persist only earned canonical cross-links and material retrieval failure canaries, not a parallel bibliography or mandatory new metadata layer. When a user supplies the forgotten source after this gate should have found it, treat it as a **detector escape**: repair both the affected model dependency and the retrieval trigger, then test the known-miss query without relying on the supplied title.
+
+
+
 Refresh remembered/derived context according to:
 
 - drift likelihood;
