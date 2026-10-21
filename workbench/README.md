@@ -14,6 +14,15 @@ Internal collaborative work manager for translating Sayyid Kamal al-Haydari's bo
 - The document writer establishes anonymous access (at least Anyone with link → Viewer) and checks Drive metadata. After creating or finding a document, PATCH the book's `/api/projects/:id/questions` link, GET the same project to verify the exact persisted URL, and ensure the **Questions** action opens it. This is part of the same work unit, not a deferred manual website chore.
 - Do not create 176 empty files for books that have not started. Preserve their null URL until a real book-work context exists. If link sync fails, preserve the existing document, mark the Workbench attachment OPEN, and retry rather than duplicating the file.
 
+## Read-only portfolio evidence source (draft)
+
+`GET /api/portfolio-evidence` is a public **aggregate-only** D1 projection for the Operator command center. It reuses current `translation_progress_checkpoints`, `translation_quality_evidence` and `translation_human_review_attestations` records; it does not create a competing set of manuscript state or bypass existing status gates. Its two counters, each divided by the actual returned project count, are:
+
+- Whole-book `from_page=1 … to_page=pages` **QA receipt present for the latest stored source hash and English Doc revision**. A submitted report is not proof its Arabic/English fidelity, rendered formatting or cited evidence is accurate.
+- **Self-declared** human-review attestation present for that same latest checkpoint and a matching whole-book receipt. Names are NOT authentication, and the endpoint performs no live Google Docs text revision check. Changed checkpoints invalidate stale receipts and attestations automatically.
+
+The response includes only counts, canonical source mutation time, and observation time—not book text, private notes, Doc URLs, reviewer names or secrets. If the guarded evidence tables are unavailable, the endpoint returns a 503 instead of breaking existing `/api/projects`. This is a prospective source API until the exact Cloudflare deployment and actual D1 readback are checked; it must never be called an independently verified completed-translation or published-book count.
+
 ## Book-processing workflow
 
 [TRANSLATION-WORKFLOW.md](TRANSLATION-WORKFLOW.md) owns the approved project execution plan: prepare once, reuse verified source text, let Mac OCR feed Windows translation in coherent batches, complete each batch's applicable review/formatting/verification, then immediately synchronize and read back its Workbench checkpoint. Keep one writer per final manuscript; finish with whole-book QA. This is a measured starting plan, not a benchmark-proven fastest configuration or a runner-routing change. The scoped [agent instructions](AGENTS.md) route book work through it; the current Operator profiles and this README's progress/status contract remain governing.
