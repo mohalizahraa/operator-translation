@@ -2,6 +2,8 @@
 
 Use with Core + THINK + KNOWLEDGE/ASSURANCE as relevant for public-web, literature, market, product, technical, policy, or other external evidence-gathering work. This profile adds source-research procedure rather than restating general reasoning/saturation laws.
 
+**User-origin model/source priority — founder rule, 2026-10-21:** If Research is invoked while developing the user's own model, map or theory, it **supports** the user's original notes/observations rather than taking over discovery. Retrieve and DMSC the available user material and the relevant `profiles/model-building.md` authority first; seek papers specifically to verify factual extensions, identify meaningful rival explanations, test limitations or expose counterexamples. Literature should not dictate the root axes solely because it offers a ready-made framework. Present the user's synthesis before research citations; preserve exceptions, uncertainty and source status (direct user preference is authoritative about preference, not population statistics). Ordinary external fact-finding remains governed by the claim-appropriate strongest source.
+
 ## 1. Match sources to the claim
 
 Evaluate source authority **for the exact proposition**, not as a global prestige ladder.
