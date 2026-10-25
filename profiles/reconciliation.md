@@ -255,6 +255,8 @@ After extraction/reconciliation:
 - remove/demote stale competing authorities and temporary correction bridges once integrated;
 - propagate affected terminology/implications downstream.
 
+**Hierarchy-floor handoff (THINK §6, not a new DMSC definition):** Before the reconstruction audit, actively try to *reduce* each material containment/dependency tree—not just preserve its inherited formatting. For every apparent sibling/peer, test whether it is actually a repeated instance, narrower child/subchild, configuration, derived observation, process, context or view of an existing parent; recurse down all justified depths. Retain edges where merging would lose authority, direction, lifecycle, meaning or actual behavior. Preserve the old→reduced hierarchy crosswalk and one reversal/edge canary, then reconstruct the downstream representation from the reduced parent. Merely listing fewer headings, faithfully copying an old tree, or presenting parent and descendants as same-level inputs does **not** demonstrate the DMSC floor. This scoped reconciliation handoff implements the existing recursive-containment owner; it does not prescribe a universal number of levels or numerical factors.
+
 Then simulate a fresh competent consumer with only the canonical owners. It should be able to recover:
 
 - the current model;
