@@ -32,9 +32,14 @@ export async function onRequestGet(context){
   const project=await context.env.DB.prepare('SELECT id,google_doc_url FROM projects WHERE id=?').bind(id).first();
   if(!project)return json({error:'Project not found.'},404);
   try{
-    return json({project_id:id,google_doc_id:googleDocIdFromUrl(project.google_doc_url),
-      comment_links:await list(context.env.DB,id),observation_scope:'client_reported_unverified',
-      note:'Native comment anchors are client-reported observations, not authenticated server-side Google Docs checks or independent human decisions.'});
+    const currentDocId=googleDocIdFromUrl(project.google_doc_url);
+    const commentLinks=(await list(context.env.DB,id)).map(link=>({
+      ...link,matches_current_english_doc:link.google_doc_id===currentDocId,
+    }));
+    return json({project_id:id,google_doc_id:currentDocId,
+      comment_links:commentLinks,stale_link_count:commentLinks.filter(link=>!link.matches_current_english_doc).length,
+      observation_scope:'client_reported_unverified',
+      note:'Native comment anchors are client-reported observations, not authenticated server-side Google Docs checks or independent human decisions. A mismatched manuscript link is stale and requires explicit reconciliation.'});
   }catch{
     return json({error:'Comment-link schema not yet migrated; deploy schema before reading.',code:'schema_pending'},503);
   }
