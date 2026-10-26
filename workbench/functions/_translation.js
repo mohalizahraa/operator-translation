@@ -258,7 +258,7 @@ async function getEditorialLedgerCounts(db, projectId) {
     catch { return {ledger_state:'unavailable',comment_link_state:'unavailable',total:null,
       unresolved:null,answered_not_applied:null,blocking_unresolved:null,linked_comments:null}; }
   }
-  return {ledger_state:'available',comment_link_state:linked===null?'migration_pending':'connector_reported',
+  return {ledger_state:'available',comment_link_state:linked===null?'migration_pending':'client_reported_unverified',
     total:Number(counts?.total||0),unresolved:Number(counts?.unresolved||0),
     answered_not_applied:Number(counts?.answered_not_applied||0),
     blocking_unresolved:Number(counts?.blocking_unresolved||0),
