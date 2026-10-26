@@ -314,6 +314,21 @@ export async function getTranslationContext(db, request, projectId) {
           : markerResult.data?.error || 'Progress marker could not be verified.',
     },
     source_pack: sourcePackProjection,
+    // Editorial decisions live in the existing D1 ledger; Google Docs native
+    // anchored comments are the approved interaction, not another manuscript
+    // or a reason to create an independent Questions Doc. The integration
+    // bridge is not yet deployed; legacy links remain migration witnesses.
+    editorial_questions: {
+      mode: 'native_anchored_comments_with_d1_ledger',
+      ledger_url: `${origin}/api/projects/${project.id}/questions`,
+      english_doc_url: project.google_doc_url || null,
+      legacy_questions_doc_url: project.questions_doc_url || null,
+      legacy_questions_doc_role: 'read_only_migration_witness',
+      comment_bridge_status: 'not_deployed',
+      instruction: project.google_doc_url
+        ? 'Record source-evidenced questions in the D1 ledger. Attach a native Google Docs comment to the exact English passage through an authorized Docs connector when available; keep question key and source-page identity. Do not create separate Questions Docs. Do not equate comment resolution with applied reviewer judgment.'
+        : 'Link and verify the canonical English Book first. Do not create a standalone Questions Doc or attach a comment to a guessed manuscript.',
+    },
     resume: {
       phase: project.status,
       project_notes: projectedNotes.project_notes,
