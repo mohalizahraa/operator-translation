@@ -304,7 +304,7 @@ export async function getTranslationContext(db, request, projectId) {
       needs_link: project.status !== 'not_started' && !project.questions_doc_url,
       instruction: project.questions_doc_url
         ? 'Open the linked Questions & Evidence Log and maintain source-aligned decisions for this book.'
-        : 'Create or reuse a separate Google Questions & Evidence Log for this started book; verify public readability, PATCH questions_doc_url through the link endpoint, and GET/read back the exact persisted project before advancing. Do not duplicate an existing Doc.',
+        : project.status === 'not_started' ? 'This book has not started; do not create an empty Questions Doc.' : 'Create or reuse a separate Google Questions & Evidence Log for this started book; verify public readability, PATCH questions_doc_url through the link endpoint, and GET/read back the exact persisted project before advancing. Do not duplicate an existing Doc.',
     },
     progress: {
       stored_translated_pages: storedPages,
