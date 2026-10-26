@@ -36,6 +36,10 @@ assert(helper.includes('workbench_pdf_url') && helper.includes('source_pdf_sha25
 assert(helper.includes("sentinel: '[[NEXT_BATCH]]'"), 'Context is missing the exact manuscript continuation sentinel.');
 assert(helper.includes("project.assignee === 'Both' && TRANSLATORS.has(actor)"), 'Shared-book focus preservation is missing.');
 
+assert(helper.includes("mode: 'native_anchored_comments_with_d1_ledger'"), 'Fast-start must surface the approved manuscript-native editorial question mode.');
+assert(helper.includes("comment_bridge_status: 'not_deployed'"), 'Fast-start must not claim a Google Docs comments/D1 sync bridge already exists.');
+assert(helper.includes("legacy_questions_doc_role: 'read_only_migration_witness'"), 'Existing Questions Docs must remain migration witnesses, not new prerequisites.');
+assert(helper.includes('Do not create separate Questions Docs.'), 'Fast-start must not tell collaborators to create new Questions Docs.');
 assert(context.includes('getTranslationContext'), 'Per-project translation-context endpoint is not wired to the composite owner.');
 assert(sourcePack.includes('translation_source_packs') && sourcePack.includes('recovery_routes'), 'Source-pack persistence endpoint is incomplete.');
 assert(sourcePack.includes("recordActivity") && sourcePack.includes("'updated translation source pack'"), 'Source-pack mutations must participate in shared live revision via Activity.');
