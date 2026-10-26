@@ -65,7 +65,7 @@ const nativeDoc={
     {startIndex:2,endIndex:2+begin.length+2,paragraph:{elements:[
       {startIndex:2,endIndex:2+begin.length,textRun:{content:begin}},
       {startIndex:2+begin.length,endIndex:3+begin.length,footnoteReference:{footnoteId:'fn1'}},
-      {startIndex:3+begin.length,endIndex:4+begin.length,textRun:{content:'\\n'}},
+      {startIndex:3+begin.length,endIndex:4+begin.length,textRun:{content:'\n'}},
     ]}},
   ]}}],
 };
@@ -81,11 +81,11 @@ assert.equal(native.endIndex-native.startIndex,excerpt.length);
 assert.equal(native.request.insertComment.range.tabId,'t.0');
 assert.equal(native.write_control.requiredRevisionId,revision);
 const crossesGap=planNativeCommentAnchorFromStructure({...nativeArgs,
-  quoted_text:begin.slice(-10)+'\\n'});
+  quoted_text:begin.slice(-10)+'\n'});
 assert.equal(crossesGap.code,'invalid_quote');
 // There is no safe match that silently skips over a footnote marker.
 const missingSpan=planNativeCommentAnchorFromStructure({...nativeArgs,
-  quoted_text:'remaining text. \\n'});
+  quoted_text:'remaining text. \n'});
 assert.equal(missingSpan.code,'invalid_quote');
 const repeatedStructured={
   ...nativeDoc,tabs:[{tabId:'t.0',body:{content:[
