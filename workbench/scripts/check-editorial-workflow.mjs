@@ -46,7 +46,7 @@ assert(!app.includes('data-link-questions'),'UI must not invite creation/linking
 assert(app.includes('project?.google_doc_url')&&app.includes('Review comments'),'Passage comments must open the canonical English manuscript.');
 assert(commentLinks.includes('googleDocIdFromUrl(project.google_doc_url)'),'Native comment linkage must bind to the current exact English Book.');
 assert(commentLinks.includes('comment_id')&&commentLinks.includes('anchor_id')&&commentLinks.includes('tab_id'),'Native comment linkage must preserve stable Google Docs anchor identity.');
-assert(commentLinks.includes('connector_reported'),'No server-side Google OAuth check may be fabricated.');
+assert(commentLinks.includes('client_reported_unverified'),'No server-side Google OAuth check may be fabricated.');
 assert(commentLinks.includes('question_key')&&commentLinks.includes('translation_question_events'),'Comment links must preserve D1 stable keys and question history.');
 assert(commentLinks.includes('context.env.DB.batch(['),'Comment linkage and event/history must be atomic.');
 assert(commentLinks.includes('confirmed_readback'),'Comment linkage must require explicit readback from the authenticated Docs client.');
