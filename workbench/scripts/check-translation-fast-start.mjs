@@ -37,7 +37,8 @@ assert(helper.includes("sentinel: '[[NEXT_BATCH]]'"), 'Context is missing the ex
 assert(helper.includes("project.assignee === 'Both' && TRANSLATORS.has(actor)"), 'Shared-book focus preservation is missing.');
 
 assert(helper.includes("mode: 'native_anchored_comments_with_d1_ledger'"), 'Fast-start must surface the approved manuscript-native editorial question mode.');
-assert(helper.includes("comment_bridge_status: 'not_deployed'"), 'Fast-start must not claim a Google Docs comments/D1 sync bridge already exists.');
+assert(helper.includes("comment_bridge_status: 'd1_link_tracking_connector_required'"), 'Fast-start must label D1-only comment linkage separately from Google Docs API synchronization.');
+assert(helper.includes("google_comment_verification: 'not_authenticated_by_public_workbench'"), 'Public Workbench cannot claim server-verified Google comment observations.');
 assert(helper.includes("legacy_questions_doc_role: 'read_only_migration_witness'"), 'Existing Questions Docs must remain migration witnesses, not new prerequisites.');
 assert(helper.includes('Do not create separate Questions Docs.'), 'Fast-start must not tell collaborators to create new Questions Docs.');
 assert(context.includes('getTranslationContext'), 'Per-project translation-context endpoint is not wired to the composite owner.');
