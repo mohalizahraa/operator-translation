@@ -235,6 +235,36 @@ function translationResumeInstruction(project, nextSourcePage, totalPages) {
   return 'Workflow state is not recognized. Do not resume translation until the project state is reconciled.';
 }
 
+async function getEditorialLedgerCounts(db, projectId) {
+  // Read-only projection: a missing newly added link table must never become
+  // an invented zero count of unanswered/answered questions.
+  const basics = `SELECT COUNT(*) AS total,
+    SUM(CASE WHEN status='unresolved' THEN 1 ELSE 0 END) AS unresolved,
+    SUM(CASE WHEN status='answered' THEN 1 ELSE 0 END) AS answered_not_applied,
+    SUM(CASE WHEN status='unresolved' AND severity='blocking' THEN 1 ELSE 0 END) AS blocking_unresolved
+    FROM translation_questions WHERE project_id=?`;
+  let linked=null, counts=null;
+  try {
+    counts=await db.prepare(`SELECT COUNT(*) AS total,
+      SUM(CASE WHEN q.status='unresolved' THEN 1 ELSE 0 END) AS unresolved,
+      SUM(CASE WHEN q.status='answered' THEN 1 ELSE 0 END) AS answered_not_applied,
+      SUM(CASE WHEN q.status='unresolved' AND q.severity='blocking' THEN 1 ELSE 0 END) AS blocking_unresolved,
+      COUNT(c.question_id) AS linked_comments
+      FROM translation_questions q LEFT JOIN translation_question_comments c ON c.question_id=q.id
+      WHERE q.project_id=?`).bind(projectId).first();
+    linked=Number(counts?.linked_comments||0);
+  } catch {
+    try { counts=await db.prepare(basics).bind(projectId).first(); }
+    catch { return {ledger_state:'unavailable',comment_link_state:'unavailable',total:null,
+      unresolved:null,answered_not_applied:null,blocking_unresolved:null,linked_comments:null}; }
+  }
+  return {ledger_state:'available',comment_link_state:linked===null?'migration_pending':'connector_reported',
+    total:Number(counts?.total||0),unresolved:Number(counts?.unresolved||0),
+    answered_not_applied:Number(counts?.answered_not_applied||0),
+    blocking_unresolved:Number(counts?.blocking_unresolved||0),
+    linked_comments:linked};
+}
+
 export async function getTranslationContext(db, request, projectId) {
   const project = await db.prepare(`
     SELECT p.*, EXISTS(SELECT 1 FROM project_covers c WHERE c.project_id=p.id) AS has_uploaded_cover
@@ -243,10 +273,11 @@ export async function getTranslationContext(db, request, projectId) {
   `).bind(projectId).first();
   if (!project) return null;
 
-  const [checkpoint, sourcePack, markerResult] = await Promise.all([
+  const [checkpoint, sourcePack, markerResult, editorialCounts] = await Promise.all([
     db.prepare('SELECT * FROM translation_progress_checkpoints WHERE project_id=? ORDER BY id DESC LIMIT 1').bind(projectId).first(),
     db.prepare('SELECT * FROM translation_source_packs WHERE project_id=?').bind(projectId).first(),
     readPublicProgressMarker(project),
+    getEditorialLedgerCounts(db,projectId),
   ]);
 
   const normalizedProject = normalizeProject(project);
@@ -321,6 +352,8 @@ export async function getTranslationContext(db, request, projectId) {
     editorial_questions: {
       mode: 'native_anchored_comments_with_d1_ledger',
       ledger_url: `${origin}/api/projects/${project.id}/questions`,
+      comment_links_url: `${origin}/api/projects/${project.id}/comment-links`,
+      counts: editorialCounts,
       english_doc_url: project.google_doc_url || null,
       legacy_questions_doc_url: project.questions_doc_url || null,
       legacy_questions_doc_role: 'read_only_migration_witness',
