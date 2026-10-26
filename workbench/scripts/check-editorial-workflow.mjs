@@ -25,6 +25,8 @@ assert(questions.includes('question_key'),'Questions require stable idempotency 
 assert(questions.includes('requireHumanReviewerCapability'),'Question answers carry human-declared decisions, not automatic model answers.');
 assert(questions.includes('The automated manuscript writer cannot replace the human reviewer answer'),'Applying questions cannot rewrite reviewer decisions');
 assert(questions.includes('translation_question_events'),'Questions preserve decision history');
+assert(questions.includes('legacy_questions_link_read_only'),'Historical Questions-Doc URL mutations must be blocked.');
+assert(!questions.includes('verifyGoogleDocLinkAccess'),'Deprecated question-link writes must not reappear as a hidden public endpoint.');
 assert(questions.includes('recordActivity'),'Questions must advance shared revision token');
 assert(quality.includes('assessTranslationEvidence'),'QA receipts require deterministic preflight');
 assert(quality.includes('requireEditorCapability'),'QA writes pass through the open-collaboration guard.');
