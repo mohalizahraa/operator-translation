@@ -39,7 +39,7 @@ assert.equal(decodeDocsQuote('&#x1F600;'),'😀');
 assert.equal(decodeDocsQuote('&amp;'),'&');
 assert.equal(decodeDocsQuote('&bogus;'),null);
 assert.equal(decodeDocsQuote('&#xD800;'),null);
-assert.equal(decodeDocsQuote('<b>quoted</b>'),'<b>quoted</b>'); // audit caller rejects markup
+assert.equal(decodeDocsQuote('<b>quoted</b>'),null);
 
 const dupe=auditHistoricalNativeComments({document,tab_id:'t.0',comments:[comments[0],comments[0]]});
 assert.equal(dupe.results[1].classification,'duplicate_or_missing_comment_id');
