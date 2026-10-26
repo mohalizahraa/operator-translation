@@ -235,7 +235,7 @@ function translationResumeInstruction(project, nextSourcePage, totalPages) {
   return 'Workflow state is not recognized. Do not resume translation until the project state is reconciled.';
 }
 
-async function getEditorialLedgerCounts(db, projectId) {
+async function getEditorialLedgerCounts(db, projectId, englishDocId) {
   // Read-only projection: a missing newly added link table must never become
   // an invented zero count of unanswered/answered questions.
   const basics = `SELECT COUNT(*) AS total,
@@ -249,20 +249,22 @@ async function getEditorialLedgerCounts(db, projectId) {
       SUM(CASE WHEN q.status='unresolved' THEN 1 ELSE 0 END) AS unresolved,
       SUM(CASE WHEN q.status='answered' THEN 1 ELSE 0 END) AS answered_not_applied,
       SUM(CASE WHEN q.status='unresolved' AND q.severity='blocking' THEN 1 ELSE 0 END) AS blocking_unresolved,
-      COUNT(c.question_id) AS linked_comments
+      COUNT(CASE WHEN c.google_doc_id=? THEN 1 END) AS linked_comments,
+      COUNT(CASE WHEN c.question_id IS NOT NULL AND
+        (c.google_doc_id<>? OR ? IS NULL) THEN 1 END) AS stale_comment_links
       FROM translation_questions q LEFT JOIN translation_question_comments c ON c.question_id=q.id
-      WHERE q.project_id=?`).bind(projectId).first();
+      WHERE q.project_id=?`).bind(englishDocId,englishDocId,englishDocId,projectId).first();
     linked=Number(counts?.linked_comments||0);
   } catch {
     try { counts=await db.prepare(basics).bind(projectId).first(); }
     catch { return {ledger_state:'unavailable',comment_link_state:'unavailable',total:null,
-      unresolved:null,answered_not_applied:null,blocking_unresolved:null,linked_comments:null}; }
+      unresolved:null,answered_not_applied:null,blocking_unresolved:null,linked_comments:null,stale_comment_links:null}; }
   }
   return {ledger_state:'available',comment_link_state:linked===null?'migration_pending':'client_reported_unverified',
     total:Number(counts?.total||0),unresolved:Number(counts?.unresolved||0),
     answered_not_applied:Number(counts?.answered_not_applied||0),
     blocking_unresolved:Number(counts?.blocking_unresolved||0),
-    linked_comments:linked};
+    linked_comments:linked,stale_comment_links:linked===null?null:Number(counts?.stale_comment_links||0)};
 }
 
 export async function getTranslationContext(db, request, projectId) {
@@ -277,7 +279,7 @@ export async function getTranslationContext(db, request, projectId) {
     db.prepare('SELECT * FROM translation_progress_checkpoints WHERE project_id=? ORDER BY id DESC LIMIT 1').bind(projectId).first(),
     db.prepare('SELECT * FROM translation_source_packs WHERE project_id=?').bind(projectId).first(),
     readPublicProgressMarker(project),
-    getEditorialLedgerCounts(db,projectId),
+    getEditorialLedgerCounts(db,projectId,googleDocIdFromUrl(project.google_doc_url)),
   ]);
 
   const normalizedProject = normalizeProject(project);
