@@ -73,7 +73,7 @@ export async function ensureCatalog(db) {
     tab_id TEXT NOT NULL,
     quoted_text TEXT NOT NULL,
     document_revision TEXT NOT NULL,
-    observed_state TEXT NOT NULL DEFAULT 'open',
+    observed_state TEXT NOT NULL DEFAULT 'unknown',
     verification_status TEXT NOT NULL DEFAULT 'connector_reported',
     recorded_by TEXT NOT NULL,
     recorded_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
