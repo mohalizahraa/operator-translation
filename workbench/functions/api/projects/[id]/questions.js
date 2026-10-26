@@ -1,4 +1,4 @@
-import {actorFromRequest,ensureCatalog,json,recordActivity,normalizeGoogleDocUrl,verifyGoogleDocLinkAccess} from '../../../_lib.js';
+import {actorFromRequest,ensureCatalog,json,recordActivity,normalizeGoogleDocUrl} from '../../../_lib.js';
 import {requireEditorCapability,requireHumanReviewerCapability} from '../../../_write_auth.js';
 
 const idFrom=context=>{const n=Number(context.params.id);return Number.isInteger(n)&&n>0?n:null;};
@@ -75,25 +75,18 @@ export async function onRequestPatch(context){
   const body=await context.request.json().catch(()=>null);
   if(!body||typeof body!=='object')return json({error:'Invalid JSON.'},400);
   if(body.questions_doc_url!==undefined){
-    const raw=phrase(body.questions_doc_url,1000);
-    const normalized=normalizeGoogleDocUrl(raw);
-    if(normalized===false)return json({error:'Questions document must be a valid Google Docs link.'},400);
-    if(normalized){
-      const access=await verifyGoogleDocLinkAccess(normalized);
-      if(!access.accessible)return json({error:'Questions Google Doc cannot be read through the approved public access policy; correct its sharing first.'},409);
+    // Historical read compatibility only: a legacy Questions Doc is a
+    // migration witness, not an active target or required book prerequisite.
+    // Fail closed on both new links and clearing an existing archived link.
+    const old=await projectFor(context.env.DB,id);
+    if(!old)return json({error:'Project not found.'},404);
+    const normalized=normalizeGoogleDocUrl(phrase(body.questions_doc_url,1000));
+    if(normalized===false)return json({error:'Invalid historical Questions Google Doc URL.'},400);
+    if((old.questions_doc_url||null)!==(normalized||null)){
+      return json({error:'Historical Questions Doc links are read-only under the approved in-manuscript comments model. Preserve the existing URL and use the authenticated manuscript-comments migration workflow.',
+        code:'legacy_questions_link_read_only'},409);
     }
-    const old=await projectFor(context.env.DB,id);if(!old)return json({error:'Project not found.'},404);
-    const actor=actorFromRequest(context.request);
-    if((old.questions_doc_url||null)===(normalized||null))return json({project_id:id,questions_doc_url:normalized||null,unchanged:true});
-    const updated=await context.env.DB.batch([
-      context.env.DB.prepare('UPDATE projects SET questions_doc_url=?,updated_at=CURRENT_TIMESTAMP WHERE id=? AND questions_doc_url IS ?')
-        .bind(normalized||null,id,old.questions_doc_url||null),
-      context.env.DB.prepare(`INSERT INTO activity(project_id,actor,action,before_json,after_json)
-        SELECT ?,?,'linked questions document',?,? WHERE changes()>0`)
-        .bind(id,actor,JSON.stringify({questions_doc_url:old.questions_doc_url}),JSON.stringify({questions_doc_url:normalized||null}))
-    ]);
-    if(Number(updated?.[0]?.meta?.changes||0)!==1)return json({error:'Questions link changed concurrently; refresh and retry.'},409);
-    return json({project_id:id,questions_doc_url:raw||null});
+    return json({project_id:id,questions_doc_url:old.questions_doc_url||null,unchanged:true,legacy_read_only:true});
   }
   const key=phrase(body.question_key,200);
   if(!validKey(key)||!statuses.has(body.status))return json({error:'Provide valid question key and status.'},400);
