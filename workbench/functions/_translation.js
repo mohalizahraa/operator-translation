@@ -357,7 +357,8 @@ export async function getTranslationContext(db, request, projectId) {
       english_doc_url: project.google_doc_url || null,
       legacy_questions_doc_url: project.questions_doc_url || null,
       legacy_questions_doc_role: 'read_only_migration_witness',
-      comment_bridge_status: 'not_deployed',
+      comment_bridge_status: 'd1_link_tracking_connector_required',
+      google_comment_verification: 'not_authenticated_by_public_workbench',
       instruction: project.google_doc_url
         ? 'Record source-evidenced questions in the D1 ledger. Attach a native Google Docs comment to the exact English passage through an authorized Docs connector when available; keep question key and source-page identity. Do not create separate Questions Docs. Do not equate comment resolution with applied reviewer judgment.'
         : 'Link and verify the canonical English Book first. Do not create a standalone Questions Doc or attach a comment to a guessed manuscript.',
