@@ -147,9 +147,10 @@ export async function onRequestPatch(context){
   const updates=await db.batch([
     db.prepare(`UPDATE translation_question_comments
       SET observed_state=?,last_observed_revision=?,last_observed_at=CURRENT_TIMESTAMP
-      WHERE question_id=? AND observed_state=? AND
-      (last_observed_revision IS ? OR last_observed_revision=?)`)
-      .bind(next,observed_revision,old.question_id,old.observed_state,old.last_observed_revision,old.last_observed_revision),
+      WHERE question_id=? AND observed_state=? AND last_observed_revision IS ?
+      AND EXISTS(SELECT 1 FROM translation_questions q JOIN projects p ON p.id=q.project_id
+        WHERE q.id=? AND p.google_doc_url=?)`)
+      .bind(next,observed_revision,old.question_id,old.observed_state,old.last_observed_revision,old.question_id,project.google_doc_url),
     db.prepare(`INSERT INTO translation_question_events(question_id,actor,action,payload_json)
       SELECT ?,?,'native comment state observed',? WHERE changes()>0`).bind(old.question_id,actor,payload),
     db.prepare(`INSERT INTO activity(project_id,actor,action,before_json,after_json)
