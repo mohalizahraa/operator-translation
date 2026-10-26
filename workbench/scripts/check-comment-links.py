@@ -59,6 +59,23 @@ except sqlite3.IntegrityError:
 assert db.execute("SELECT COUNT(*) FROM translation_question_comments").fetchone()[0]==1
 assert db.execute("SELECT COUNT(*) FROM translation_question_events").fetchone()[0]==1
 
+# Observed native comment resolution is a separate record from reviewer judgment.
+db.execute("""UPDATE translation_question_comments
+  SET observed_state='resolved',last_observed_revision='docRevisionA2',
+      last_observed_at=CURRENT_TIMESTAMP
+  WHERE question_id=? AND observed_state='unknown' AND last_observed_revision IS NULL""",
+  (question_id,))
+assert db.execute("SELECT observed_state,last_observed_revision FROM translation_question_comments WHERE question_id=?",
+                  (question_id,)).fetchone()==("resolved","docRevisionA2")
+assert db.execute("SELECT status FROM translation_questions WHERE id=?",(question_id,)).fetchone()[0]=="unresolved"
+
+# A competing old-state event cannot overwrite a newer observation.
+result=db.execute("""UPDATE translation_question_comments SET observed_state='open'
+  WHERE question_id=? AND observed_state='unknown'""",(question_id,))
+assert result.rowcount==0
+assert db.execute("SELECT observed_state FROM translation_question_comments WHERE question_id=?",
+                  (question_id,)).fetchone()[0]=="resolved"
+
 # No migration may rewrite the original Arabic or reviewer decisions.
 assert db.execute("SELECT arabic_text,status FROM translation_questions WHERE id=?",(question_id,)).fetchone()==("النص الأصلي","unresolved")
 print("Native comment-link D1 schema/transaction simulation: PASS")
