@@ -44,6 +44,8 @@ Verification is behavioral: on the exact production release, verify `GET /api/he
 
 ## Next integration work
 
+Production checkpoint (2026-10-26): `/api/health` reported `write_protection: public_collaboration` and `quality_gate: LEGACY_MARKER_ONLY` over the 176-book corpus. `/api/portfolio-evidence` reported 0 latest-checkpoint whole-book QA receipts and 0 matching self-declared human-review attestations. These are dated aggregate observations, not manuscript certification; refresh them before strict-mode activation. Existing Drive files are not automatically linked or accessible Workbench files.
+
 1. Verify that the deployed Workbench preserves the founder-approved open-collaboration behavior and associated validation, audit, and recovery controls; do not reintroduce credentials.
 2. Discover and reuse each book's existing Google Docs before creating replacements. For started books, establish a separate Questions & Evidence Log, confirm anonymous Viewer access, link it through the verified Workbench Questions endpoint and read back the exact project URL. Leave unstarted books without empty Questions Docs.
 3. Have the translation runner emit real, independently checked Arabic source-unit maps and QA receipts at each checkpoint; only then activate strict QA for all affected books.
