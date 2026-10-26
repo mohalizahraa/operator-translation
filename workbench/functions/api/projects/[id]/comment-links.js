@@ -33,7 +33,7 @@ export async function onRequestGet(context){
   if(!project)return json({error:'Project not found.'},404);
   try{
     return json({project_id:id,google_doc_id:googleDocIdFromUrl(project.google_doc_url),
-      comment_links:await list(context.env.DB,id),observation_scope:'connector_reported',
+      comment_links:await list(context.env.DB,id),observation_scope:'client_reported_unverified',
       note:'Native comment anchors are client-reported observations, not authenticated server-side Google Docs checks or independent human decisions.'});
   }catch{
     return json({error:'Comment-link schema not yet migrated; deploy schema before reading.',code:'schema_pending'},503);
@@ -74,12 +74,12 @@ export async function onRequestPost(context){
     'SELECT * FROM translation_question_comments WHERE question_id=?'
   ).bind(question.id).first();
   if(current)return same(current)
-    ? json({project_id:id,question_key,comment_id,unchanged:true,verification_status:'connector_reported'})
+    ? json({project_id:id,question_key,comment_id,unchanged:true,verification_status:'client_reported_unverified'})
     : json({error:'Question already has a different comment anchor. Reconcile the existing thread instead of overwriting it.'},409);
 
   const actor=actorFromRequest(context.request);
   const payload=JSON.stringify({question_key,comment_id,google_doc_id,tab_id,
-    comment_origin:isInherited?'pre_existing':'new',verification_status:'connector_reported'});
+    comment_origin:isInherited?'pre_existing':'new',verification_status:'client_reported_unverified'});
   // Atomic under D1: mapping, immutable question history, and visible activity.
   // INSERT OR IGNORE also protects the global (doc,comment) uniqueness constraint.
   await context.env.DB.batch([
@@ -104,13 +104,13 @@ export async function onRequestPost(context){
     return json({error:'Comment association conflicted or the target book changed concurrently; inspect existing state.',code:'association_conflict'},409);
   }
   return json({project_id:id,question_key,comment_id,unchanged:false,
-    verification_status:'connector_reported',
+    verification_status:'client_reported_unverified',
     note:'This stores reported Docs readback only. Inherited comments may lack question keys in their original text. It is not a human decision or independent Google-side verification.'},201);
 }
 
 /* A connector-driven observation of one already-linked Docs comment.
    The server cannot authenticate Google comments itself; preserve this as
-   a self-declared/connector-reported snapshot, never a scholarly decision. */
+   a self-declared/client-reported snapshot, never a scholarly decision. */
 export async function onRequestPatch(context){
   const auth=await requireEditorCapability(context);
   if(!auth.ok)return json({error:auth.error},auth.status);
@@ -139,11 +139,11 @@ export async function onRequestPatch(context){
   const next=resolved?'resolved':'open';
   if(old.observed_state===next&&old.last_observed_revision===observed_revision){
     return json({project_id:id,question_key,observed_state:next,unchanged:true,
-      decision_status_unchanged:true,verification_status:'connector_reported'});
+      decision_status_unchanged:true,verification_status:'client_reported_unverified'});
   }
   const actor=actorFromRequest(context.request);
   const payload=JSON.stringify({question_key,comment_id,old_observed_state:old.observed_state,new_observed_state:next,
-    observed_revision,verification_status:'connector_reported'});
+    observed_revision,verification_status:'client_reported_unverified'});
   const updates=await db.batch([
     db.prepare(`UPDATE translation_question_comments
       SET observed_state=?,last_observed_revision=?,last_observed_at=CURRENT_TIMESTAMP
@@ -158,6 +158,6 @@ export async function onRequestPatch(context){
   ]);
   if(Number(updates?.[0]?.meta?.changes||0)!==1)return json({error:'Comment observation changed concurrently; refresh the connector and retry.',code:'stale_comment_observation'},409);
   return json({project_id:id,question_key,observed_state:next,
-    decision_status_unchanged:true,verification_status:'connector_reported',
+    decision_status_unchanged:true,verification_status:'client_reported_unverified',
     note:'Thread resolution is not a human editorial answer or applied source check.'});
 }
