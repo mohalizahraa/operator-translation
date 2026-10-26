@@ -301,7 +301,7 @@ export async function getTranslationContext(db, request, projectId) {
     questions: {
       doc_url: project.questions_doc_url || null,
       link_endpoint: `${origin}/api/projects/${project.id}/questions`,
-      needs_link: Boolean(project.google_doc_url) && !project.questions_doc_url,
+      needs_link: project.status !== 'not_started' && !project.questions_doc_url,
       instruction: project.questions_doc_url
         ? 'Open the linked Questions & Evidence Log and maintain source-aligned decisions for this book.'
         : 'Create or reuse a separate Google Questions & Evidence Log for this started book; verify public readability, PATCH questions_doc_url through the link endpoint, and GET/read back the exact persisted project before advancing. Do not duplicate an existing Doc.',
