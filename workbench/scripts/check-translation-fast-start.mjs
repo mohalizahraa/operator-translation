@@ -37,6 +37,7 @@ assert(helper.includes("sentinel: '[[NEXT_BATCH]]'"), 'Context is missing the ex
 assert(helper.includes("project.assignee === 'Both' && TRANSLATORS.has(actor)"), 'Shared-book focus preservation is missing.');
 
 assert(helper.includes("mode: 'native_anchored_comments_with_d1_ledger'"), 'Fast-start must surface the approved manuscript-native editorial question mode.');
+assert(helper.includes('stale_comment_links:')&&helper.includes('c.google_doc_id<>?'),'Fast-start must flag associations pointing at an old English Book.');
 assert(helper.includes("comment_bridge_status: 'd1_link_tracking_connector_required'"), 'Fast-start must label D1-only comment linkage separately from Google Docs API synchronization.');
 assert(helper.includes("google_comment_verification: 'not_authenticated_by_public_workbench'"), 'Public Workbench cannot claim server-verified Google comment observations.');
 assert(helper.includes("legacy_questions_doc_role: 'read_only_migration_witness'"), 'Existing Questions Docs must remain migration witnesses, not new prerequisites.');
