@@ -74,6 +74,8 @@ export async function ensureCatalog(db) {
     quoted_text TEXT NOT NULL,
     document_revision TEXT NOT NULL,
     observed_state TEXT NOT NULL DEFAULT 'unknown',
+  last_observed_revision TEXT,
+  last_observed_at TEXT,
     verification_status TEXT NOT NULL DEFAULT 'connector_reported',
     recorded_by TEXT NOT NULL,
     recorded_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
