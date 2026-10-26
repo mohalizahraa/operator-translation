@@ -76,6 +76,18 @@ assert result.rowcount==0
 assert db.execute("SELECT observed_state FROM translation_question_comments WHERE question_id=?",
                   (question_id,)).fetchone()[0]=="resolved"
 
+# Guard that the observed-state constraint lives on the state column itself.
+assert "observed_state TEXT NOT NULL DEFAULT 'unknown' CHECK (observed_state IN ('open','resolved','unknown'))" in schema
+try:
+    db.execute("""INSERT INTO translation_question_comments
+    (question_id,google_doc_id,comment_id,anchor_id,tab_id,quoted_text,
+     document_revision,observed_state,recorded_by)
+    VALUES (?,?,?,?,?,?,?,?,?)""",(other_id,'otherEnglishBookId123456789',
+        'doco.invalidstatus987','kix.invalidstatus123','t.0','Phrase','docRevisionA3','unverified','Zahraa'))
+    raise AssertionError("Invalid native-thread state passed SQL CHECK")
+except sqlite3.IntegrityError:
+    pass
+
 # No migration may rewrite the original Arabic or reviewer decisions.
 assert db.execute("SELECT arabic_text,status FROM translation_questions WHERE id=?",(question_id,)).fetchone()==("النص الأصلي","unresolved")
 print("Native comment-link D1 schema/transaction simulation: PASS")
