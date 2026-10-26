@@ -11,7 +11,7 @@ const idFrom=context=>{
 const string=(value,min,max)=>typeof value==='string'&&value.length>=min&&value.length<=max&&
   value.trim()===value&&!/[\u0000-\u001f\u007f]/.test(value);
 const keyValid=value=>string(value,3,180)&&/^[a-zA-Z0-9_.:-]+$/.test(value);
-const commentValid=value=>string(value,12,180)&&/^doco\.[a-zA-Z0-9_-]+$/.test(value);
+const commentValid=value=>string(value,8,180)&&/^(?:doco\.[a-zA-Z0-9_-]+|[a-zA-Z0-9_-]{8,180})$/.test(value);
 const anchorValid=value=>string(value,10,180)&&/^kix\.[a-zA-Z0-9_-]+$/.test(value);
 const tabValid=value=>string(value,3,180)&&/^t\.[a-zA-Z0-9_.-]+$/.test(value);
 const docIdValid=value=>string(value,20,120)&&/^[a-zA-Z0-9_-]+$/.test(value);
@@ -48,10 +48,11 @@ export async function onRequestPost(context){
   const body=await context.request.json().catch(()=>null);
   if(!body||typeof body!=='object'||Array.isArray(body))return json({error:'Invalid JSON comment observation.'},400);
   const {question_key,google_doc_id,comment_id,anchor_id,tab_id,quoted_text,document_revision,comment_text}=body;
+  const isInherited=body.existing_comment_import===true;
   if(!keyValid(question_key)||!docIdValid(google_doc_id)||!commentValid(comment_id)||
       !anchorValid(anchor_id)||!tabValid(tab_id)||!string(quoted_text,4,1000)||
       !string(document_revision,10,512)||!string(comment_text,8,6000)||
-      !comment_text.includes(question_key)||body.confirmed_readback!==true){
+      (!isInherited&&!comment_text.includes(question_key))||body.confirmed_readback!==true){
     return json({error:'Supply a stable question key, exact manuscript ID, native comment/anchor/tab IDs, quoted text, revision and a connector readback including the question key.'},400);
   }
   await ensureCatalog(context.env.DB);
@@ -75,7 +76,8 @@ export async function onRequestPost(context){
     : json({error:'Question already has a different comment anchor. Reconcile the existing thread instead of overwriting it.'},409);
 
   const actor=actorFromRequest(context.request);
-  const payload=JSON.stringify({question_key,comment_id,google_doc_id,tab_id,verification_status:'connector_reported'});
+  const payload=JSON.stringify({question_key,comment_id,google_doc_id,tab_id,
+    comment_origin:isInherited?'pre_existing':'new',verification_status:'connector_reported'});
   // Atomic under D1: mapping, immutable question history, and visible activity.
   // INSERT OR IGNORE also protects the global (doc,comment) uniqueness constraint.
   await context.env.DB.batch([
@@ -101,5 +103,5 @@ export async function onRequestPost(context){
   }
   return json({project_id:id,question_key,comment_id,unchanged:false,
     verification_status:'connector_reported',
-    note:'This stores reported Docs readback only. It is not a human decision or independent Google-side verification.'},201);
+    note:'This stores reported Docs readback only. Inherited comments may lack question keys in their original text. It is not a human decision or independent Google-side verification.'},201);
 }
