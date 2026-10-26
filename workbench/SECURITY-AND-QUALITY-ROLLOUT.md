@@ -44,7 +44,7 @@ Verification is behavioral: on the exact production release, verify `GET /api/he
 
 ## Next integration work
 
-1. Provision the production write secret without exposing it. Confirm protected mutation and stable collaborator access.
+1. Verify that the deployed Workbench preserves the founder-approved open-collaboration behavior and associated validation, audit, and recovery controls; do not reintroduce credentials.
 2. Grant the authorized document writer permission to create one Google Doc per book and sync the question ledger; no unattended Google Doc creation is claimed yet.
 3. Have the translation runner emit real, independently checked Arabic source-unit maps and QA receipts at each checkpoint; only then activate strict QA for all affected books.
 4. Provision and independently verify the separate human-reviewer credential, then exercise real stage transitions, source hash/revision changes, conflicting questions, concurrent edits and revoked document access. For stronger identity assurance, add verified individual authentication rather than treating shared-key possession as personal identity.
