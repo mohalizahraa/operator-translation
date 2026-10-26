@@ -19,7 +19,7 @@ const docIdValid=value=>string(value,20,120)&&/^[a-zA-Z0-9_-]+$/.test(value);
 async function list(db,id) {
   const {results}=await db.prepare(`SELECT q.question_key,q.source_page,q.status AS decision_status,
     c.google_doc_id,c.comment_id,c.anchor_id,c.tab_id,c.quoted_text,c.document_revision,
-    c.observed_state,c.verification_status,c.recorded_at
+    c.observed_state,c.verification_status,c.recorded_at,c.last_observed_revision,c.last_observed_at
     FROM translation_question_comments c
     JOIN translation_questions q ON q.id=c.question_id
     WHERE q.project_id=? ORDER BY q.source_page,q.id`).bind(id).all();
@@ -106,4 +106,57 @@ export async function onRequestPost(context){
   return json({project_id:id,question_key,comment_id,unchanged:false,
     verification_status:'connector_reported',
     note:'This stores reported Docs readback only. Inherited comments may lack question keys in their original text. It is not a human decision or independent Google-side verification.'},201);
+}
+
+/* A connector-driven observation of one already-linked Docs comment.
+   The server cannot authenticate Google comments itself; preserve this as
+   a self-declared/connector-reported snapshot, never a scholarly decision. */
+export async function onRequestPatch(context){
+  const auth=await requireEditorCapability(context);
+  if(!auth.ok)return json({error:auth.error},auth.status);
+  const id=idFrom(context);
+  if(!id)return json({error:'Invalid project id.'},400);
+  const body=await context.request.json().catch(()=>null);
+  if(!body||typeof body!=='object'||Array.isArray(body))return json({error:'Invalid JSON.'},400);
+  const {question_key,google_doc_id,comment_id,anchor_id,quoted_text,observed_revision,resolved}=body;
+  if(!keyValid(question_key)||!docIdValid(google_doc_id)||!commentValid(comment_id)||
+      !anchorValid(anchor_id)||!string(quoted_text,4,1000)||
+      !string(observed_revision,10,512)||typeof resolved!=='boolean'||body.confirmed_readback!==true){
+    return json({error:'Provide matching source question, native comment anchor and exact quoted text, connector readback, Docs revision and explicit resolved state.'},400);
+  }
+  await ensureCatalog(context.env.DB);
+  const db=context.env.DB;
+  const project=await db.prepare('SELECT id,google_doc_url FROM projects WHERE id=?').bind(id).first();
+  if(!project)return json({error:'Project not found.'},404);
+  if(googleDocIdFromUrl(project.google_doc_url)!==google_doc_id)return json({error:'English Book changed; do not record a comment for another manuscript.'},409);
+  const old=await db.prepare(`SELECT c.*,q.question_key FROM translation_question_comments c
+    JOIN translation_questions q ON q.id=c.question_id
+    WHERE q.project_id=? AND q.question_key=?`).bind(id,question_key).first();
+  if(!old)return json({error:'The source question has no registered native comment association. Record/verify it before syncing thread status.'},409);
+  if(old.google_doc_id!==google_doc_id||old.comment_id!==comment_id||old.anchor_id!==anchor_id||old.quoted_text!==quoted_text){
+    return json({error:'Comment identity or anchor differs from its existing registered source; reconcile instead of rewriting history.'},409);
+  }
+  const next=resolved?'resolved':'open';
+  if(old.observed_state===next&&old.last_observed_revision===observed_revision){
+    return json({project_id:id,question_key,observed_state:next,unchanged:true,
+      decision_status_unchanged:true,verification_status:'connector_reported'});
+  }
+  const actor=actorFromRequest(context.request);
+  const payload=JSON.stringify({question_key,comment_id,old_observed_state:old.observed_state,new_observed_state:next,
+    observed_revision,verification_status:'connector_reported'});
+  const updates=await db.batch([
+    db.prepare(`UPDATE translation_question_comments
+      SET observed_state=?,last_observed_revision=?,last_observed_at=CURRENT_TIMESTAMP
+      WHERE question_id=? AND observed_state=? AND
+      (last_observed_revision IS ? OR last_observed_revision=?)`)
+      .bind(next,observed_revision,old.question_id,old.observed_state,old.last_observed_revision,old.last_observed_revision),
+    db.prepare(`INSERT INTO translation_question_events(question_id,actor,action,payload_json)
+      SELECT ?,?,'native comment state observed',? WHERE changes()>0`).bind(old.question_id,actor,payload),
+    db.prepare(`INSERT INTO activity(project_id,actor,action,before_json,after_json)
+      SELECT ?,?,'translation comment state observed',NULL,? WHERE changes()>0`).bind(id,actor,payload)
+  ]);
+  if(Number(updates?.[0]?.meta?.changes||0)!==1)return json({error:'Comment observation changed concurrently; refresh the connector and retry.',code:'stale_comment_observation'},409);
+  return json({project_id:id,question_key,observed_state:next,
+    decision_status_unchanged:true,verification_status:'connector_reported',
+    note:'Thread resolution is not a human editorial answer or applied source check.'});
 }
