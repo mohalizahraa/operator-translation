@@ -45,9 +45,9 @@ Verification is behavioral: on the exact production release, verify `GET /api/he
 ## Next integration work
 
 1. Verify that the deployed Workbench preserves the founder-approved open-collaboration behavior and associated validation, audit, and recovery controls; do not reintroduce credentials.
-2. Grant the authorized document writer permission to create one Google Doc per book and sync the question ledger; no unattended Google Doc creation is claimed yet.
+2. Discover and reuse each book's existing Google Docs before creating replacements. For started books, establish a separate Questions & Evidence Log, confirm anonymous Viewer access, link it through the verified Workbench Questions endpoint and read back the exact project URL. Leave unstarted books without empty Questions Docs.
 3. Have the translation runner emit real, independently checked Arabic source-unit maps and QA receipts at each checkpoint; only then activate strict QA for all affected books.
-4. Provision and independently verify the separate human-reviewer credential, then exercise real stage transitions, source hash/revision changes, conflicting questions, concurrent edits and revoked document access. For stronger identity assurance, add verified individual authentication rather than treating shared-key possession as personal identity.
+4. Exercise final human-review self-declaration without reviewer keys. Require actual reviewer confirmation, matching whole-book QA evidence, exact source/Google Doc revision, no blocking questions, and rejection of stale revisions, competing edits or revoked access. Editing-as names cannot prove reviewer identity.
 5. Use actual reviewer-validated Arabic passages and independent model outputs to establish translation-quality calibration, not only illustrative short examples.
 
 **Verification boundary:** CI tests module syntax, safeguards, generated provenance and deterministic preflight logic. Live protection/quality mode requires separate production deployment/readback, credentials, real documents and observed runner behavior.
