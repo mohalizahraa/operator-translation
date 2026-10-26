@@ -148,7 +148,7 @@ CREATE TABLE IF NOT EXISTS translation_question_comments (
   observed_state TEXT NOT NULL DEFAULT 'unknown',
   last_observed_revision TEXT,
   last_observed_at TEXT CHECK (observed_state IN ('open','resolved','unknown')),
-  verification_status TEXT NOT NULL DEFAULT 'connector_reported',
+  verification_status TEXT NOT NULL DEFAULT 'client_reported_unverified',
   recorded_by TEXT NOT NULL,
   recorded_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   UNIQUE (google_doc_id, comment_id),
