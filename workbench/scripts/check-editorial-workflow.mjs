@@ -52,6 +52,7 @@ assert(commentLinks.includes('context.env.DB.batch(['),'Comment linkage and even
 assert(commentLinks.includes('confirmed_readback'),'Comment linkage must require explicit readback from the authenticated Docs client.');
 assert(commentLinks.includes('existing_comment_import'),'Inherited native Docs comments must be linkable without inserting duplicate threads.');
 assert(commentLinks.includes('export async function onRequestPatch'),'Native comment link API must receive connector-sourced resolved/open observations.');
+assert(commentLinks.includes('matches_current_english_doc')&&commentLinks.includes('stale_link_count'),'Comment GET must expose stale anchors after manuscript relinking.');
 assert(commentLinks.includes('decision_status_unchanged:true'),'A resolved Docs thread must not imply a scholarly answer or application.');
 assert(schema.includes('last_observed_revision TEXT')&&migration.includes('last_observed_revision TEXT'),'Docs observation revisions require DB schema in both bootstrap and migration.');
 assert(schema.includes("observed_state TEXT NOT NULL DEFAULT 'unknown'"),'Comment-state observations must not claim unverified existing threads are open.');
