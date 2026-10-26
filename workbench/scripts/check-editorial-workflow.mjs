@@ -48,6 +48,8 @@ assert(commentLinks.includes('connector_reported'),'No server-side Google OAuth 
 assert(commentLinks.includes('question_key')&&commentLinks.includes('translation_question_events'),'Comment links must preserve D1 stable keys and question history.');
 assert(commentLinks.includes('context.env.DB.batch(['),'Comment linkage and event/history must be atomic.');
 assert(commentLinks.includes('confirmed_readback'),'Comment linkage must require the authenticated Docs client's explicit readback receipt.');
+assert(commentLinks.includes('existing_comment_import'),'Inherited native Docs comments must be linkable without inserting duplicate threads.');
+assert(schema.includes("observed_state TEXT NOT NULL DEFAULT 'unknown'"),'Comment-state observations must not claim unverified existing threads are open.');
 assert(!commentLinks.includes('UPDATE translation_questions SET'),'Comment thread state must not directly change human editorial decision status.');
 assert(app.includes('data-human-review')&&!app.includes('x-workbench-reviewer-key'),'Human review must not ask for a credential key.');
 assert(!app.includes("sessionStorage.getItem('workbench-editor-key')"),'Browser must not read an editor key to edit.');
