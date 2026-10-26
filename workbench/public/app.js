@@ -281,9 +281,16 @@ function englishPdfLinkMarkup(p) {
     : '';
 }
 function questionsDocLinkMarkup(p) {
-  return p.questions_doc_url
-    ? `<button class="mini-link secondary-link" type="button" data-open-questions="${p.id}">Questions</button>`
-    : `<button class="mini-link secondary-link" type="button" data-link-questions="${p.id}">Questions · link</button>`;
+  // Passage-specific review happens in the one authoritative English Book.
+  // Historical separate Questions Docs remain directly accessible for audit
+  // until an explicitly verified migration is complete; never link new ones.
+  const review = p.google_doc_url
+    ? `<button class="mini-link secondary-link" type="button" data-open-questions="${p.id}">Review comments</button>`
+    : '';
+  const legacy = p.questions_doc_url
+    ? `<button class="mini-link secondary-link" type="button" data-open-legacy-questions="${p.id}">Older questions</button>`
+    : '';
+  return review + legacy;
 }
 // Integrity dialog lifetime is independent of repeated project-card rendering.
 document.getElementById('close-integrity-dialog')?.addEventListener('click',()=>{
@@ -614,18 +621,12 @@ function bindQuickActions(root=document) {
   root.querySelectorAll('[data-open-questions]').forEach(button=>button.addEventListener('click',event=>{
     event.stopPropagation();
     const project=state.projects.find(p=>p.id===Number(button.dataset.openQuestions));
-    if(project?.questions_doc_url) window.open(project.questions_doc_url,'_blank','noopener,noreferrer');
+    if(project?.google_doc_url) window.open(project.google_doc_url,'_blank','noopener,noreferrer');
   }));
-  root.querySelectorAll('[data-link-questions]').forEach(button=>button.addEventListener('click',async event=>{
+  root.querySelectorAll('[data-open-legacy-questions]').forEach(button=>button.addEventListener('click',event=>{
     event.stopPropagation();
-    const id=Number(button.dataset.linkQuestions);
-    const raw=window.prompt('Paste the separate Google Doc URL for this book’s translation questions:');
-    if(raw===null||!raw.trim())return;
-    try {
-      await api(`/api/projects/${id}/questions`,{method:'PATCH',body:JSON.stringify({questions_doc_url:raw.trim()})});
-      await loadData();
-      toast('Questions document linked to this book.');
-    } catch(error){toast(error.message);}
+    const project=state.projects.find(p=>p.id===Number(button.dataset.openLegacyQuestions));
+    if(project?.questions_doc_url) window.open(project.questions_doc_url,'_blank','noopener,noreferrer');
   }));
   root.querySelectorAll('[data-work-on-book]').forEach(button => button.addEventListener('click', event => {
     event.stopPropagation();
