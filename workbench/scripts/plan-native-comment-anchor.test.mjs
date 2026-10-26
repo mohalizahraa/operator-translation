@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import assert from 'node:assert/strict';
-import {planNativeCommentAnchor} from './plan-native-comment-anchor.mjs';
+import {planNativeCommentAnchor,planNativeCommentAnchorFromStructure} from './plan-native-comment-anchor.mjs';
 
 const docId='1J4rtQ0t9bN57FG-AclGCENPbOSyGXGn0NzYkhvMGhUo';
 const revision='AHj4eMSPxsWscpBs1-t2xwj6XGENGlRsT0KqEZSle';
@@ -53,4 +53,52 @@ for(const [args,code] of rejected){
 const malformed=documentFor([{text:'سلام with care and 😊\n'}]);
 malformed.paragraphs[0].endIndex++;
 assert.equal(planNativeCommentAnchor(input({document:malformed})).code,'structural_index_mismatch');
+
+// Native Docs structure can have an indexed inline footnote while
+// get_document_text() omits that marker and its trailing newline.
+const excerpt='«There is no doubt that error cannot apply to this hadith';
+const begin='«There is no doubt that error cannot apply to this hadith and the remaining text. ';
+const nativeDoc={
+  documentId:docId,revisionId:revision,
+  tabs:[{tabId:'t.0',body:{content:[
+    {startIndex:1,endIndex:2,sectionBreak:{}},
+    {startIndex:2,endIndex:2+begin.length+2,paragraph:{elements:[
+      {startIndex:2,endIndex:2+begin.length,textRun:{content:begin}},
+      {startIndex:2+begin.length,endIndex:3+begin.length,footnoteReference:{footnoteId:'fn1'}},
+      {startIndex:3+begin.length,endIndex:4+begin.length,textRun:{content:'\\n'}},
+    ]}},
+  ]}}],
+};
+const nativeArgs={
+  document:nativeDoc,google_doc_id:docId,document_revision:revision,tab_id:'t.0',
+  quoted_text:excerpt,comment_text:'Q118-REV-002 | inspect citation boundary.',
+};
+const native=planNativeCommentAnchorFromStructure(nativeArgs);
+assert.equal(native.ok,true,JSON.stringify(native));
+assert.equal(native.source_view,'native_elements');
+assert.equal(native.startIndex,2);
+assert.equal(native.endIndex-native.startIndex,excerpt.length);
+assert.equal(native.request.insertComment.range.tabId,'t.0');
+assert.equal(native.write_control.requiredRevisionId,revision);
+const crossesGap=planNativeCommentAnchorFromStructure({...nativeArgs,
+  quoted_text:begin.slice(-10)+'\\n'});
+assert.equal(crossesGap.code,'invalid_quote');
+// There is no safe match that silently skips over a footnote marker.
+const missingSpan=planNativeCommentAnchorFromStructure({...nativeArgs,
+  quoted_text:'remaining text. \\n'});
+assert.equal(missingSpan.code,'invalid_quote');
+const repeatedStructured={
+  ...nativeDoc,tabs:[{tabId:'t.0',body:{content:[
+    ...nativeDoc.tabs[0].body.content,
+    {paragraph:{elements:[{startIndex:1000,endIndex:1000+begin.length,textRun:{content:begin}}]}},
+  ]}}],
+};
+assert.equal(planNativeCommentAnchorFromStructure({...nativeArgs,document:repeatedStructured}).code,'ambiguous_quote');
+assert.equal(planNativeCommentAnchorFromStructure({...nativeArgs,
+  document:{...nativeDoc,revisionId:'later'}}).code,'stale_revision');
+const wrongNative={...nativeDoc,tabs:[{tabId:'t.0',body:{content:[
+  {paragraph:{elements:[{startIndex:2,endIndex:4,textRun:{content:begin}}]}},
+]}}]};
+assert.equal(planNativeCommentAnchorFromStructure({...nativeArgs,document:wrongNative}).code,'structural_index_mismatch');
+
 console.log('Native Docs exact-comment anchor planner: PASS (unique UTF-16 range, revision, doc/tab identity, ambiguity and structural drift).');
