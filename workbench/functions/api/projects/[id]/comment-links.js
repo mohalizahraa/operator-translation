@@ -9,7 +9,7 @@ const idFrom=context=>{
   return Number.isInteger(id)&&id>0?id:null;
 };
 const string=(value,min,max)=>typeof value==='string'&&value.length>=min&&value.length<=max&&
-  value.trim()===value&&!/[\u0000-\u001f\u007f]/.test(value);
+  value.trim()===value&&!/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/.test(value);
 const keyValid=value=>string(value,3,180)&&/^[a-zA-Z0-9_.:-]+$/.test(value);
 const commentValid=value=>string(value,8,180)&&/^(?:doco\.[a-zA-Z0-9_-]+|[a-zA-Z0-9_-]{8,180})$/.test(value);
 const anchorValid=value=>string(value,10,180)&&/^kix\.[a-zA-Z0-9_-]+$/.test(value);
@@ -49,6 +49,8 @@ export async function onRequestPost(context){
   if(!body||typeof body!=='object'||Array.isArray(body))return json({error:'Invalid JSON comment observation.'},400);
   const {question_key,google_doc_id,comment_id,anchor_id,tab_id,quoted_text,document_revision,comment_text}=body;
   const isInherited=body.existing_comment_import===true;
+  // A native Docs thread's last-known state cannot be presumed current from a mapping.
+  // Decision and application state remain exclusively in translation_questions.
   if(!keyValid(question_key)||!docIdValid(google_doc_id)||!commentValid(comment_id)||
       !anchorValid(anchor_id)||!tabValid(tab_id)||!string(quoted_text,4,1000)||
       !string(document_revision,10,512)||!string(comment_text,8,6000)||
