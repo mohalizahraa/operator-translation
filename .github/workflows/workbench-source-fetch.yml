@@ -28,7 +28,11 @@ concurrency:
 
 jobs:
   source-fetch:
-    if: github.repository == 'mohalizahraa/operator-translation' && (github.event_name != 'issues' || (github.event.issue.user.login == github.repository_owner && startsWith(github.event.issue.title, 'Workbench PDF source: #')))
+    if: >-
+      github.repository == 'mohalizahraa/operator-translation' &&
+      (github.event_name != 'issues' ||
+      (github.event.issue.user.login == github.repository_owner &&
+      startsWith(github.event.issue.title, 'Workbench PDF source: #')))
     runs-on: [self-hosted, Windows, X64]
     timeout-minutes: 15
     steps:
@@ -70,22 +74,7 @@ jobs:
           $output = & node workbench/scripts/fetch-workbench-source.mjs $projectId $outputPath
           if ($LASTEXITCODE -ne 0) { throw 'Canonical PDF fetch/verification failed.' }
           $meta = (($output | Out-String).Trim() | ConvertFrom-Json)
-          if ([int]$meta.projectId -ne [int]$projectId -or $meta.bytes -le 0 -or $meta.sha256 -notmatch '^[a-f0-9]{64}
-      - name: Upload short-lived verified PDF artifact
-        id: upload
-        uses: actions/upload-artifact@v4
-        with:
-          name: workbench-source-pdf
-          path: ${{ steps.fetch.outputs.path }}
-          if-no-files-found: error
-          retention-days: 1
-      - name: Remove source bytes from runner temporary storage
-        if: always()
-        shell: pwsh
-        run: |
-          $path = Join-Path $env:RUNNER_TEMP 'workbench-source.pdf'
-          if (Test-Path $path) { Remove-Item $path -Force }
-) {
+          if ([int]$meta.projectId -ne [int]$projectId -or $meta.bytes -le 0 -or $meta.sha256 -notmatch '^[a-f0-9]{64}$') {
             throw 'Source helper metadata did not match requested project or required checks.'
           }
           "path=$outputPath" >> $env:GITHUB_OUTPUT
@@ -93,6 +82,7 @@ jobs:
           "sha256=$($meta.sha256)" >> $env:GITHUB_OUTPUT
           "bytes=$($meta.bytes)" >> $env:GITHUB_OUTPUT
       - name: Upload short-lived verified PDF artifact
+        id: upload
         uses: actions/upload-artifact@v4
         with:
           name: workbench-source-pdf
