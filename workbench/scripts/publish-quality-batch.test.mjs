@@ -4,7 +4,7 @@ import {publishQualityVerifiedBatch} from './publish-quality-batch.mjs';
 
 const digest='a'.repeat(64),source='b'.repeat(64),docId='doc_123';
 const permission={file_id:docId,mime_type:'application/vnd.google-apps.document',anyone_role:'writer'};
-const driveMetadata={id:docId,mimeType:'application/vnd.google-apps.document',
+const driveMetadata={id:docId,mime_type:'application/vnd.google-apps.document',
  permissions:[{type:'anyone',role:'writer',allowFileDiscovery:false}]};
 const report={evidence_schema_version:2,project_id:12,project_title:'Test Book',assignee:'Mohammed',
  target_document_id:docId,target_permission:permission,source_page_basis:'physical_pdf',

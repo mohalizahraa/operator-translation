@@ -30,9 +30,10 @@ function normalizeAnyoneEditor(metadata){
  if(!metadata||typeof metadata!=='object')return null;
  const permissions=Array.isArray(metadata.permissions)?metadata.permissions:[metadata.permission||metadata.permissions].filter(Boolean);
  const anyone=permissions.find(p=>p?.type==='anyone'&&p?.role==='writer');
- const id=metadata.id||metadata.fileId;
- if(!id||metadata.mimeType!=='application/vnd.google-apps.document'||!anyone)return null;
- return {file_id:id,mime_type:metadata.mimeType,anyone_role:'writer'};
+ const id=metadata.id||metadata.fileId||metadata.file_id;
+ const mimeType=metadata.mime_type||metadata.mimeType;
+ if(!id||mimeType!=='application/vnd.google-apps.document'||!anyone)return null;
+ return {file_id:id,mime_type:mimeType,anyone_role:'writer'};
 }
 function exactReport(report,project,id,docId,permission,previous,target,total,revision){
  const expectedTitle=project.title_en||project.title_ar;
