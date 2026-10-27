@@ -58,6 +58,16 @@ export async function onRequestPatch(context) {
       current_translated_pages: Number(before.translated_pages || 0),
     }, 409);
   }
+
+  // This handler is also directly addressable as /progress. Only the
+  // evidence-bound /progress-sync owner may pass the internal context flag;
+  // public callers cannot manufacture it with an HTTP header or request body.
+  if (translatedPages !== expectedPrevious && context.evidenceBoundSync !== true) {
+    return json({
+      error: 'Translated-page changes must use the evidence-bound sync route with a matching QA receipt and live document readback.',
+      code: 'evidence_bound_sync_required',
+    }, 409);
+  }
   if (translatedPages < expectedPrevious && !correction) {
     return json({ error: 'Translation progress is monotonic. A decrease requires correction=true and a correction_reason.' }, 409);
   }
