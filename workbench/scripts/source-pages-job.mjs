@@ -7,8 +7,8 @@
 import {readFile,rm} from 'node:fs/promises';
 import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
-import {join} from 'node:path';
-import {fileURLToPath} from 'node:url';
+import {join,resolve} from 'node:path';
+import {fileURLToPath,pathToFileURL} from 'node:url';
 import {fetchWorkbenchSource,validProjectId} from './fetch-workbench-source.mjs';
 
 const REPOSITORY='mohalizahraa/operator-translation';
@@ -84,6 +84,6 @@ export async function processSourcePages({env=process.env,fetchImpl=fetch,postFe
     await rm(jsonPath,{force:true});
   }
 }
-if(import.meta.url===new URL(`file://${process.argv[1]}`).href){
+if(process.argv[1] && import.meta.url===pathToFileURL(resolve(process.argv[1])).href){
   processSourcePages().then(r=>console.log(JSON.stringify(r))).catch(e=>{console.error(e.message);process.exitCode=1;});
 }
