@@ -268,6 +268,17 @@ input[type=file]::file-selector-button:hover{background:rgba(var(--gold-rgb),.1)
 .book-translation-progress{display:grid;gap:4px;margin-top:9px;max-width:420px}.book-translation-progress.compact{margin-top:7px}
 .book-progress-copy{display:flex;justify-content:space-between;gap:10px;color:var(--sage);font-size:9px}.book-progress-copy strong{color:var(--oxblood);font-weight:600}
 .book-progress-track{height:4px}
+
+/* Shared track: sage measures drafted text-edition pages; wine overlays QA-verified PDF progress. */
+.combined-progress-track{position:relative;isolation:isolate;overflow:hidden;min-width:0}
+.combined-progress-track .draft-fill,.combined-progress-track .verified-fill{position:absolute;left:0;top:0;height:100%;border-radius:999px;transition:width .22s ease}
+.combined-progress-track .draft-fill{z-index:1;background:var(--sage)}
+.combined-progress-track .verified-fill{z-index:2;background:var(--oxblood)}
+.live-translation-row .book-draft-progress{max-width:none;margin:1px 0 3px}
+.book-draft-progress span{display:block;white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere}
+.book-progress-copy{flex-wrap:wrap;align-items:baseline}
+@media (prefers-reduced-motion:reduce){.combined-progress-track .draft-fill,.combined-progress-track .verified-fill{transition:none}}
+
 /* Draft is a witness-based signal, deliberately separate from certified PDF progress. */
 .book-draft-progress{margin-top:4px;max-width:420px;color:var(--sage);font-size:10px;line-height:1.4}
 .book-draft-progress span{display:block;overflow-wrap:anywhere}
