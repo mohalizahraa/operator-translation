@@ -4,6 +4,10 @@
  * verified PDF checkpoint. Draft numbers are NOT PDF physical page numbers.
  */
 const MAX_EXPORT_BYTES=8*1024*1024;
+// Only source editions whose independent pagination is known may receive a
+// draft-percentage bar. Do not divide text-edition numbers by physical PDF totals.
+// Project #88: 560 numbered text-edition pages; canonical physical PDF: 559.
+export const KNOWN_TEXT_EDITION_TOTALS=Object.freeze({88:560});
 const DRAFT_HEADING=/^Source text-edition page ([1-9]\d{0,4})(?:[ \t]*[—–-][ \t]*[^\n]*)?[ \t]*$/gm;
 
 export function extractDraftProgress(text){
