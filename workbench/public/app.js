@@ -43,14 +43,9 @@ const savedActivityType = localStorage.getItem('haydariActivityType');
 const state = { projects: [], activity: [], paceEvents: [], liveSignature: '', liveRevision: null, pdfAudit: null, coverMap: {}, seriesMap: {groups:{},books:{}}, coverObjectUrls: new Map(), coverLoads: new Map(), selectedIds: new Set(), view: 'dashboard', actor: ['Zahraa', 'Mohammed'].includes(savedActor) ? savedActor : 'Zahraa', projectSort: SORT_VALUES.includes(savedProjectSort) ? savedProjectSort : 'updated', projectGrouping: savedProjectGrouping === 'series' ? 'series' : 'none', viewScope: VIEW_SCOPES.includes(savedViewScope) ? savedViewScope : 'Shared', mobileBoardStatus: MOBILE_BOARD_STATUSES.includes(savedMobileBoardStatus) ? savedMobileBoardStatus : 'all', activityActorFilter: ACTIVITY_ACTORS.includes(savedActivityActor) ? savedActivityActor : 'all', activityTypeFilter: ACTIVITY_TYPES.includes(savedActivityType) ? savedActivityType : 'all', pendingWorkOnLink: null, activityLoaded:false, activityError:null };
 const LIVE_REVISION_MS = 2000;
 const LIVE_REVISION_RETRY_MS = 1000;
-const LIVE_MARKER_SYNC_MS = 5000;
-const LIVE_MARKER_BATCH_SIZE = 3;
 let liveSyncTimer = null;
 let liveSyncInFlight = false;
 let liveRevisionInFlight = false;
-let markerSyncInFlight = false;
-let markerSyncCursor = 0;
-let lastMarkerSyncAt = 0;
 let liveSyncStarted = false;
 let activitySyncInFlight = false;
 let activityRefreshPending = false;
@@ -1943,51 +1938,9 @@ async function syncSharedData({allowHidden=false}={}) {
 }
 
 async function syncVerifiedTranslationMarkers() {
-  if (document.hidden || markerSyncInFlight) return true;
-  const now=Date.now();
-  if (now-lastMarkerSyncAt < LIVE_MARKER_SYNC_MS) return true;
-  lastMarkerSyncAt=now;
-
-  const candidates=state.projects
-    .filter(p=>
-      p.google_doc_url &&
-      p.page_count_verified &&
-      (
-        (p.status==='in_progress' && (p.assignee===state.actor || p.assignee==='Both')) ||
-        (p.status==='not_started' && (p.assignee===state.actor || p.assignee==='Both'))
-      )
-    )
-    .sort((a,b)=>{
-      const active=Number(b.status==='in_progress')-Number(a.status==='in_progress');
-      if (active) return active;
-      const recent=String(b.translation_progress_at || '').localeCompare(String(a.translation_progress_at || ''));
-      if (recent) return recent;
-      return Number(a.id)-Number(b.id);
-    });
-
-  if (!candidates.length) {
-    markerSyncCursor=0;
-    return true;
-  }
-  const start=markerSyncCursor % candidates.length;
-  const batchSize=Math.min(LIVE_MARKER_BATCH_SIZE,candidates.length);
-  const batch=Array.from({length:batchSize},(_,offset)=>candidates[(start+offset)%candidates.length]);
-  markerSyncCursor=(start+batchSize)%candidates.length;
-
-  markerSyncInFlight=true;
-  let ok=true;
-  try {
-    for (const project of batch) {
-      try {
-        await api(`/api/projects/${project.id}/progress-sync`,{method:'POST'});
-      } catch {
-        ok=false;
-      }
-    }
-  } finally {
-    markerSyncInFlight=false;
-  }
-  return ok;
+  // A WBPROGRESS marker is only a draft signal. Verified progress is published
+  // by the evidence-bound runner after QA and revision/checkpoint readback.
+  return true;
 }
 
 async function pollLiveRevision() {

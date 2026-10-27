@@ -14,11 +14,6 @@ function requireText(source, needle, label) {
 
 requireText(app, 'const LIVE_REVISION_MS = 2000;', '2-second visible-tab revision polling');
 requireText(app, 'const LIVE_REVISION_RETRY_MS = 1000;', '1-second retry after transient poll failure');
-requireText(app, 'const LIVE_MARKER_SYNC_MS = 5000;', '5-second verified progress-marker cadence');
-requireText(app, 'let markerSyncCursor = 0;', 'rotating marker-sync cursor');
-requireText(app, 'const batch=Array.from({length:batchSize}', 'round-robin coverage for all eligible active translations');
-requireText(app, "(p.status==='not_started' && (p.assignee===state.actor || p.assignee==='Both'))", 'first-checkpoint marker bootstrap candidates');
-requireText(progressSync, 'bootstrapSourcePdfSha256(project)', 'server-side first-checkpoint source-identity bootstrap');
 requireText(app, "return String(data.revision ?? '');", 'opaque revision-token comparison');
 requireText(app, "window.addEventListener('focus'", 'focus resynchronization');
 requireText(app, "document.addEventListener('visibilitychange'", 'visibility resynchronization');
@@ -41,10 +36,15 @@ if (pdfAudit.includes('pdf_check_note = ?, updated_at = ?')) {
 if (projectsIndex.includes('syncActiveTranslationMarkers')) {
   throw new Error('Live-sync invariant regression: GET /api/projects must remain read-only.');
 }
+requireText(app,'async function syncVerifiedTranslationMarkers()', 'marker-only browser write gate');
+if (app.includes('/progress-sync`,{method:\'POST\'}')) {
+  throw new Error('Marker-only browser sync must not advance translated progress.');
+}
+requireText(progressSync, "code:'qa_receipt_required'", 'marker-only progress writes fail closed');
 if (progressSync.includes('SET notes =')) {
   throw new Error('Live-sync invariant regression: verified marker sync must not overwrite project notes.');
 }
-requireText(progressSync, "headers.get('x-workbench-actor')", 'verified marker sync preserves collaborator attribution');
+requireText(progressSync, "headers.get('x-workbench-actor')", 'evidence-bound sync preserves collaborator attribution');
 for (const field of ['p.title_en','p.pages','p.notes','p.source_pdf_url','p.pdf_checked_at','p.pdf_check_note','p.page_count_verified','p.has_uploaded_cover']) {
   requireText(app, field, `shared project render signature includes ${field}`);
 }
@@ -88,7 +88,7 @@ for (const field of ['status','translated_pages','pages']) {
 }
 requireText(activityApi, "const [activity, paceEvents]", 'archival Activity route remains full fidelity');
 requireText(app, "void refreshActivityData();", 'Activity refresh is independent of project load');
-requireText(app, "(p.status==='in_progress' && (p.assignee===state.actor || p.assignee==='Both'))", 'in-progress auto-sync must not credit a different collaborator');
+requireText(progressSync, "body.assignee!==project.assignee", 'evidence-bound sync must match the assigned translator');
 requireText(app, 'const active=VIEW_RENDERERS[view];','render only active Workbench view');
 requireText(app, 'if (state.projects.length) render();','refresh view on navigation');
 const progressSyncRead=fs.readFileSync(new URL('../functions/api/projects/[id]/progress-sync.js',import.meta.url),'utf8');
@@ -96,5 +96,5 @@ const markerReader=progressSyncRead.split('async function readMarker(context) {'
 if (!markerReader || markerReader.includes('ensureCatalog(')) {
   throw new Error('High-frequency marker reads must not run D1 schema migrations.');
 }
-requireText(progressSyncRead,"return publishProgress({...context,request});",'new markers use guarded mutation validation');
+requireText(progressSyncRead,"return publishProgress({...context,request});",'evidence-bound checkpoints use guarded mutation validation');
 console.log('Live-sync invariant: PASS');
