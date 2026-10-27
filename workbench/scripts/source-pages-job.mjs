@@ -50,7 +50,7 @@ function pageEvidence(payload,receipt,request,runId) {
     return `### Physical PDF page ${p.physical_page} — ${p.extraction_method}\n\n${p.text}`;
   });
   const body=[
-    'Canonical Workbench PDFKit **TEXT-LAYER WITNESS** — not yet OCR, source-page certification, or English translation.',
+    'Canonical Workbench PDFKit/Vision **SOURCE-PAGE WITNESS** — extraction method shown per physical page; OCR is not source-page certification or English translation.',
     `Project: ${request.projectId}; physical pages: ${request.from}–${request.to}; physical page count: ${payload.physical_page_count}`,
     `Canonical URL: https://haydari-translation-workbench.pages.dev/api/pdf/${request.projectId}`,
     `PDF SHA-256: ${receipt.sha256}; PDF bytes: ${receipt.bytes}`,
