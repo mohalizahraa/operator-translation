@@ -274,6 +274,11 @@ input[type=file]::file-selector-button:hover{background:rgba(var(--gold-rgb),.1)
 .combined-progress-track .draft-fill,.combined-progress-track .verified-fill{position:absolute;left:0;top:0;height:100%;border-radius:999px;transition:width .22s ease}
 .combined-progress-track .draft-fill{z-index:1;background:var(--sage)}
 .combined-progress-track .verified-fill{z-index:2;background:var(--oxblood)}
+/* Baseline density: only the book title, one summary, one progress track. */
+.live-translation-row{gap:5px;padding:9px 12px}
+.live-translation-copy strong{font-size:10px;white-space:nowrap}
+.book-translation-progress .book-progress-copy{margin-bottom:5px}
+@media(max-width:720px){.live-translation-row{gap:5px;padding:9px 12px}.live-translation-copy{gap:2px}.live-translation-copy strong{align-self:flex-start}}
 .live-translation-row .book-draft-progress{max-width:none;margin:1px 0 3px}
 .book-draft-progress span{display:block;white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere}
 .book-progress-copy{flex-wrap:wrap;align-items:baseline}
