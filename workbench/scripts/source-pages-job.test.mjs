@@ -47,7 +47,7 @@ test('blank text layer is reported OPEN and does not retain PDF',async()=>{
   await assert.rejects(processSourcePages({env,fetchImpl:async()=>new Response(pdf,{headers:{'content-type':'application/pdf'}}),
     extractImpl:async(_s,_f,_l,out)=>writeFile(out,JSON.stringify({physical_page_count:559,pages:[{physical_page:153,text:'',extraction_method:'pdfkit'},{physical_page:154,text:'word'.repeat(20),extraction_method:'pdfkit'}]})),
     postFetch:async(_u,o)=>{posts.push(JSON.parse(o.body).body);return new Response('{}',{status:201});}
-  }),/usable text layer/);
+  }),/lacks source text/);
   assert.equal(posts.length,1);
   assert.match(posts[0],/remains OPEN/);
   await assert.rejects(stat(join(dir,'workbench-source-pages.pdf')),{code:'ENOENT'});
