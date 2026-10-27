@@ -4,7 +4,7 @@
  * verified PDF checkpoint. Draft numbers are NOT PDF physical page numbers.
  */
 const MAX_EXPORT_BYTES=8*1024*1024;
-const DRAFT_HEADING=/^Source text-edition page ([1-9]\d{0,4})(?:\s*[—–-]\s*[^\n]*)?\s*$/gm;
+const DRAFT_HEADING=/^Source text-edition page ([1-9]\d{0,4})(?:[ \t]*[—–-][ \t]*[^\n]*)?[ \t]*$/gm;
 
 export function extractDraftProgress(text){
   if(typeof text!=='string')throw new Error('Draft export must be text.');
