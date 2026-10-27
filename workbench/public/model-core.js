@@ -37,9 +37,17 @@
     const validDraft=project?.status==='in_progress' && project?.google_doc_url
       && Number.isSafeInteger(draftPage) && draftPage>0
       && Number.isSafeInteger(draftTotal) && draftTotal>0 && draftPage<=draftTotal;
+    // Workflow stage is independent evidence of reported translation completion:
+    // do not turn Needs Review / Completed / Published into an empty bar merely
+    // because older projects have no certified-page receipts. Certification
+    // remains precisely the stored, source-bound page numerator above.
+    const translatedStatus=['review','completed','published'].includes(project?.status);
+    const draftPercent=validDraft?Math.round(100*draftPage/draftTotal):null;
+    const translationPercent=translatedStatus?100:draftPercent;
+    const progressBasis=translatedStatus?'workflow_status':validDraft?'source_text_edition':null;
     return {verifiedPages,verifiedTotal,verifiedPercent,
       draftPages:validDraft?draftPage:null,draftTotal:validDraft?draftTotal:null,
-      draftPercent:validDraft?Math.round(100*draftPage/draftTotal):null};
+      draftPercent,translationPercent,progressBasis,translatedStatus};
   }
 
   function statusTransitionAllowed(statusOrder, from, to) {
