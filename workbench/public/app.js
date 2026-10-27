@@ -870,17 +870,27 @@ function translationDisplayPages(p) {
 // draft share of a documented text edition (sage), verified physical PDF (wine).
 function combinedProgressTrack(p, trackClass) {
   const view=WorkbenchCore.translationProgressDisplay(p,state.draftProgress[p.id]);
-  const draftPercent=view.draftPercent??0;
+  const translatedPercent=view.translationPercent??0;
   const verifiedPercent=view.verifiedPercent??0;
-  const sourceLabel=view.draftPercent===null ? 'Draft percentage not established' :
-    `Draft ${view.draftPages} of ${view.draftTotal} text-edition pages, ${draftPercent}%`;
+  const translationLabel=view.translatedStatus
+    ? 'Reported translation complete by workflow status; source-page certification may still be missing'
+    : view.draftPercent===null ? 'Draft percentage not established'
+      : `Draft ${view.draftPages} of ${view.draftTotal} text-edition pages, ${view.draftPercent}%`;
   const verifiedLabel=view.verifiedTotal===null ? 'Physical PDF total unverified' :
-    `Verified ${view.verifiedPages} of ${view.verifiedTotal} physical PDF pages, ${verifiedPercent}%`;
+    `Source-certified ${view.verifiedPages} of ${view.verifiedTotal} physical PDF pages, ${verifiedPercent}%`;
   return `<div class="${trackClass} combined-progress-track" data-progress-track-for="${p.id}" role="img"
-    aria-label="${escapeHtml(sourceLabel+'; '+verifiedLabel)}">
-    <span class="draft-fill" style="width:${draftPercent}%"></span>
+    aria-label="${escapeHtml(translationLabel+'; '+verifiedLabel)}">
+    <span class="draft-fill" style="width:${translatedPercent}%"></span>
     <span class="verified-fill" style="width:${verifiedPercent}%"></span>
   </div>`;
+}
+function translationStageMarkup(p) {
+  if (!isTranslated(p)) return '';
+  const v=WorkbenchCore.translationProgressDisplay(p,state.draftProgress[p.id]);
+  const next=v.verifiedTotal!==null && v.verifiedPages===v.verifiedTotal
+    ? ' · physical pages accounted for; quality review is separate'
+    : ' · workflow-reported, source verification pending';
+  return `<div class="book-draft-progress translation-stage" aria-label="Translation completion from workflow status, distinct from source certification">Translated · 100% (${escapeHtml(STATUS[p.status])})${escapeHtml(next)}</div>`;
 }
 function draftProgressMarkup(p) {
   if (p.status!=='in_progress' || !p.google_doc_url) return '';
@@ -896,23 +906,18 @@ function draftProgressMarkup(p) {
     <span>${escapeHtml(progress+caution)}</span></div>`;
 }
 function translationProgressMarkup(p, compact=false, showZero=false) {
-  const storedDone=Math.max(0,Number(p.translated_pages||0));
-  const done=translationDisplayPages(p);
-  const total=Math.max(0,Number(p.pages||0));
+  const view=WorkbenchCore.translationProgressDisplay(p,state.draftProgress[p.id]);
+  const storedDone=view.verifiedPages;
+  const total=view.verifiedTotal;
   const isDraftBook=p.status==='in_progress'&&Boolean(p.google_doc_url);
-  if (!p.page_count_verified) {
-    if (!showZero && !storedDone && !isDraftBook) return '';
-    return `<div class="book-translation-progress ${compact?'compact':''} unverified" aria-label="Verified physical PDF total unavailable">
-      <div class="book-progress-copy"><span>Verified · ${storedDone} physical pages</span><strong>PDF total unverified</strong></div>
-      ${isDraftBook?combinedProgressTrack(p,'book-progress-track'):''}
-      ${draftProgressMarkup(p)}
-    </div>`;
-  }
-  if (!total || (!showZero && !done && !isDraftBook)) return '';
-  const percent=Math.min(100,Math.round((done/total)*100));
-  return `<div class="book-translation-progress ${compact?'compact':''} ${done===0?'zero':''}"
-    aria-label="Verified ${done} of ${total} physical source PDF pages">
-    <div class="book-progress-copy"><span>Verified · ${done}/${total} physical pages</span><strong>${percent}% verified</strong></div>
+  if (!showZero && storedDone===0 && !isDraftBook && !view.translatedStatus) return '';
+  const label=total===null ? `Source-certified · ${storedDone} pages · PDF total unverified` :
+    `Source-certified · ${storedDone}/${total} physical pages`;
+  const percentLabel=total===null ? 'total unverified' : `${view.verifiedPercent}% certified`;
+  return `<div class="book-translation-progress ${compact?'compact':''} ${storedDone===0&&!isDraftBook&&!view.translatedStatus?'zero':''}"
+    aria-label="${escapeHtml(label)}">
+    <div class="book-progress-copy"><span>${escapeHtml(label)}</span><strong>${escapeHtml(percentLabel)}</strong></div>
+    ${translationStageMarkup(p)}
     ${combinedProgressTrack(p,'book-progress-track')}
     ${draftProgressMarkup(p)}
   </div>`;
@@ -966,10 +971,10 @@ function renderTranslationLive() {
     const storedDone=Math.max(0,Number(p.translated_pages || 0));
     const done=translationDisplayPages(p), total=Number(p.pages || 0);
     const verified=Boolean(p.page_count_verified && total>0);
-    const percent=verified ? Math.min(100,Math.round(done/total*100)) : 0;
-    const progressText=verified ? `${done}/${total} pages` : `${storedDone} pages · total unverified`;
+    const progressText=verified ? `${storedDone}/${total} physical pages` : `${storedDone} physical pages · total unverified`;
     return `<button type="button" class="live-translation-row ${done===0?'zero':''} ${verified?'':'unverified'}" data-live-project="${p.id}">
-      <div class="live-translation-copy">${bookTitleMarkup(p,{compact:true})}<strong>Verified · ${progressText}</strong></div>
+      <div class="live-translation-copy">${bookTitleMarkup(p,{compact:true})}<strong>Source-certified · ${progressText}</strong></div>
+      ${translationStageMarkup(p)}
       ${draftProgressMarkup(p)}
       ${combinedProgressTrack(p,'live-translation-track')}
     </button>`;

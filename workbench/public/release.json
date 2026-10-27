@@ -1,6 +1,6 @@
 {
-  "release_id": "20261027-draft-progress-bar-1",
-  "app_version": "20261027-draft-progress-bar-1",
-  "css_version": "20261027-draft-progress-bar-1",
-  "description": "Progress bars visibly fill with source-text-edition draft coverage; physical-PDF verification remains separately labelled and unchanged"
+  "release_id": "20261027-preserve-finished-translation-bars-1",
+  "app_version": "20261027-preserve-finished-translation-bars-1",
+  "css_version": "20261027-preserve-finished-translation-bars-1",
+  "description": "Preserve workflow-reported 100% translated books as visibly full bars while distinguishing source-certified PDF page receipts and draft markers"
 }
