@@ -272,14 +272,13 @@
   <dialog id="english-book-dialog" class="small-dialog">
     <form id="english-book-form" method="dialog">
       <div class="dialog-head">
-        <div><div class="modal-section-title">English Book</div><h2>Link Google Doc</h2></div>
+        <div><div class="modal-section-title">English Book</div><h2>Link existing Google Doc</h2></div>
         <button type="button" id="close-english-dialog" class="ghost" aria-label="Close">×</button>
       </div>
       <input type="hidden" id="english-project-id" />
-      <p class="muted">Create the translation Doc, set sharing to <strong>Anyone with the link → Editor</strong>, then paste its link here. The Workbench rejects Docs that are not publicly reachable without sign-in; Operator-created/linked Docs are additionally verified in Drive as public Editor links.</p>
+      <p class="muted">Reuse this book's <strong>existing English Translation Google Doc</strong>; do not create a duplicate. First verify the correct Workbench book ID, edition, and <strong>Anyone with the link → Editor</strong> permission in Google Drive. Paste the exact existing URL only after sharing and identity are verified. The public website can check document reachability, but <strong>cannot independently prove Editor permissions</strong> or Google account identity.</p>
       <label class="dialog-field">Google Doc URL<input id="english-book-url" type="url" required placeholder="https://docs.google.com/document/..." /></label>
       <div class="dialog-actions split-actions">
-        <a class="secondary create-doc-link" href="https://docs.new" target="_blank" rel="noopener">Create new Google Doc ↗</a>
         <span class="action-spacer"></span>
         <button type="button" id="cancel-english-dialog" class="secondary">Cancel</button>
         <button type="submit" class="primary">Link English Book</button>
