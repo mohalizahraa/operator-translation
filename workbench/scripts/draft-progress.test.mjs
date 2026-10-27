@@ -1,6 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {extractDraftProgress,readDraftProgress} from '../functions/_draft_progress.js';
+import {extractDraftProgress,readDraftProgress,KNOWN_TEXT_EDITION_TOTALS} from '../functions/_draft_progress.js';
+import fs from 'node:fs/promises';
+import vm from 'node:vm';
 import {onRequestGet} from '../functions/api/projects/[id]/draft-progress.js';
 
 const docId='1-XtipDYDsowyivR7NfnYxXPbGtRN9M5IZ0OGt21xZxk';
@@ -52,6 +54,7 @@ test('project endpoint returns draft and verified fields independently; no D1 wr
    assert.equal(json.project_id,88);
    assert.equal(json.google_doc_id,docId);
    assert.equal(json.last_labeled_page,110);
+   assert.equal(json.draft_text_edition_total_pages,560);
    assert.equal(json.verified_physical_pdf_pages,0);
    assert.equal(json.verified_physical_pdf_total,559);
    assert.equal(json.certified_pdf_pages,false);
@@ -63,4 +66,25 @@ test('wrong ID, missing project and absent doc never fetch arbitrary book',async
  assert.equal(r.status,400);
  r=await onRequestGet(context({project:null}).ctx);assert.equal(r.status,404);
  r=await onRequestGet(context({project:{id:88,google_doc_url:null}}).ctx);assert.equal(r.status,409);
+});
+
+test('live bar uses known text-edition denominator, not the different physical PDF denominator',async()=>{
+ const source=await fs.readFile(new URL('../public/model-core.js',import.meta.url),'utf8');
+ const scope={};vm.runInNewContext(source,scope);
+ const display=scope.WorkbenchCore.translationProgressDisplay;
+ const project={id:88,status:'in_progress',google_doc_url:target,page_count_verified:true,translated_pages:0,pages:559};
+ const snapshot={last_labeled_page:112,labeled_sections:112,draft_text_edition_total_pages:KNOWN_TEXT_EDITION_TOTALS[88]};
+ const result=display(project,snapshot);
+ assert.equal(result.draftPages,112);
+ assert.equal(result.draftTotal,560);
+ assert.equal(result.draftPercent,20);
+ assert.equal(result.verifiedPages,0);
+ assert.equal(result.verifiedTotal,559);
+ assert.equal(result.verifiedPercent,0);
+ assert.equal(display({...project,translated_pages:28},snapshot).verifiedPercent,5);
+ assert.equal(display(project,{last_labeled_page:112,draft_text_edition_total_pages:null}).draftPercent,null,
+   'unknown text-edition denominator must not borrow the physical PDF denominator');
+ assert.equal(display(project,{last_labeled_page:561,draft_text_edition_total_pages:560}).draftPercent,null,
+   'invalid out-of-range text edition marker cannot produce a misleading full bar');
+ assert.equal(display({...project,status:'review'},snapshot).draftPercent,null);
 });
