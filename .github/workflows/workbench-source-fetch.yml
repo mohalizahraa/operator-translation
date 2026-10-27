@@ -11,9 +11,14 @@ on:
         description: Exact Workbench project ID to retrieve
         required: true
         type: string
+      evidence_issue:
+        description: Optional existing private repository issue for the fetch outcome
+        required: false
+        type: string
 
 permissions:
   contents: read
+  issues: write
 
 concurrency:
   group: workbench-source-fetch
@@ -30,6 +35,7 @@ jobs:
         with:
           node-version: '22'
       - name: Verify source bridge and fail-closed tests
+        id: verify
         shell: pwsh
         run: |
           node --check workbench/scripts/fetch-workbench-source.mjs
@@ -52,9 +58,31 @@ jobs:
           if ($projectId -notmatch '^[1-9][0-9]*$') { throw 'Invalid exact project ID.' }
           $outputPath = Join-Path $env:RUNNER_TEMP 'workbench-source.pdf'
           if (Test-Path $outputPath) { Remove-Item $outputPath -Force }
-          node workbench/scripts/fetch-workbench-source.mjs $projectId $outputPath
+          $output = & node workbench/scripts/fetch-workbench-source.mjs $projectId $outputPath
           if ($LASTEXITCODE -ne 0) { throw 'Canonical PDF fetch/verification failed.' }
+          $meta = (($output | Out-String).Trim() | ConvertFrom-Json)
+          if ([int]$meta.projectId -ne [int]$projectId -or $meta.bytes -le 0 -or $meta.sha256 -notmatch '^[a-f0-9]{64}
+      - name: Upload short-lived verified PDF artifact
+        id: upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: workbench-source-pdf
+          path: ${{ steps.fetch.outputs.path }}
+          if-no-files-found: error
+          retention-days: 1
+      - name: Remove source bytes from runner temporary storage
+        if: always()
+        shell: pwsh
+        run: |
+          $path = Join-Path $env:RUNNER_TEMP 'workbench-source.pdf'
+          if (Test-Path $path) { Remove-Item $path -Force }
+) {
+            throw 'Source helper metadata did not match requested project or required checks.'
+          }
           "path=$outputPath" >> $env:GITHUB_OUTPUT
+          "project_id=$projectId" >> $env:GITHUB_OUTPUT
+          "sha256=$($meta.sha256)" >> $env:GITHUB_OUTPUT
+          "bytes=$($meta.bytes)" >> $env:GITHUB_OUTPUT
       - name: Upload short-lived verified PDF artifact
         uses: actions/upload-artifact@v4
         with:
@@ -68,3 +96,47 @@ jobs:
         run: |
           $path = Join-Path $env:RUNNER_TEMP 'workbench-source.pdf'
           if (Test-Path $path) { Remove-Item $path -Force }
+      - name: Report run outcome to private verification issue
+        if: always()
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          INPUT_EVIDENCE_ISSUE: ${{ inputs.evidence_issue }}
+          INPUT_PROJECT_ID: ${{ inputs.project_id }}
+          EVENT_NAME: ${{ github.event_name }}
+          VERIFY_OUTCOME: ${{ steps.verify.outcome }}
+          FETCH_OUTCOME: ${{ steps.fetch.outcome }}
+          UPLOAD_OUTCOME: ${{ steps.upload.outcome }}
+          FETCH_PROJECT_ID: ${{ steps.fetch.outputs.project_id }}
+          FETCH_SHA256: ${{ steps.fetch.outputs.sha256 }}
+          FETCH_BYTES: ${{ steps.fetch.outputs.bytes }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $issue = $env:INPUT_EVIDENCE_ISSUE
+          if (-not $issue) {
+            $request = Get-Content 'workbench/source-access-request.txt' -Raw
+            $match = [regex]::Match($request, '(?m)^# Evidence issue: ([1-9][0-9]*)\s*$')
+            if ($match.Success) { $issue = $match.Groups[1].Value }
+          }
+          if ($issue -notmatch '^[1-9][0-9]*$') {
+            Write-Output 'No exact existing issue number supplied; outcome remains in Actions logs.'
+            exit 0
+          }
+          $projectId = if ($env:EVENT_NAME -eq 'workflow_dispatch') { $env:INPUT_PROJECT_ID } else { (Get-Content 'workbench/source-access-request.txt' -TotalCount 1).Trim() }
+          $success = $env:VERIFY_OUTCOME -eq 'success' -and $env:FETCH_OUTCOME -eq 'success' -and $env:UPLOAD_OUTCOME -eq 'success'
+          $outcome = if ($success) { 'ARTIFACT_UPLOADED; consumer download and source alignment still require readback' } else { 'FETCH_OPEN; artifact not proven available' }
+          $message = @"
+          Canonical Workbench PDF bridge: $outcome
+
+          Project: $projectId
+          Run: https://github.com/$env:GITHUB_REPOSITORY/actions/runs/$env:GITHUB_RUN_ID
+          Commit: $env:GITHUB_SHA
+          Verify: $env:VERIFY_OUTCOME; fetch: $env:FETCH_OUTCOME; upload: $env:UPLOAD_OUTCOME
+          PDF bytes: $env:FETCH_BYTES; SHA-256: $env:FETCH_SHA256
+          Source URL: https://haydari-translation-workbench.pages.dev/api/pdf/$projectId
+          Neither this comment nor an uploaded artifact certifies translated pages.
+          "@
+          $uri = "https://api.github.com/repos/$env:GITHUB_REPOSITORY/issues/$issue/comments"
+          $headers = @{ Authorization="Bearer $env:GH_TOKEN"; 'X-GitHub-Api-Version'='2022-11-28'; 'User-Agent'='Workbench-PDF-bridge' }
+          $body = @{ body = $message } | ConvertTo-Json -Compress
+          Invoke-RestMethod -Method Post -Uri $uri -Headers $headers -ContentType 'application/json' -Body $body | Out-Null
