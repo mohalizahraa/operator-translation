@@ -23,6 +23,21 @@ assert.match(workflow,/node --test workbench\/scripts\/fetch-workbench-source\.t
 assert.match(workflow,/node workbench\/scripts\/fetch-workbench-source\.mjs/,'Workflow must call tested source helper.');
 assert.match(workflow,/actions\/upload-artifact@v4/,'Expected handoff action missing.');
 assert.match(workflow,/name: workbench-source-pdf/,'Expected stable artifact name missing.');
+
+const count = pattern => [...workflow.matchAll(pattern)].length;
+for (const [label,pattern] of [
+  ['canonical PDF download',/node workbench\/scripts\/fetch-workbench-source\.mjs/g],
+  ['artifact upload',/      - name: Upload short-lived verified PDF artifact/g],
+  ['runner cleanup',/      - name: Remove source bytes from runner temporary storage/g],
+  ['issue outcome reporter',/      - name: Report run outcome to private verification issue/g],
+]) {
+  assert.equal(count(pattern),1,`Exactly one ${label} step is required; duplicate or absent steps are a broken workflow.`);
+}
+assert.match(workflow,/    if: >-\n/,'The job expression containing a colon must use YAML folded scalar quoting.');
+assert.match(workflow,/if \(\[int\]\$meta\.projectId[^\n]*-notmatch '\^\[a-f0-9\]\{64\}\$'\) \{/,'The PowerShell SHA-256 gate is incomplete or truncated.');
+assert.match(workflow,/"path=\$outputPath" >> \$env:GITHUB_OUTPUT/,'The verified source file path must reach the artifact uploader.');
+assert.doesNotMatch(workflow,/\n\) \{\n\s+throw/,'A broken continuation appeared outside the PowerShell block.');
+
 assert.match(workflow,/retention-days: 1/,'Source handoff must be short lived.');
 assert.match(workflow,/issues: write/,'Reporting results to the private verification issue requires scoped issue permission.');
 assert.match(workflow,/Report run outcome to private verification issue/,'A bridge run must expose checkable outcome outside the runner.');
