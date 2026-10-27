@@ -47,7 +47,7 @@ async function getRequest(env) {
   return deriveRequest({env,event,requestFile});
 }
 
-export async function stage({env=process.env,fetchImpl=fetch}) {
+export async function stage({env=process.env,fetchImpl=fetch}={}) {
   const request = await getRequest(env);
   const outputPath = join(env.RUNNER_TEMP,'workbench-source.pdf');
   await rm(outputPath,{force:true});
@@ -58,7 +58,7 @@ export async function stage({env=process.env,fetchImpl=fetch}) {
   return {projectId:receipt.projectId,bytes:receipt.bytes,sha256:receipt.sha256};
 }
 
-export async function report({env=process.env,fetchImpl=fetch}) {
+export async function report({env=process.env,fetchImpl=fetch}={}) {
   const req = await getRequest(env);
   const issueNumber = safeIssueNumber(req.issueNumber);
   if (!issueNumber) throw new Error('Source workflow must have a verified issue for outcome reporting.');
