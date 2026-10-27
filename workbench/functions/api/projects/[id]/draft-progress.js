@@ -1,5 +1,5 @@
 import {json,googleDocIdFromUrl} from '../../../_lib.js';
-import {readDraftProgress} from '../../../_draft_progress.js';
+import {readDraftProgress,KNOWN_TEXT_EDITION_TOTALS} from '../../../_draft_progress.js';
 
 export async function onRequestGet(context){
   const id=Number(context.params.id);
@@ -14,7 +14,8 @@ export async function onRequestGet(context){
   try{
     const evidence=await readDraftProgress(documentId);
     return json({project_id:id,google_doc_id:documentId,
-      ...evidence,checked_at:new Date().toISOString(),
+      ...evidence, draft_text_edition_total_pages:KNOWN_TEXT_EDITION_TOTALS[id]||null,
+      checked_at:new Date().toISOString(),
       // These are displayed distinctly and never substituted for draft labels.
       verified_physical_pdf_pages:Number(project.translated_pages||0),
       verified_physical_pdf_total:Number(project.pages||0)});
