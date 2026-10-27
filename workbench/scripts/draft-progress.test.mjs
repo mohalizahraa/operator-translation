@@ -5,7 +5,7 @@ import {onRequestGet} from '../functions/api/projects/[id]/draft-progress.js';
 
 const docId='1-XtipDYDsowyivR7NfnYxXPbGtRN9M5IZ0OGt21xZxk';
 const target='https://docs.google.com/document/d/'+docId+'/edit';
-const witness=\`Working manuscript
+const witness=`Working manuscript
 Source text-edition page 1 — Title
 Source text-edition page 2 — Publisher
 Source text-edition pages 1–110 are a draft, NOT verified.
@@ -14,7 +14,7 @@ Source text-edition page 10 — Outline
 Source text-edition page 110 — Example passage
 Source text-edition page 110 — Duplicate marker
 [[NEXT_BATCH]]
-\`;
+`;
 test('read-only draft scanner counts unique exact headings, never notes or physical pages',()=>{
  const r=extractDraftProgress(witness);
  assert.deepEqual(r,{last_labeled_page:110,labeled_sections:5,first_labeled_page:1,
