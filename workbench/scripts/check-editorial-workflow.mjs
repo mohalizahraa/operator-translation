@@ -8,6 +8,8 @@ const humanReview=file('../functions/api/projects/[id]/human-review.js');
 const integrity=file('../functions/api/projects/[id]/integrity.js');
 const translator=file('../functions/_translation.js');
 const quality=file('../functions/api/projects/[id]/quality.js');
+const syncRunner=file('../scripts/publish-quality-batch.mjs');
+const syncHelper=file('../scripts/sync-verified-progress.mjs');
 const progress=file('../functions/api/projects/[id]/progress.js');
 const project=file('../functions/api/projects/[id].js');
 const app=file('../public/app.js');
@@ -27,7 +29,8 @@ assert(questions.includes('translation_question_events'),'Questions preserve dec
 assert(questions.includes('recordActivity'),'Questions must advance shared revision token');
 assert(quality.includes('assessTranslationEvidence'),'QA receipts require deterministic preflight');
 assert(quality.includes('requireEditorCapability'),'QA writes pass through the open-collaboration guard.');
-assert(quality.includes('recordActivity'),'QA receipts must trigger live UI sync');
+assert(quality.includes('INSERT INTO activity'),'QA receipts must advance the shared live revision.');
+assert(syncRunner.includes('publishQualityVerifiedBatch') && syncRunner.includes('--drive-metadata') && syncHelper.includes('liveSnapshot'), 'QA receipts must use the same-session evidence-bound runner and live readback.');
 assert(humanReview.includes('requireHumanReviewerCapability'),'Human approval must require explicit self-declaration, not an inferred AI approval.');
 assert(humanReview.includes('requireEditorCapability'),'Human review uses the documented open editing model.');
 assert(humanReview.includes('translation_quality_evidence'),'Human approval must bind to final QA revision');
@@ -35,7 +38,7 @@ assert(humanReview.includes('translation_questions'),'Blocking open translation 
 assert(humanReview.includes('recordActivity'),'Human approval must update revision token');
 
 assert(progress.includes('WORKBENCH_REQUIRE_QA_EVIDENCE'),'Quality gate must be explicitly configurable');
-assert(progress.includes('qa_receipt_required'),'Marker-only updates must fail when gate is enforced');
+assert(progress.includes('qa_receipt_required'),'Progress endpoint must enforce QA receipts when strict mode is enabled');
 assert(project.includes('qa_coverage_incomplete')&&project.includes('whole_book_qa_required'),'Stage changes must guard formatting and whole-book QA');
 assert(project.includes('human_review_attestation_required'),'Human review cannot be inferred from automatic status');
 assert(app.includes('data-link-questions')&&app.includes('data-open-questions'),'Questions Doc needs UI actions');

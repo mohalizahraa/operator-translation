@@ -23,12 +23,13 @@ assert(
   'Project editor must not submit translated_pages.'
 );
 assert(
-  !app.includes("Number(p.translated_pages || 0) > 0"),
-  'Verified marker sync must bootstrap in-progress projects from 0 translated pages.'
+  app.includes('async function syncVerifiedTranslationMarkers()') &&
+  !app.includes('/progress-sync`,{method:\'POST\'}'),
+  'Workbench browser must not advance translated progress from a marker alone.'
 );
 assert(
-  app.includes("(p.status==='not_started' && (p.assignee===state.actor || p.assignee==='Both'))"),
-  'Verified marker sync must include assigned Not Started projects so the first checkpoint can bootstrap from 0.'
+  progressSync.includes("code:'qa_receipt_required'"),
+  'Marker-only progress writes must fail closed until a revision-matched QA receipt is submitted.'
 );
 assert(
   progressSync.includes('bootstrapSourcePdfSha256(project)') &&

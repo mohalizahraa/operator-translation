@@ -1,6 +1,6 @@
 {
-  "release_id": "20261016-open-editor-questions-1",
-  "app_version": "20261016-open-editor-questions-1",
+  "release_id": "20261027-evidence-bound-sync-1",
+  "app_version": "20261027-evidence-bound-sync-1",
   "css_version": "20261009-book-titles-right-1",
-  "description": "Open collaborative editing without editor or reviewer keys; keep revision-bound question and human-review validation"
+  "description": "Evidence-bound Google Docs to Workbench checkpoints with source-page QA and live revision readback"
 }
