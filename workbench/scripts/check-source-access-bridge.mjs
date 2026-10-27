@@ -21,6 +21,10 @@ assert.match(workflow,/node workbench\/scripts\/fetch-workbench-source\.mjs/,'Wo
 assert.match(workflow,/actions\/upload-artifact@v4/,'Expected handoff action missing.');
 assert.match(workflow,/name: workbench-source-pdf/,'Expected stable artifact name missing.');
 assert.match(workflow,/retention-days: 1/,'Source handoff must be short lived.');
+assert.match(workflow,/issues: write/,'Reporting results to the private verification issue requires scoped issue permission.');
+assert.match(workflow,/Report run outcome to private verification issue/,'A bridge run must expose checkable outcome outside the runner.');
+assert.match(workflow,/if: always\(\)/,'A failed source job must still attempt its outcome report.');
+assert.match(workflow,/FETCH_SHA256/,'Report must identify the downloaded PDF by SHA-256 without exposing source bytes.');
 assert.match(workflow,/if: always\(\)/,'Ephemeral source clean-up must run on failure.');
 assert.match(helper,/haydari-translation-workbench\.pages\.dev/,'Source must remain Workbench-owned.');
 assert.match(helper,/\/api\/pdf\/\$\{id\}/,'Source must go through project PDF route.');
