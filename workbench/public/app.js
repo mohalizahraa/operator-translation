@@ -40,9 +40,13 @@ const savedViewScope = localStorage.getItem('haydariViewScope') || localStorage.
 const savedMobileBoardStatus = localStorage.getItem('haydariBoardStatus');
 const savedActivityActor = localStorage.getItem('haydariActivityActor');
 const savedActivityType = localStorage.getItem('haydariActivityType');
-const state = { projects: [], activity: [], paceEvents: [], liveSignature: '', liveRevision: null, pdfAudit: null, coverMap: {}, seriesMap: {groups:{},books:{}}, coverObjectUrls: new Map(), coverLoads: new Map(), selectedIds: new Set(), view: 'dashboard', actor: ['Zahraa', 'Mohammed'].includes(savedActor) ? savedActor : 'Zahraa', projectSort: SORT_VALUES.includes(savedProjectSort) ? savedProjectSort : 'updated', projectGrouping: savedProjectGrouping === 'series' ? 'series' : 'none', viewScope: VIEW_SCOPES.includes(savedViewScope) ? savedViewScope : 'Shared', mobileBoardStatus: MOBILE_BOARD_STATUSES.includes(savedMobileBoardStatus) ? savedMobileBoardStatus : 'all', activityActorFilter: ACTIVITY_ACTORS.includes(savedActivityActor) ? savedActivityActor : 'all', activityTypeFilter: ACTIVITY_TYPES.includes(savedActivityType) ? savedActivityType : 'all', pendingWorkOnLink: null, activityLoaded:false, activityError:null };
+const state = { projects: [], activity: [], paceEvents: [], liveSignature: '', liveRevision: null, pdfAudit: null, coverMap: {}, seriesMap: {groups:{},books:{}}, coverObjectUrls: new Map(), coverLoads: new Map(), selectedIds: new Set(), view: 'dashboard', actor: ['Zahraa', 'Mohammed'].includes(savedActor) ? savedActor : 'Zahraa', projectSort: SORT_VALUES.includes(savedProjectSort) ? savedProjectSort : 'updated', projectGrouping: savedProjectGrouping === 'series' ? 'series' : 'none', viewScope: VIEW_SCOPES.includes(savedViewScope) ? savedViewScope : 'Shared', mobileBoardStatus: MOBILE_BOARD_STATUSES.includes(savedMobileBoardStatus) ? savedMobileBoardStatus : 'all', activityActorFilter: ACTIVITY_ACTORS.includes(savedActivityActor) ? savedActivityActor : 'all', activityTypeFilter: ACTIVITY_TYPES.includes(savedActivityType) ? savedActivityType : 'all', pendingWorkOnLink: null, draftProgress:{}, activityLoaded:false, activityError:null };
 const LIVE_REVISION_MS = 2000;
 const LIVE_REVISION_RETRY_MS = 1000;
+const DRAFT_REFRESH_MS = 75000; // Read the linked Google Doc, not any verified PDF checkpoint.
+let draftRefreshTimer = null;
+let draftRefreshInFlight = false;
+let draftBatchOffset = 0;
 let liveSyncTimer = null;
 let liveSyncInFlight = false;
 let liveRevisionInFlight = false;
@@ -862,22 +866,32 @@ function translationDisplayPages(p) {
   const total=Math.max(0,Number(p.pages || 0));
   return isTranslated(p) && p.page_count_verified && total>0 && done<total ? total : done;
 }
+function draftProgressMarkup(p) {
+  if (p.status!=='in_progress' || !p.google_doc_url) return '';
+  const snapshot=state.draftProgress[p.id];
+  const known=Number.isSafeInteger(snapshot?.last_labeled_page) && snapshot.last_labeled_page>0;
+  const value=known
+    ? `Draft · text-edition p.${snapshot.last_labeled_page} (${snapshot.labeled_sections} labeled sections)`
+    : snapshot?.error ? 'Draft · Google Doc export unavailable' : 'Draft · checking linked Google Doc…';
+  const caution=known ? (snapshot?.stale ? ' · refresh pending' : ' · not PDF-verified') : ' · not PDF-verified';
+  return `<div class="book-draft-progress" data-draft-progress-for="${p.id}" aria-label="Draft text-edition progress, not verified PDF pages"><span>${escapeHtml(value + caution)}</span></div>`;
+}
 function translationProgressMarkup(p, compact=false, showZero=false) {
   const storedDone=Math.max(0,Number(p.translated_pages || 0));
   const done=translationDisplayPages(p);
   const total=Math.max(0,Number(p.pages || 0));
   if (!p.page_count_verified) {
-    if (!showZero && !storedDone) return '';
+    if (!showZero && !storedDone) return draftProgressMarkup(p);
     return `<div class="book-translation-progress ${compact?'compact':''} unverified" aria-label="${storedDone} source pages translated; total page count unverified">
       <div class="book-progress-copy"><span>${storedDone} pages translated</span><strong>Total unverified</strong></div>
-    </div>`;
+    </div>${draftProgressMarkup(p)}`;
   }
-  if (!total || (!showZero && !done)) return '';
+  if (!total || (!showZero && !done)) return draftProgressMarkup(p);
   const percent=Math.min(100,Math.round((done/total)*100));
   return `<div class="book-translation-progress ${compact?'compact':''} ${done===0?'zero':''}" aria-label="${done} of ${total} source pages translated">
     <div class="book-progress-copy"><span>${done}/${total} pages translated</span><strong>${percent}%</strong></div>
     <div class="book-progress-track"><span style="width:${percent}%"></span></div>
-  </div>`;
+  </div>${draftProgressMarkup(p)}`;
 }
 function assignedProjectMarkup(p) {
   const due = p.due_date ? dateText(p.due_date) : 'No deadline';
@@ -931,7 +945,7 @@ function renderTranslationLive() {
     const percent=verified ? Math.min(100,Math.round(done/total*100)) : 0;
     const progressText=verified ? `${done}/${total} pages` : `${storedDone} pages · total unverified`;
     return `<button type="button" class="live-translation-row ${done===0?'zero':''} ${verified?'':'unverified'}" data-live-project="${p.id}">
-      <div class="live-translation-copy">${bookTitleMarkup(p,{compact:true})}<strong>${progressText}</strong></div>
+      <div class="live-translation-copy">${bookTitleMarkup(p,{compact:true})}<strong>Verified · ${progressText}</strong>${draftProgressMarkup(p)}</div>
       ${verified ? `<div class="live-translation-track"><span style="width:${percent}%"></span></div>` : ''}
     </button>`;
   }).join('') : '<div class="live-empty">No books are assigned here yet.</div>';
@@ -1916,10 +1930,43 @@ async function refreshActivityData() {
   }
 }
 
+async function refreshDraftProgress() {
+  if (document.hidden || draftRefreshInFlight) return;
+  const eligible=state.projects.filter(p=>p.status==='in_progress'&&p.google_doc_url);
+  if(!eligible.length) return;
+  draftRefreshInFlight=true;
+  // Rotating bounded batches avoid hammering Google Docs when many books are active.
+  const batch=Array.from({length:Math.min(6,eligible.length)},(_,i)=>eligible[(draftBatchOffset+i)%eligible.length]);
+  draftBatchOffset=(draftBatchOffset+batch.length)%eligible.length;
+  try{
+    await Promise.all(batch.map(async p=>{
+      try{
+        const data=await api(`/api/projects/${p.id}/draft-progress`);
+        const current=state.projects.find(q=>q.id===p.id);
+        if(!current||current.status!=='in_progress'||!current.google_doc_url?.includes('/d/'+data.google_doc_id+'/'))return;
+        state.draftProgress[p.id]=data;
+      }catch(error){
+        state.draftProgress[p.id]={...state.draftProgress[p.id],stale:true,error:String(error?.message||error)};
+      }
+      const current=state.projects.find(q=>q.id===p.id);
+      if(!current)return;
+      document.querySelectorAll(`[data-draft-progress-for="${p.id}"]`).forEach(el=>{
+        el.outerHTML=draftProgressMarkup(current);
+      });
+    }));
+  }finally{draftRefreshInFlight=false;}
+}
+function scheduleDraftRefresh() {
+  if(draftRefreshTimer)clearTimeout(draftRefreshTimer);
+  draftRefreshTimer=setTimeout(async()=>{
+    try{await refreshDraftProgress();}finally{scheduleDraftRefresh();}
+  },DRAFT_REFRESH_MS);
+}
 async function loadData() {
   const next=await fetchSharedData();
   applySharedData(next,{force:true});
   void refreshActivityData();
+  void refreshDraftProgress();
 }
 
 async function syncSharedData({allowHidden=false}={}) {
@@ -1972,9 +2019,10 @@ function startLiveSync() {
   if (liveSyncStarted) return;
   liveSyncStarted=true;
   scheduleLiveRevisionPoll();
-  window.addEventListener('focus',()=>syncSharedData({allowHidden:true}));
+  scheduleDraftRefresh();
+  window.addEventListener('focus',()=>{void syncSharedData({allowHidden:true});void refreshDraftProgress();});
   document.addEventListener('visibilitychange',()=>{
-    if (!document.hidden) syncSharedData({allowHidden:true});
+    if (!document.hidden) {void syncSharedData({allowHidden:true});void refreshDraftProgress();}
   });
 }
 async function refreshProjects() {

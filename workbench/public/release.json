@@ -1,6 +1,6 @@
 {
-  "release_id": "20261027-evidence-bound-sync-2",
-  "app_version": "20261027-evidence-bound-sync-1",
-  "css_version": "20261009-book-titles-right-1",
-  "description": "Evidence-bound Google Docs to Workbench checkpoints; all translated-page changes require the QA-gated route"
+  "release_id": "20261027-automatic-draft-visibility-1",
+  "app_version": "20261027-draft-visibility-1",
+  "css_version": "20261027-draft-visibility-1",
+  "description": "Read-only automatic Google Docs draft-page visibility, distinct from evidence-bound verified physical PDF progress"
 }
