@@ -32,7 +32,7 @@ test('publishes bounded PDFKit witness with source identity and destroys tempora
   });
   assert.equal(r.projectId,88);
   assert.equal(posts.length,1);
-  assert.match(posts[0].body,/PDFKit \*\*TEXT-LAYER WITNESS\*\*/);
+  assert.match(posts[0].body,/PDFKit\/Vision \*\*SOURCE-PAGE WITNESS\*\*/);
   assert.match(posts[0].body,/Physical PDF page 153/);
   assert.match(posts[0].body,/PDF SHA-256: [a-f0-9]{64}/);
   assert.doesNotMatch(posts[0].body,/dummy-token/);
