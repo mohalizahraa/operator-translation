@@ -273,7 +273,7 @@ function coverMarkup(p, compact=false) {
 function googleDocLinkMarkup(p) {
   return p.google_doc_url
     ? `<button class="mini-link secondary-link english-book-link" type="button" data-open-english="${p.id}">English Book</button>`
-    : `<button class="mini-link secondary-link english-book-button" type="button" data-link-english="${p.id}">English Book · link</button>`;
+    : `<button class="mini-link secondary-link english-book-button" type="button" data-link-english="${p.id}">Existing English Doc · link</button>`;
 }
 function englishPdfLinkMarkup(p) {
   return p.english_pdf_url
@@ -555,7 +555,7 @@ async function startWorkOnBook(id) {
   if (!project) return;
   if (!project.google_doc_url) {
     openEnglishBookDialog(id,true);
-    toast('Link the English Book first');
+    toast('Verify and link this book’s EXISTING English Doc; never create a duplicate.');
     return;
   }
   const reservedPdfWindow = project.pdf_available ? window.open('about:blank','_blank') : null;
