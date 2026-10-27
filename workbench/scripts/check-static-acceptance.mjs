@@ -46,6 +46,8 @@ const progressSyncSource = await fs.readFile(new URL('functions/api/projects/[id
 const translationSource = await fs.readFile(new URL('functions/_translation.js', root), 'utf8');
 const modelCoreSource = await fs.readFile(new URL('public/model-core.js', root), 'utf8');
 const projectsIndexSource = await fs.readFile(new URL('functions/api/projects/index.js', root), 'utf8');
+const syncRunnerSource = await fs.readFile(new URL('scripts/publish-quality-batch.mjs', root), 'utf8');
+const syncHelperSource = await fs.readFile(new URL('scripts/sync-verified-progress.mjs', root), 'utf8');
 
 
 assert(!appSource.includes('state.projects.filter(projectMatchesSearch)'), 'Board/Timeline must not pass optional-argument search predicate directly to Array.filter.');
@@ -196,8 +198,10 @@ assert(appSource.includes('const LIVE_REVISION_MS = 2000') && appSource.includes
 assert(appSource.includes("api('/api/revision')") && appSource.includes('function scheduleLiveRevisionPoll('), 'Revision-gated live sync is missing.');
 assert(appSource.includes("cache: options.cache || 'no-store'"), 'Workbench API reads do not explicitly bypass browser caches.');
 assert(revisionSource.includes('MAX(id)') && revisionSource.includes('FROM activity'), 'Live revision endpoint is not derived from shared activity state.');
-assert(appSource.includes('const LIVE_MARKER_SYNC_MS = 5000') && appSource.includes('syncVerifiedTranslationMarkers()'), 'Verified Google Doc marker sync is missing from live polling.');
-assert(appSource.includes("/progress-sync\`,{method:'POST'}"), 'Live client does not publish verified marker checkpoints through the same-origin sync route.');
+assert(appSource.includes('function syncVerifiedTranslationMarkers()') && !appSource.includes('LIVE_MARKER_SYNC_MS'), 'Legacy marker-only browser writes must stay disabled.');
+assert(!appSource.includes("/progress-sync`,{method:'POST'}") && progressSyncSource.includes("code:'qa_receipt_required'"), 'Marker-only progress writes must fail closed.');
+assert(progressSyncSource.includes("sync_mode==='evidence_bound_v1'") && syncRunnerSource.includes('--drive-metadata') && syncRunnerSource.includes('target_permission'), 'Same-session evidence-bound Google Docs sync runner is missing.');
+assert(syncHelperSource.includes('checkpointMatches') && syncHelperSource.includes('liveSnapshot'), 'Safe checkpoint retry and live readback are missing from the shared sync helper.');
 assert(
   translationSource.includes("export?format=txt") &&
   translationSource.includes('WBPROGRESS') &&
@@ -268,4 +272,4 @@ assert(stylesSource.includes('@media (prefers-reduced-motion:reduce)') && styles
 assert(stylesSource.includes('@media (hover:none) and (pointer:coarse)') && stylesSource.includes('.timeline-bar{height:44px;min-height:44px;top:7px}'), 'Coarse-pointer touch-target floor is incomplete.');
 assert(stylesSource.includes('--status-not-started:#D6D5CF') && stylesSource.includes('--status-ready:#805359'), 'Low-light status palette tokens are incomplete.');
 assert(!['#F4EDDC','#F7F0E1','#C7A56E','#D8D1BD','#C6A56A','#D2B980','#B88132','#CAA05D','#829987','#9DAF9F','#8F4844','#A45B55'].some(color=>stylesSource.includes(color)), 'Legacy warm visual literals remain after low-light palette consolidation.');
-assert(/p\.google_doc_url\s*&&\s*p\.page_count_verified/.test(appSource), 'Verified marker sync still includes books without a verified physical-page denominator.');
+assert(progressSyncSource.includes("body.source_page_basis!=='physical_pdf'") && progressSyncSource.includes('!normalized.page_count_verified'), 'Evidence-bound sync must require verified physical-PDF pages.');
