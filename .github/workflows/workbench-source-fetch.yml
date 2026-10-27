@@ -1,0 +1,70 @@
+name: Workbench canonical Arabic PDF access bridge
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - workbench/source-access-request.txt
+  workflow_dispatch:
+    inputs:
+      project_id:
+        description: Exact Workbench project ID to retrieve
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: workbench-source-fetch
+  cancel-in-progress: false
+
+jobs:
+  source-fetch:
+    if: github.repository == 'mohalizahraa/operator-translation'
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify source bridge and fail-closed tests
+        shell: pwsh
+        run: |
+          node --check workbench/scripts/fetch-workbench-source.mjs
+          if ($LASTEXITCODE -ne 0) { throw 'Source helper syntax check failed.' }
+          node --test workbench/scripts/fetch-workbench-source.test.mjs
+          if ($LASTEXITCODE -ne 0) { throw 'Source helper tests failed.' }
+      - name: Download exact canonical source PDF to ephemeral runner storage
+        id: fetch
+        shell: pwsh
+        env:
+          INPUT_PROJECT_ID: ${{ inputs.project_id }}
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          if ($env:EVENT_NAME -eq 'workflow_dispatch') {
+            $projectId = $env:INPUT_PROJECT_ID
+          } else {
+            $projectId = (Get-Content 'workbench/source-access-request.txt' -TotalCount 1).Trim()
+          }
+          if ($projectId -notmatch '^[1-9][0-9]*$') { throw 'Invalid exact project ID.' }
+          $outputPath = Join-Path $env:RUNNER_TEMP 'workbench-source.pdf'
+          if (Test-Path $outputPath) { Remove-Item $outputPath -Force }
+          node workbench/scripts/fetch-workbench-source.mjs $projectId $outputPath
+          if ($LASTEXITCODE -ne 0) { throw 'Canonical PDF fetch/verification failed.' }
+          "path=$outputPath" >> $env:GITHUB_OUTPUT
+      - name: Upload short-lived verified PDF artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: workbench-source-pdf
+          path: ${{ steps.fetch.outputs.path }}
+          if-no-files-found: error
+          retention-days: 1
+      - name: Remove source bytes from runner temporary storage
+        if: always()
+        shell: pwsh
+        run: |
+          $path = Join-Path $env:RUNNER_TEMP 'workbench-source.pdf'
+          if (Test-Path $path) { Remove-Item $path -Force }
