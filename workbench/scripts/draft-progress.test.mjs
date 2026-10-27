@@ -104,16 +104,16 @@ test('Dashboard and project-card HTML render a genuinely 20%-filled draft progre
  const context={WorkbenchCore:scope.WorkbenchCore,state:{draftProgress:{88:snapshot}},
   escapeHtml:(x)=>String(x),translationDisplayPages:(p)=>p.translated_pages};
  const markup=vm.runInNewContext(appSource.slice(start,end)+
-  '\\n({combinedProgressTrack,draftProgressMarkup,translationProgressMarkup})',context);
+  '\n({combinedProgressTrack,draftProgressMarkup,translationProgressMarkup})',context);
  const html=markup.translationProgressMarkup(project,true,true);
  const live=markup.combinedProgressTrack(project,'live-translation-track');
- assert.match(html,/Verified · 0\\/559 physical pages/);
- assert.match(html,/Draft · 112\\/560 text-edition pages · 20%/);
+ assert.match(html,/Verified · 0\/559 physical pages/);
+ assert.match(html,/Draft · 112\/560 text-edition pages · 20%/);
  assert.match(html,/class="draft-fill" style="width:20%"/);
  assert.match(html,/class="verified-fill" style="width:0%"/);
  assert.match(live,/class="draft-fill" style="width:20%"/);
  assert.match(live,/class="verified-fill" style="width:0%"/);
- assert.match(css,/\\.combined-progress-track \\.draft-fill\\{z-index:1;background:var\\(--sage\\)/);
- assert.match(css,/\\.book-draft-progress span\\{display:block;white-space:normal/);
- assert.match(appSource,/el\\.outerHTML=combinedProgressTrack\\(current/);
+ assert.ok(css.includes('.combined-progress-track .draft-fill{z-index:1;background:var(--sage)'));
+ assert.ok(css.includes('.book-draft-progress span{display:block;white-space:normal'));
+ assert.ok(appSource.includes('el.outerHTML=combinedProgressTrack(current'));
 });
