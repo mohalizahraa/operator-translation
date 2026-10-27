@@ -24,6 +24,24 @@
     return fallbackPages;
   }
 
+  // Display-only math: draft text-edition and physical PDF totals are distinct.
+  // An unknown or out-of-range edition denominator cannot produce a draft fill.
+  function translationProgressDisplay(project, snapshot) {
+    const verifiedTotal=project?.page_count_verified && Number.isSafeInteger(Number(project?.pages))
+      && Number(project.pages)>0 ? Number(project.pages) : null;
+    const stored=Number(project?.translated_pages || 0);
+    const verifiedPages=Number.isFinite(stored) && stored>=0 ? Math.floor(stored) : 0;
+    const verifiedPercent=verifiedTotal===null ? null : Math.min(100,Math.round(100*verifiedPages/verifiedTotal));
+    const draftPage=Number(snapshot?.last_labeled_page);
+    const draftTotal=Number(snapshot?.draft_text_edition_total_pages);
+    const validDraft=project?.status==='in_progress' && project?.google_doc_url
+      && Number.isSafeInteger(draftPage) && draftPage>0
+      && Number.isSafeInteger(draftTotal) && draftTotal>0 && draftPage<=draftTotal;
+    return {verifiedPages,verifiedTotal,verifiedPercent,
+      draftPages:validDraft?draftPage:null,draftTotal:validDraft?draftTotal:null,
+      draftPercent:validDraft?Math.round(100*draftPage/draftTotal):null};
+  }
+
   function statusTransitionAllowed(statusOrder, from, to) {
     if (from===to) return true;
     const a=statusOrder.indexOf(from), b=statusOrder.indexOf(to);
@@ -100,6 +118,7 @@
     median,
     verifiedFallbackPages,
     estimatedPages,
+    translationProgressDisplay,
     statusTransitionAllowed,
     workflowTransitionAllowed,
     reconcilePageDeltas,
