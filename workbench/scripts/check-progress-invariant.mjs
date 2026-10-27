@@ -53,6 +53,10 @@ assert(
   'Progress endpoint must fail closed on stale expected_previous_pages.'
 );
 assert(
+  progress.includes('evidence_bound_sync_required') && progressSync.includes('evidenceBoundSync:true'),
+  'Progress changes must be callable only through the evidence-bound sync owner.'
+);
+assert(
   progress.includes('translation_progress_checkpoints'),
   'Progress endpoint must persist checkpoint evidence.'
 );

@@ -142,7 +142,7 @@ async function evidenceBoundPost(context, body) {
     source_pdf_sha256:sourceHash,google_doc_revision:body.google_doc_revision,
     verification_note:'Evidence-bound sync; verified physical-source page refs and revision-matched QA receipt '+receipt.id+'.',
   })});
-  return publishProgress({...context,request});
+  return publishProgress({...context,request,evidenceBoundSync:true});
 }
 
 export async function onRequestPost(context) {
