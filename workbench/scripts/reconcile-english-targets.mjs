@@ -10,16 +10,14 @@
 const candidateId=entry=>{
   const title=entry?.title??entry?.name??'';
   if(typeof title!=='string'||!/English Translation/i.test(title))return null;
-  const match=title.match(/\(Workbench #(\d+)\)/);
+  const match=title.match(/\(Workbench #(\d+)(?=[^\d]|$)/);
   return match?Number(match[1]):null;
 };
 const docIdFromUrl=url=>{
-  if(!url)return null;
-  try{
-    const u=new URL(url);
-    if(u.protocol!=='https:'||u.hostname!=='docs.google.com')return null;
-    return u.pathname.match(/^\/document\/d\/([a-zA-Z0-9_-]+)(?:\/|$)/)?.[1]||null;
-  }catch{return null;}
+  if(typeof url!=='string'||!url)return null;
+  // Matches exactly docs.google.com, not a lookalike domain, and avoids
+  // environment-dependent URL globals in pure offline manifest checks.
+  return url.match(/^https:\/\/docs\.google\.com\/document\/d\/([a-zA-Z0-9_-]+)(?:[\/?#]|$)/i)?.[1]||null;
 };
 
 export function reconcileEnglishTargets({
