@@ -58,8 +58,9 @@ jobs:
             $event = Get-Content $env:GITHUB_EVENT_PATH -Raw | ConvertFrom-Json
             if ($event.issue.user.login -ne $env:GITHUB_REPOSITORY_OWNER) { throw 'Issue owner does not match repository owner.' }
             $title = [string]$event.issue.title
-            if ($title -notmatch '^Workbench PDF source: #([1-9][0-9]*)$') { throw 'Issue title must contain one exact Workbench project ID.' }
-            $projectId = $Matches[1]
+            $idMatch = [regex]::Match($title,'^Workbench PDF source: #([1-9][0-9]*)$')
+            if (-not $idMatch.Success) { throw 'Issue title must contain one exact Workbench project ID.' }
+            $projectId = $idMatch.Groups[1].Value
           } else {
             $projectId = (Get-Content 'workbench/source-access-request.txt' -TotalCount 1).Trim()
           }
