@@ -1,4 +1,6 @@
 import test from 'node:test';
+import {spawnSync} from 'node:child_process';
+import {fileURLToPath} from 'node:url';
 import assert from 'node:assert/strict';
 import {mkdtemp,writeFile,readFile,rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
@@ -47,4 +49,17 @@ test('report posts only verification metadata to exact private issue',async()=>{
     assert.match(JSON.parse(opts.body).body,/ARTIFACT_UPLOADED/);
     assert.doesNotMatch(JSON.parse(opts.body).body,/test-token/);
   } finally {await rm(dir,{recursive:true,force:true});}
+});
+
+test('real no-argument CLI entrypoints reach event loading without destructuring failure',()=>{
+  const script=fileURLToPath(new URL('./source-access-job.mjs',import.meta.url));
+  for(const mode of ['stage','report']){
+    const result=spawnSync(process.execPath,[script,mode],{
+      encoding:'utf8',
+      env:{...process.env,GITHUB_EVENT_PATH:'/path/that/does/not/exist',GITHUB_REPOSITORY:repo},
+    });
+    assert.equal(result.status,1);
+    assert.match(result.stderr,/ENOENT/);
+    assert.doesNotMatch(result.stderr,/Cannot read properties of undefined/);
+  }
 });
