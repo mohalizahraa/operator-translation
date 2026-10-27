@@ -124,7 +124,13 @@ assert(appSource.includes("p.google_doc_url,p.english_pdf_url,p.cover_url"), 'En
 assert(appSource.includes('return p.english_pdf_url') && appSource.includes('escapeHtml(p.english_pdf_url)'), 'Unlinked books must hide the English PDF action; linked URLs must be escaped.');
 assert(appSource.includes('openEnglishBookDialog(id,true)'), 'Work on Book auto-continue into English Book linking is missing.');
 assert(appSource.includes('reservedPdfWindow'), 'Work on Book post-link popup-safe continuation is missing.');
-assert(indexSource.includes('Anyone with the link → Editor') && indexSource.includes('public Editor links'), 'English Book sharing requirement/boundary is missing from the UI.');
+assert(indexSource.includes('Anyone with the link → Editor') &&
+  indexSource.includes('cannot independently prove Editor permissions'),
+  'English Book UI must distinguish public reachability from verified Editor permissions.');
+assert(indexSource.includes('Reuse this book') && !indexSource.includes('https://docs.new') &&
+  !indexSource.includes('Create new Google Doc'),
+  'Existing-workbench manuscripts must be reused; the site must not suggest duplicate creation.');
+assert(appSource.includes('Existing English Doc · link'),'Link action must emphasize the existing English Doc.');
 assert(projectPatchSource.includes('publicly accessible without sign-in') && projectPatchSource.includes('Anyone with the link → Editor'), 'English Book public-access guard messaging is missing or misleading.');
 assert(appSource.includes('function clearProjectFilters()'), 'Clear filters behavior is missing.');
 assert(indexSource.includes('id="clear-project-filters"'), 'Clear filters control is missing.');
