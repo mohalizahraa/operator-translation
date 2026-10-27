@@ -96,5 +96,5 @@ const markerReader=progressSyncRead.split('async function readMarker(context) {'
 if (!markerReader || markerReader.includes('ensureCatalog(')) {
   throw new Error('High-frequency marker reads must not run D1 schema migrations.');
 }
-requireText(progressSyncRead,"return publishProgress({...context,request});",'evidence-bound checkpoints use guarded mutation validation');
+requireText(progressSyncRead,"return publishProgress({...context,request,evidenceBoundSync:true});",'evidence-bound checkpoints use guarded mutation validation');
 console.log('Live-sync invariant: PASS');
