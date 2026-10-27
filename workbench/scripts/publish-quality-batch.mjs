@@ -36,12 +36,12 @@ function normalizeAnyoneEditor(metadata){
 }
 function exactReport(report,project,id,docId,permission,previous,target,total,revision){
  const expectedTitle=project.title_en||project.title_ar;
- if(report.evidence_schema_version!==2||Number(report.project_id)!==id||
+ if(report.evidence_schema_version!==2||report.project_id!==id||
   report.project_title!==expectedTitle||report.assignee!==project.assignee||
   report.target_document_id!==docId||report.source_page_basis!=='physical_pdf'||
-  report.target_revision!==revision||Number(report.expected_previous_pages)!==previous||
-  Number(report.from_page)!==previous+1||Number(report.to_page)!==target||
-  Number(report.source_total_pages)!==total||
+  report.target_revision!==revision||report.expected_previous_pages!==previous||
+  report.from_page!==previous+1||report.to_page!==target||
+  report.source_total_pages!==total||
   report.target_permission?.file_id!==permission.file_id||report.target_permission?.mime_type!==permission.mime_type||report.target_permission?.anyone_role!==permission.anyone_role||
   !/^[a-f0-9]{64}$/.test(String(report.source_hash||'')))
   throw new Error('QA report must match the exact live project, assigned translator, linked Doc, Drive permission, next physical-page range, PDF hash and current Doc revision.');
@@ -76,6 +76,8 @@ export async function publishQualityVerifiedBatch({
  if(Number(project?.id)!==id||Number(project?.pages)!==total||project?.page_count_verified!==true)
   throw new Error('Exact project id or verified physical-PDF denominator does not match live Workbench.');
  if(project.status!=='in_progress')throw new Error('Project must be in progress before a verified translation batch can be synchronized.');
+ if(actor!==null && project.assignee!=='Both' && actor!==project.assignee)
+  throw new Error('Actor must match the live Workbench assignee for this project.');
  const linkedDoc=/\/document\/d\/([A-Za-z0-9_-]+)/.exec(project.google_doc_url||'')?.[1];
  if(!linkedDoc||linkedDoc!==docId)throw new Error('Google Drive metadata id does not match the exact live Workbench-linked Google Doc.');
  if(target<=previous)throw new Error('No new contiguous pages are ready for a QA checkpoint.');
