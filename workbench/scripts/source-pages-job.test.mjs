@@ -27,7 +27,7 @@ test('publishes bounded PDFKit witness with source identity and destroys tempora
  await withContext(async (env,dir)=>{
   const posts=[];
   const r=await processSourcePages({env,fetchImpl:async()=>new Response(pdf,{headers:{'content-type':'application/pdf','content-length':String(pdf.length)}}),
-    extractImpl:async(_src,_from,_to,out)=>writeFile(out,JSON.stringify({physical_page_count:559,pages:[{physical_page:153,text:'ا'.repeat(200)},{physical_page:154,text:'ب'.repeat(200)}]})),
+    extractImpl:async(_src,_from,_to,out)=>writeFile(out,JSON.stringify({physical_page_count:559,pages:[{physical_page:153,text:'ا'.repeat(200),extraction_method:'vision_ocr'},{physical_page:154,text:'ب'.repeat(200),extraction_method:'vision_ocr'}]})),
     postFetch:async(url,options)=>{posts.push({url,body:JSON.parse(options.body).body});return new Response('{}',{status:201});}
   });
   assert.equal(r.projectId,88);
@@ -45,11 +45,28 @@ test('blank text layer is reported OPEN and does not retain PDF',async()=>{
  await withContext(async(env,dir)=>{
   const posts=[];
   await assert.rejects(processSourcePages({env,fetchImpl:async()=>new Response(pdf,{headers:{'content-type':'application/pdf'}}),
-    extractImpl:async(_s,_f,_l,out)=>writeFile(out,JSON.stringify({physical_page_count:559,pages:[{physical_page:153,text:''},{physical_page:154,text:'word'.repeat(20)}]})),
+    extractImpl:async(_s,_f,_l,out)=>writeFile(out,JSON.stringify({physical_page_count:559,pages:[{physical_page:153,text:'',extraction_method:'pdfkit'},{physical_page:154,text:'word'.repeat(20),extraction_method:'pdfkit'}]})),
     postFetch:async(_u,o)=>{posts.push(JSON.parse(o.body).body);return new Response('{}',{status:201});}
   }),/usable text layer/);
   assert.equal(posts.length,1);
   assert.match(posts[0],/remains OPEN/);
+  await assert.rejects(stat(join(dir,'workbench-source-pages.pdf')),{code:'ENOENT'});
+ });
+});
+
+test('rejects long font-substitution gibberish despite nonempty PDFKit text',async()=>{
+ await withContext(async(env,dir)=>{
+  const posts=[];
+  await assert.rejects(processSourcePages({
+    env,
+    fetchImpl:async()=>new Response(pdf,{headers:{'content-type':'application/pdf'}}),
+    extractImpl:async(_s,_f,_l,out)=>writeFile(out,JSON.stringify({physical_page_count:559,pages:[
+      {physical_page:153,text:'VZ!1>ÖX+'.repeat(60),extraction_method:'pdfkit'},
+      {physical_page:154,text:'م'.repeat(200),extraction_method:'vision_ocr'}
+    ]})),
+    postFetch:async(_u,o)=>{posts.push(JSON.parse(o.body).body);return new Response('{}',{status:201});}
+  }),/non-Arabic gibberish/);
+  assert.equal(posts.length,1);
   await assert.rejects(stat(join(dir,'workbench-source-pages.pdf')),{code:'ENOENT'});
  });
 });
