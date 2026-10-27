@@ -89,7 +89,7 @@ test('live bar uses known text-edition denominator, not the different physical P
  assert.equal(display({...project,status:'review'},snapshot).draftPercent,null);
 });
 
-test('Dashboard and project-card HTML render a genuinely 20%-filled draft progress bar',async()=>{
+test('Compact progress cards: one text label plus one filled track, no explanatory rows',async()=>{
  const [coreSource,appSource,css]=await Promise.all([
   fs.readFile(new URL('../public/model-core.js',import.meta.url),'utf8'),
   fs.readFile(new URL('../public/app.js',import.meta.url),'utf8'),
@@ -98,44 +98,44 @@ test('Dashboard and project-card HTML render a genuinely 20%-filled draft progre
  const scope={};vm.runInNewContext(coreSource,scope);
  const start=appSource.indexOf('function combinedProgressTrack(p, trackClass) {');
  const end=appSource.indexOf('function assignedProjectMarkup(p) {',start);
- assert.ok(start>=0 && end>start,'expected shared progress rendering functions');
+ assert.ok(start>=0 && end>start);
  const project={id:88,status:'in_progress',google_doc_url:target,page_count_verified:true,translated_pages:0,pages:559};
- const snapshot={last_labeled_page:112,labeled_sections:112,draft_text_edition_total_pages:560};
- const context={WorkbenchCore:scope.WorkbenchCore,state:{draftProgress:{88:snapshot}},
+ const context={WorkbenchCore:scope.WorkbenchCore,state:{draftProgress:{88:{
+  last_labeled_page:112,labeled_sections:112,draft_text_edition_total_pages:560}}},
   escapeHtml:(x)=>String(x),translationDisplayPages:(p)=>p.translated_pages,
   isTranslated:(p)=>['review','completed','published'].includes(p.status),
   STATUS:{review:'Needs Review',completed:'Completed',published:'Published'}};
  const markup=vm.runInNewContext(appSource.slice(start,end)+
-  '\n({combinedProgressTrack,draftProgressMarkup,translationProgressMarkup})',context);
- const html=markup.translationProgressMarkup(project,true,true);
- const live=markup.combinedProgressTrack(project,'live-translation-track');
- assert.match(html,/Source-certified · 0\/559 physical pages/);
- assert.match(html,/Draft · 112\/560 text-edition pages · 20%/);
- assert.match(html,/class="draft-fill" style="width:20%"/);
- assert.match(html,/class="verified-fill" style="width:0%"/);
- assert.match(live,/class="draft-fill" style="width:20%"/);
- assert.match(live,/class="verified-fill" style="width:0%"/);
- assert.ok(css.includes('.combined-progress-track .draft-fill{z-index:1;background:var(--sage)'));
- assert.ok(css.includes('.book-draft-progress span{display:block;white-space:normal'));
- assert.ok(appSource.includes('el.outerHTML=combinedProgressTrack(current'));
-
- const legacyReview={...project,id:118,status:'review',translated_pages:0,pages:117};
- const legacyCompleted={...project,id:3,status:'completed',translated_pages:132,pages:132};
- const legacyPublished={...project,id:43,status:'published',translated_pages:0,pages:382};
- const renderedReview=markup.translationProgressMarkup(legacyReview,true,true);
- const renderedCompleted=markup.translationProgressMarkup(legacyCompleted,true,true);
- const renderedPublished=markup.translationProgressMarkup(legacyPublished,true,true);
- assert.match(renderedReview,/Translated · 100% \(Needs Review\)/);
- assert.match(renderedReview,/Source-certified · 0\/117 physical pages/);
- assert.match(renderedReview,/class="draft-fill" style="width:100%"/);
- assert.match(renderedReview,/class="verified-fill" style="width:0%"/);
- assert.match(renderedCompleted,/Translated · 100% \(Completed\)/);
- assert.match(renderedCompleted,/class="verified-fill" style="width:100%"/);
- assert.match(renderedPublished,/Translated · 100% \(Published\)/);
- assert.match(renderedPublished,/class="draft-fill" style="width:100%"/);
- assert.match(renderedPublished,/class="verified-fill" style="width:0%"/);
- const view=scope.WorkbenchCore.translationProgressDisplay;
- assert.equal(view(legacyReview,undefined).progressBasis,'workflow_status');
- assert.equal(view(legacyReview,undefined).translationPercent,100);
- assert.equal(view(legacyReview,undefined).verifiedPercent,0);
+  '\n({combinedProgressTrack,compactProgressLabel,compactProgressMarkup,translationProgressMarkup})',context);
+ const cases=[
+  {project,visible:'Draft · 112/560 · 20%',fill:20,certified:0},
+  {project:{...project,id:118,status:'review',translated_pages:0,pages:117},
+   visible:'Translated · 100%',fill:100,certified:0},
+  {project:{...project,id:3,status:'completed',translated_pages:132,pages:132},
+   visible:'Verified · 132/132 pages',fill:100,certified:100},
+  {project:{...project,id:43,status:'published',translated_pages:0,pages:382},
+   visible:'Translated · 100%',fill:100,certified:0},
+  {project:{...project,id:40,status:'not_started',google_doc_url:null,translated_pages:0,pages:289},
+   visible:'Verified · 0/289 pages',fill:0,certified:0}
+ ];
+ for(const item of cases){
+  const html=markup.translationProgressMarkup(item.project,true,true);
+  const live=markup.combinedProgressTrack(item.project,'live-translation-track');
+  assert.ok(html.includes(item.visible),'expected '+item.visible);
+  assert.match(html,new RegExp('class="draft-fill" style="width:'+item.fill+'%"'));
+  assert.match(html,new RegExp('class="verified-fill" style="width:'+item.certified+'%"'));
+  assert.match(live,new RegExp('class="draft-fill" style="width:'+item.fill+'%"'));
+  assert.equal((html.match(/data-progress-summary-for=/g)||[]).length,1,'exactly one label');
+  assert.equal((html.match(/data-progress-track-for=/g)||[]).length,1,'exactly one track');
+  assert.doesNotMatch(html,/class="book-draft-progress"|class="translation-stage"/);
+  assert.ok(html.length<1000,'compact card markup should not grow without a design review');
+ }
+ assert.ok(css.includes('.combined-progress-track .draft-fill'));
+ const liveStart=appSource.indexOf('function renderTranslationLive() {');
+ const liveEnd=appSource.indexOf('function render',liveStart+1);
+ const liveBody=appSource.slice(liveStart,liveEnd<0?undefined:liveEnd);
+ assert.match(liveBody,/compactProgressMarkup\(p,'strong'\)/);
+ assert.doesNotMatch(liveBody,/translationStageMarkup\(p\)|draftProgressMarkup\(p\)/);
+ assert.match(appSource,/el\.outerHTML=compactProgressMarkup\(current,/);
+ assert.match(appSource,/el\.outerHTML=combinedProgressTrack\(current/);
 });

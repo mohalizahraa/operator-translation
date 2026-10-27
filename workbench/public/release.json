@@ -1,6 +1,6 @@
 {
-  "release_id": "20261027-preserve-finished-translation-bars-1",
-  "app_version": "20261027-preserve-finished-translation-bars-1",
-  "css_version": "20261027-preserve-finished-translation-bars-1",
-  "description": "Preserve workflow-reported 100% translated books as visibly full bars while distinguishing source-certified PDF page receipts and draft markers"
+  "release_id": "20261027-compact-translation-cards-1",
+  "app_version": "20261027-compact-translation-cards-1",
+  "css_version": "20261027-compact-translation-cards-1",
+  "description": "Restore minimal one-label, one-bar phone translation dashboard; detailed QA provenance retained in book details"
 }
