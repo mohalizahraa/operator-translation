@@ -88,3 +88,32 @@ test('live bar uses known text-edition denominator, not the different physical P
    'invalid out-of-range text edition marker cannot produce a misleading full bar');
  assert.equal(display({...project,status:'review'},snapshot).draftPercent,null);
 });
+
+test('Dashboard and project-card HTML render a genuinely 20%-filled draft progress bar',async()=>{
+ const [coreSource,appSource,css]=await Promise.all([
+  fs.readFile(new URL('../public/model-core.js',import.meta.url),'utf8'),
+  fs.readFile(new URL('../public/app.js',import.meta.url),'utf8'),
+  fs.readFile(new URL('../public/styles.css',import.meta.url),'utf8')
+ ]);
+ const scope={};vm.runInNewContext(coreSource,scope);
+ const start=appSource.indexOf('function combinedProgressTrack(p, trackClass) {');
+ const end=appSource.indexOf('function assignedProjectMarkup(p) {',start);
+ assert.ok(start>=0 && end>start,'expected shared progress rendering functions');
+ const project={id:88,status:'in_progress',google_doc_url:target,page_count_verified:true,translated_pages:0,pages:559};
+ const snapshot={last_labeled_page:112,labeled_sections:112,draft_text_edition_total_pages:560};
+ const context={WorkbenchCore:scope.WorkbenchCore,state:{draftProgress:{88:snapshot}},
+  escapeHtml:(x)=>String(x),translationDisplayPages:(p)=>p.translated_pages};
+ const markup=vm.runInNewContext(appSource.slice(start,end)+
+  '\\n({combinedProgressTrack,draftProgressMarkup,translationProgressMarkup})',context);
+ const html=markup.translationProgressMarkup(project,true,true);
+ const live=markup.combinedProgressTrack(project,'live-translation-track');
+ assert.match(html,/Verified · 0\\/559 physical pages/);
+ assert.match(html,/Draft · 112\\/560 text-edition pages · 20%/);
+ assert.match(html,/class="draft-fill" style="width:20%"/);
+ assert.match(html,/class="verified-fill" style="width:0%"/);
+ assert.match(live,/class="draft-fill" style="width:20%"/);
+ assert.match(live,/class="verified-fill" style="width:0%"/);
+ assert.match(css,/\\.combined-progress-track \\.draft-fill\\{z-index:1;background:var\\(--sage\\)/);
+ assert.match(css,/\\.book-draft-progress span\\{display:block;white-space:normal/);
+ assert.match(appSource,/el\\.outerHTML=combinedProgressTrack\\(current/);
+});
