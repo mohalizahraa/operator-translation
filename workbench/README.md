@@ -161,6 +161,9 @@ For environments that cannot resolve the Cloudflare Pages hostname directly, the
 
 This bridge exists only to cross runtime/network boundaries. It does not change the book's canonical source, page denominator, D1 state, or Workbench PDF behavior.
 
+**Bridge enforcement and outcome gate:** `npm run check` runs `check-source-access-bridge.mjs` and `fetch-workbench-source.test.mjs`; if the documented workflow file disappears, if the trigger or self-hosted runner drifts, or if unsafe responses are accepted, checks fail. The workflow runs only on a `main` change to `source-access-request.txt` or an exact-ID manual dispatch; it does not run because this README exists. Each run fetches and validates the canonical `/api/pdf/:id` response, saves source bytes outside Git, uploads a one-day `workbench-source-pdf` artifact, and removes the runner copy. A request-file commit is **queued intent**, not a successful fetch: require the actual Actions run, successful upload, exact requested ID and artifact readback before claiming PDF access restored. If the workflow or runner is missing, repair or explicitly report the runtime/Actions blocker; do not ask the founder to upload an already available Workbench source merely because a direct fetch failed.
+
+
 ## PDF availability contract
 
 A URL that merely ends in `.pdf` is not considered available. Candidate URLs are validated server-side in small batches and persisted in D1 as `unchecked`, `available`, or `missing`.
