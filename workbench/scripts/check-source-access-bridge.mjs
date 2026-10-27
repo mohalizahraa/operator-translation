@@ -14,6 +14,9 @@ assert.match(readme,/\.github\/workflows\/workbench-source-fetch\.yml/,'Active R
 assert.match(workflow,/branches:\s*\[main\]/,'Request trigger must be limited to main.');
 assert.match(workflow,/workbench\/source-access-request\.txt/,'Request-file push must trigger the workflow.');
 assert.match(workflow,/workflow_dispatch:/,'Manual exact-ID dispatch must be available.');
+assert.match(workflow,/issues:\s*\n\s*types: \[opened\]/,'Owner-authored exact-ID issue trigger is required for connector-driven fetch.');
+assert.match(workflow,/github\.event\.issue\.user\.login == github\.repository_owner/,'Issue-driven source fetch must be restricted to repository owner.');
+assert.match(workflow,/Workbench PDF source: #/,'Issue-driven fetch must have an exact project selector.');
 assert.match(workflow,/runs-on:\s*\[self-hosted, Windows, X64\]/,'GitHub paid hosted compute is prohibited.');
 assert.match(workflow,/permissions:\s*\n\s*contents: read/,'Use least-privileged workflow permissions.');
 assert.match(workflow,/node --test workbench\/scripts\/fetch-workbench-source\.test\.mjs/,'Source helper regression suite must execute before download.');
