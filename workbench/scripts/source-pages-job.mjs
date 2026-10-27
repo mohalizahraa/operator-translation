@@ -43,8 +43,8 @@ function pageEvidence(payload,receipt,request,runId) {
       throw new Error(`Physical PDF page ${request.from+i} lacks source text; OCR needed.`);
     if(!['pdfkit','vision_ocr'].includes(p.extraction_method))
       throw new Error(`Physical PDF page ${p.physical_page} lacks extraction-method provenance.`);
-    const letters=[...p.text.matchAll(/\\p{L}/gu)].length;
-    const arabic=[...p.text.matchAll(/\\p{Script=Arabic}/gu)].length;
+    const letters=[...p.text.matchAll(/\p{L}/gu)].length;
+    const arabic=[...p.text.matchAll(/\p{Script=Arabic}/gu)].length;
     if(arabic<35||letters===0||arabic/letters<0.30)
       throw new Error(`Physical PDF page ${p.physical_page} decoded as non-Arabic gibberish; OCR/human review required.`);
     return `### Physical PDF page ${p.physical_page} — ${p.extraction_method}\n\n${p.text}`;
