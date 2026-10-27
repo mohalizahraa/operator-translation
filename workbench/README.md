@@ -4,6 +4,16 @@
 
 Internal collaborative work manager for translating Sayyid Kamal al-Haydari's books. This is intentionally separate from the public archive/publication surface.
 
+## Live draft-progress visibility — independent of verified PDF completion
+
+The Workbench distinguishes **working English draft coverage** from **verified physical source-PDF page progress**. On every active book with a linked publicly readable English Google Doc, project cards and the Live Translation panel display both: the existing verified physical-PDF page bar (governed solely by source-checked, QA-bound checkpoints), and a secondary draft line, such as `Draft · text-edition p.110 (107 labeled sections) · not PDF-verified`. Text-edition labels are not the verified 559-page PDF denominator and never contribute to percent complete, pace, workflow advancement or publication readiness.
+
+`GET /api/projects/:id/draft-progress` is a **read-only** projection over the exact project's linked English Google Doc's public plain-text export. It detects anchored `Source text-edition page N — …` headings, de-duplicates labels, and returns only their last number, first number, unique-section count, identity and observation timestamp, beside explicitly distinct verified PDF figures. It does not emit manuscript text or change D1. Inaccessible exports, HTML/sign-in responses, and oversized documents yield an explicit non-success state; the browser shows an unavailable or stale state, not fabricated zero/draft progress. Books lacking these page markers show no claimed draft page count.
+
+The browser polls the draft endpoint in bounded rotating batches for active books about every 75 seconds and on page focus, independently of the two-second D1 revision poll. Thus saving the next batch to the existing Google Doc makes the visible draft line advance on the next refresh **without a second API PATCH, additional deployment or title-based browser automation**. It requires public Google Docs text-export reachability, already a prerequisite of linked manuscripts. A full-page refresh is not needed, though an unavailable Google export remains a real external blocker.
+
+This live draft feed **never** changes `translated_pages`. The immutable, revision-/source-/QA-bound `publish-quality-batch.mjs` route alone credits verified physical PDF pages. Publishing, human review, and source verification gates remain unchanged.
+
 ## Open collaborator access and verifiable QA deployment boundary
 
 [Editorial quality and public-collaboration contract](SECURITY-AND-QUALITY-ROLLOUT.md) governs Questions Docs, revision-bound QA receipts, and progress/review gates. **The founder's 2026-10-16 decision is no editor keys, reviewer keys, sign-in, or passwords for Workbench interaction.** Reading and writing the Workbench are open to anyone with the site URL. This is intentionally not authenticated collaboration: names chosen under **Editing as** are self-reported; publication and human-review records must not be described as identity-verified. Cloudflare D1 validation, same-origin browser guard, immutable editorial history, and strict document revision checks remain mandatory. `GET /api/health` must report `write_protection: public_collaboration` after rollout. Review live release readback before claiming deployment completed.
