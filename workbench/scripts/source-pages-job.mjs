@@ -40,8 +40,14 @@ function pageEvidence(payload,receipt,request,runId) {
   if(!Array.isArray(payload.pages)||payload.pages.length!==request.to-request.from+1)throw new Error('Incomplete extracted page set.');
   const passages=payload.pages.map((p,i)=>{
     if(p.physical_page!==request.from+i||typeof p.text!=='string'||p.text.trim().length<40)
-      throw new Error(`Physical PDF page ${request.from+i} lacks a usable text layer; OCR needed.`);
-    return `### Physical PDF page ${p.physical_page}\n\n${p.text}`;
+      throw new Error(`Physical PDF page ${request.from+i} lacks source text; OCR needed.`);
+    if(!['pdfkit','vision_ocr'].includes(p.extraction_method))
+      throw new Error(`Physical PDF page ${p.physical_page} lacks extraction-method provenance.`);
+    const letters=[...p.text.matchAll(/\\p{L}/gu)].length;
+    const arabic=[...p.text.matchAll(/\\p{Script=Arabic}/gu)].length;
+    if(arabic<35||letters===0||arabic/letters<0.30)
+      throw new Error(`Physical PDF page ${p.physical_page} decoded as non-Arabic gibberish; OCR/human review required.`);
+    return `### Physical PDF page ${p.physical_page} — ${p.extraction_method}\n\n${p.text}`;
   });
   const body=[
     'Canonical Workbench PDFKit **TEXT-LAYER WITNESS** — not yet OCR, source-page certification, or English translation.',
