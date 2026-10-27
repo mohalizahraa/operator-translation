@@ -39,6 +39,24 @@ assert.equal(result.rows.filter(x=>x.auto_create_document_allowed).length,0);
 assert.equal(JSON.stringify(result).includes('existingDoc13xxxxxxxxxx'),false);
 assert.equal(JSON.stringify(result).includes('separateLive118xxxxxxx'),false);
 
+const variant122=reconcileEnglishTargets({
+  projects:[{id:122,google_doc_url:null}],
+  candidates:[{id:'book122specificdocument',title:'Volume X — English Translation (Workbench #122, Arabic Volume 3)'}],
+  restrictedFileIds:['book122specificdocument'],
+});
+assert.equal(variant122.rows[0].candidate_count,1);
+assert.equal(variant122.rows[0].access,'limited_visibility_search');
+const tabLink=reconcileEnglishTargets({
+  projects:[{id:13,google_doc_url:d('existingDoc13xxxxxxxxxx')+'?tab=t.0#heading=h.12'}],
+  candidates:[candidates[0]],
+});
+assert.equal(tabLink.rows[0].candidate_matches_existing_link,true);
+const evilDomain=reconcileEnglishTargets({
+  projects:[{id:1,google_doc_url:'https://docs.google.com.evil.tld/document/d/bad/edit'}],
+  candidates:[],
+});
+assert.equal(evilDomain.rows[0].decision,'invalid_existing_doc_url');
+
 const duplicate=reconcileEnglishTargets({projects:[...projects,projects[0]],candidates});
 assert.equal(duplicate.code,'duplicate_workbench_book_id');
 const invalid=reconcileEnglishTargets({projects:[{id:1,google_doc_url:'https://drive.google.com/open?id=1bad'}],candidates:[]});
