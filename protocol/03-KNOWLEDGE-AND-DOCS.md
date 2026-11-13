@@ -25,6 +25,21 @@ Project-specific authority rules may override this when explicitly defined. Impl
 
 Chronology is evidence, not a delete button **and not a quality score**. Determine whether later material replaces, refines, specializes, expands, reframes, conflicts with, or leaves an earlier proposition untouched.
 
+### Founder clarification: knowledge accumulation and future recombination (explicit 2026-11-11)
+
+The founder explicitly values the **compounding value of accumulated information**: retaining earlier reasoning, examples, distinctions, hypotheses, experiments, counterexamples, and their provenance can enable connections and insights that are not visible when each new breakthrough is considered alone. The newest or most salient development should receive appropriate current attention, but **recency is not permission to erase the path that made it possible**.
+
+When updating an evolving model or project record:
+
+- Treat a new breakthrough as an additive delta by default. Reconcile it against earlier material at the proposition level; preserve every earlier proposition that remains compatible and useful.
+- Distinguish a current canonical synthesis from its supporting history. Keep the clearest current understanding easy to find, while retaining materially useful prior formulations, alternative models, examples, failed tests, counterexamples, open questions, decision rationales, and the links between them in the appropriate source, case, evidence, or history owners.
+- If an earlier proposition is genuinely replaced or rejected, retain its historical record and the reason, scope, and evidence for that disposition when it has future reconstructive value. “Not current” does not mean “never useful.”
+- Preserve provenance, chronology, dependencies, uncertainty, and the context in which an idea was generated. Do not flatten a sequence of discovery into a final conclusion when the intermediate steps may support future inference.
+- Optimize for **cumulative future understanding and recombination**, not merely the shortest current summary. DMSC compresses repetition, not meaning; it should make accumulated knowledge more connectable, not impoverish the evidence base.
+- This is not a mandate to archive every transient utterance or duplicate raw transcripts. Retain information that has durable explanatory, evidential, diagnostic, historical, or connective value at its narrowest correct owner.
+
+This is an explicit founder-specific operating preference for knowledge work across Operator-governed projects. It reinforces, rather than replaces, the existing rules on scoped precedence, source provenance, proposition-level reconciliation, evidence lifecycle, and historical disposition.
+
 A newer explicit user/founder decision can override an older user-owned decision within its scope. But a newer exploration/recommendation does not automatically make an older architecture, rationale, example, or distinction obsolete. When the parent model itself is changing, use THINK + `profiles/reconciliation.md` to compare the strongest old model, strongest new model, and synthesis before canonical promotion.
 
 ### Git/repository history is an evidence source, not automatically the project-history denominator

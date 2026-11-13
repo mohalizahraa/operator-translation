@@ -214,7 +214,26 @@ For consequential or conflict-heavy reconciliation, use THINK's proportional rea
 
 The correction should change the evidence/model, not merely attach a bias label.
 
-## 3. Resolve evidence first; ask only genuine remaining ambiguities
+## 3. Resolve evidence first; surface material conflicts visibly
+
+**Founder standing rule — reconciliation conflict register (2026-10-30):** Substantive reconciliation must not silently compress away a material conflict point merely because the agent can recommend or derive a resolution. Keep a compact conflict register while reconciling, and surface its material entries to the founder/user at the next useful checkpoint. **Reporting a conflict is not the same as asking the user to decide it.** The agent remains responsible for resolving evidence-owned questions and continuing independent work; only genuine user-owned forks require a decision.
+
+A conflict point is material when it could change the answer or synthesis, a source's interpretation/authority, a founder/user-owned proposition, a durable project rule/model, a downstream decision, or the confidence/status assigned to any of these. Do not inflate the register with trivial wording differences, duplicates, or alternatives already shown to be immaterial.
+
+For each material entry, record the smallest useful set:
+
+- **Conflict / proposition:** the exact dimension that appears incompatible;
+- **Competing positions:** each materially distinct claim, interpretation, or source reading, with provenance;
+- **What the evidence settles:** authority, scope, chronology, source dependence, definitions, and decisive evidence/counterevidence;
+- **Disposition:** `RESOLVED_BY_EVIDENCE`, `PARTIALLY_RESOLVED`, `OPEN_EVIDENCE_OWNED`, `USER_DECISION_REQUIRED`, or `NOT_MATERIAL`;
+- **Agent synthesis/recommendation:** if earned, explicitly distinguished from source/user truth;
+- **Founder input:** whether input is actually needed, why, and the narrowest useful question; otherwise invite correction without turning it into a blocking decision;
+- **Downstream effect / next test:** what changes if the point is reopened and the next admissible action.
+
+At a natural reconciliation checkpoint, surface **all currently material unresolved conflicts and material conflicts resolved by the agent that affected the synthesis** in one concise, numbered **Conflict points for review** section. Include the evidence-backed disposition and recommendation, but do not demand confirmation of facts the user does not own. Keep the register in the canonical case/evidence artifact when the work is persistent. Re-surface changed entries when new evidence alters them; do not repeat unchanged entries on unrelated turns or leave them permanently buried in a dossier.
+
+Before asking the founder to choose, apply the existing authority/provenance and SPECIFY gates: reconcile what can be settled, distinguish source disagreement from genuine contradiction, and ask only when a residual material choice belongs to the founder/user or when user-held evidence is the only meaningful discriminator. Never silently adjudicate a founder-owned fork; never transfer agent-owned research or synthesis back to the user just because sources disagree.
+
 
 Use source authority/chronology and safe derivation to settle everything that can be settled without the user.
 
