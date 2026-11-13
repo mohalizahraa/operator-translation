@@ -37,6 +37,10 @@ The response includes only counts, canonical source mutation time, and observati
 
 [TRANSLATION-WORKFLOW.md](TRANSLATION-WORKFLOW.md) owns the approved project execution plan: prepare once, reuse verified source text, let Mac OCR feed Windows translation in coherent batches, complete each batch's applicable review/formatting/verification, then immediately synchronize and read back its Workbench checkpoint. Keep one writer per final manuscript; finish with whole-book QA. This is a measured starting plan, not a benchmark-proven fastest configuration or a runner-routing change. The scoped [agent instructions](AGENTS.md) route book work through it; the current Operator profiles and this README's progress/status contract remain governing.
 
+## Engine-first backend staging (not live translation)
+
+[Engine source-to-draft staging](engine/README.md) supplies deterministic local source identity, candidate physical PDF extraction, page/unit matching, private draft artifacts, and opt-in localhost-only model adapters with refusal/negative tests. It does **not** verify source completeness, Arabic semantics, note/image coverage, translation quality, formatter fidelity, human review or live Workbench progress. The historical model capability and manuscript medium decisions remain open. No model is downloaded, network provider activated, D1 state advanced, or public production engine deployed by merging this code.
+
 ## Windows GPU translation runner safety
 
 **Automatic one-at-a-time GPU rule:** Mohammed's two Windows self-hosted translation runners share one RTX 4070. Every GPU-heavy OCR/model command must use the machine-wide exclusive PowerShell lock described in [GPU scheduling](runner/GPU-SCHEDULING.md). The scoped [Codex instructions](AGENTS.md) make this rule mandatory during Windows translation work. The Windows acceptance suite checks future GPU workflow definitions and uses two child processes to verify that jobs cannot overlap. Lightweight CPU-only Workbench jobs may run in parallel. Mac-only PDFKit/Vision jobs remain on macOS. Do not bypass the guard to make benchmarks look faster.
