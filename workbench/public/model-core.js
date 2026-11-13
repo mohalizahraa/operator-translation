@@ -24,6 +24,32 @@
     return fallbackPages;
   }
 
+  // Display-only math: draft text-edition and physical PDF totals are distinct.
+  // An unknown or out-of-range edition denominator cannot produce a draft fill.
+  function translationProgressDisplay(project, snapshot) {
+    const verifiedTotal=project?.page_count_verified && Number.isSafeInteger(Number(project?.pages))
+      && Number(project.pages)>0 ? Number(project.pages) : null;
+    const stored=Number(project?.translated_pages || 0);
+    const verifiedPages=Number.isFinite(stored) && stored>=0 ? Math.floor(stored) : 0;
+    const verifiedPercent=verifiedTotal===null ? null : Math.min(100,Math.round(100*verifiedPages/verifiedTotal));
+    const draftPage=Number(snapshot?.last_labeled_page);
+    const draftTotal=Number(snapshot?.draft_text_edition_total_pages);
+    const validDraft=project?.status==='in_progress' && project?.google_doc_url
+      && Number.isSafeInteger(draftPage) && draftPage>0
+      && Number.isSafeInteger(draftTotal) && draftTotal>0 && draftPage<=draftTotal;
+    // Workflow stage is independent evidence of reported translation completion:
+    // do not turn Needs Review / Completed / Published into an empty bar merely
+    // because older projects have no certified-page receipts. Certification
+    // remains precisely the stored, source-bound page numerator above.
+    const translatedStatus=['review','completed','published'].includes(project?.status);
+    const draftPercent=validDraft?Math.round(100*draftPage/draftTotal):null;
+    const translationPercent=translatedStatus?100:draftPercent;
+    const progressBasis=translatedStatus?'workflow_status':validDraft?'source_text_edition':null;
+    return {verifiedPages,verifiedTotal,verifiedPercent,
+      draftPages:validDraft?draftPage:null,draftTotal:validDraft?draftTotal:null,
+      draftPercent,translationPercent,progressBasis,translatedStatus};
+  }
+
   function statusTransitionAllowed(statusOrder, from, to) {
     if (from===to) return true;
     const a=statusOrder.indexOf(from), b=statusOrder.indexOf(to);
@@ -33,6 +59,7 @@
   function workflowTransitionAllowed(statusOrder, project, to) {
     const from=project?.status;
     if (!statusTransitionAllowed(statusOrder,from,to)) return false;
+    if (statusOrder.indexOf(to)>statusOrder.indexOf(from) && to!=='not_started' && !project?.google_doc_url) return false;
     if (from==='in_progress' && to==='review' && project?.page_count_verified) {
       const total=Number(project.pages || 0);
       const done=Number(project.translated_pages || 0);
@@ -99,6 +126,7 @@
     median,
     verifiedFallbackPages,
     estimatedPages,
+    translationProgressDisplay,
     statusTransitionAllowed,
     workflowTransitionAllowed,
     reconcilePageDeltas,

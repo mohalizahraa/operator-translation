@@ -59,5 +59,5 @@ export async function onRequestPost(context){
   if(!receipt)return json({error:'Human approval was not committed; please refresh.'},409);
   const inserted=Number(result?.[0]?.meta?.changes||0)>0;
   return json({attestation_id:receipt.id,unchanged:!inserted,reviewer_name:name,google_doc_revision:revision,
-    note:'Recorded an explicit reviewer credential-backed attestation; this does not mechanically prove how thoroughly the human read the source.'},201);
+    note:'Recorded a self-declared human review attestation tied to this revision. Without individual authentication, the reviewer identity and depth of review are not independently verified.'},201);
 }

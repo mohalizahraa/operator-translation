@@ -34,3 +34,46 @@ for(const field of ['status','translated_pages','pages']){
 }
 if(!activity.includes('const [activity, paceEvents]'))throw new Error('Default archival history route removed.');
 console.log('Workbench independent project bootstrap: PASS');
+
+
+// A failing health endpoint must not suppress readable project data, and a
+// failing project endpoint must still enter bounded recovery instead of
+// silently showing an empty catalogue.
+const bootstrapStart=app.indexOf('async function loadWorkspace() {');
+const bootstrapEnd=app.indexOf("document.addEventListener('visibilitychange', reconnectUnavailableWorkspace);",bootstrapStart);
+if(bootstrapStart<0||bootstrapEnd<0)throw new Error('Workspace loader missing.');
+const bootstrapCode=app.slice(bootstrapStart,bootstrapEnd);
+let projectsLoaded=0;
+let liveStarted=0;
+let recoveries=0;
+let workspaceError='';
+const bootstrapContext={
+  workspaceLoadInFlight:false,
+  workspaceRecoveryTimer:null,
+  workspaceRecoveryDelayMs:5000,
+  state:{pdfAudit:null},
+  $:()=>({disabled:false}),
+  api:async path=>{if(path==='/api/health')throw new Error('Simulated health 503');throw new Error('Unexpected request '+path);},
+  loadCoverMap:async()=>{},
+  loadSeriesMap:async()=>{},
+  loadData:async()=>{projectsLoaded++;},
+  setWorkspaceError:msg=>{workspaceError=msg;},
+  startLiveSync:()=>{liveStarted++;},
+  clearTimeout:()=>{},
+  scheduleWorkspaceRecovery:()=>{recoveries++;},
+  auditPdfs:async()=>{},
+  toast:()=>{},
+  document:{body:{classList:{contains:()=>false}}},
+};
+vm.createContext(bootstrapContext);
+vm.runInContext(bootstrapCode,bootstrapContext);
+const booted=await vm.runInContext('loadWorkspace()',bootstrapContext);
+if(!booted||projectsLoaded!==1||liveStarted!==1||recoveries!==0||workspaceError!=='') {
+  throw new Error('Health 503 incorrectly prevents workspace bootstrap.');
+}
+bootstrapContext.loadData=async()=>{throw new Error('Simulated projects 503');};
+const unavailable=await vm.runInContext('loadWorkspace()',bootstrapContext);
+if(unavailable||recoveries!==1||!workspaceError.includes('Simulated projects 503')) {
+  throw new Error('Project 503 was not marked unavailable and scheduled for recovery.');
+}
+console.log('Workbench health-independent bootstrap and recovery: PASS');

@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS projects (
   pdf_checked_at TEXT,
   pdf_check_note TEXT,
   google_doc_url TEXT,
+  english_pdf_url TEXT,
   questions_doc_url TEXT,
   translated_pages INTEGER NOT NULL DEFAULT 0 CHECK (translated_pages >= 0),
   translation_progress_at TEXT,

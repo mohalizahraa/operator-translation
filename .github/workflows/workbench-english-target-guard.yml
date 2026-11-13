@@ -1,0 +1,28 @@
+name: Workbench English target guard
+
+on:
+  pull_request:
+    paths:
+      - 'workbench/**'
+      - '.github/workflows/workbench-english-target-guard.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    # Never run untrusted fork pull-request code on a self-hosted runner.
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: [self-hosted]
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Use Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify full Workbench check suite
+        working-directory: workbench
+        run: npm run check

@@ -45,6 +45,8 @@ assert(project.includes('syncTranslationFocusForProject'), 'Project lifecycle up
 assert(projectsIndex.includes('syncTranslationFocusForProject') && projectsIndex.includes('created project'), 'New projects that begin Translating do not synchronize translation focus.');
 assert(progress.includes('syncTranslationFocusForProject'), 'Verified page progress does not synchronize translation focus.');
 assert(progressSync.includes('readPublicProgressMarker'), 'Live marker parsing is not consolidated at the shared translation helper.');
-assert(progressSync.includes("progressActor=['Zahraa','Mohammed'].includes(requestedActor)"), 'Existing collaborator attribution in marker sync was lost.');
+assert(progressSync.includes("const requestedActor=(headers.get('x-workbench-actor')||'').trim()") &&
+  progressSync.includes("requestedActor===project.assignee || project.assignee==='Both'"),
+  'Evidence-bound checkpoint must preserve only correctly assigned collaborator attribution.');
 
 console.log('Translation fast-start invariants: PASS');

@@ -1,5 +1,5 @@
 import { actorFromRequest, ensureCatalog, json, normalizeGoogleDocUrl, normalizeHttpUrl, normalizeProject, recordActivity, validDateRange, validIsoDate, verifyGoogleDocLinkAccess } from '../../_lib.js';
-import { syncTranslationFocusForProject } from '../../_translation.js';
+import { missingEnglishBook, syncTranslationFocusForProject } from '../../_translation.js';
 const validStatuses = new Set(['not_started','in_progress','review','completed','published']);
 const validAssignees = new Set(['Zahraa','Mohammed','Brother','Both','Unassigned']);
 
@@ -20,9 +20,16 @@ export async function onRequestPost(context) {
   if (body.published) return json({ error: 'A new project cannot begin Published.' }, 409);
   const googleDocUrl = normalizeGoogleDocUrl(body.google_doc_url);
   if (googleDocUrl === false) return json({ error: 'English Book must be a Google Docs document link.' }, 400);
+  if (missingEnglishBook(status, googleDocUrl)) {
+    return json({ error: 'Link a publicly accessible English Book before entering Translating.', code: 'english_book_required' }, 409);
+  }
   if (googleDocUrl) {
     const access = await verifyGoogleDocLinkAccess(googleDocUrl);
     if (!access.accessible) return json({ error: 'English Book must be shared as Anyone with the link → Editor before it can be linked.' }, 400);
+  }
+  const englishPdfUrl = normalizeHttpUrl(body.english_pdf_url);
+  if (englishPdfUrl === false || (englishPdfUrl && !englishPdfUrl.startsWith('https://'))) {
+    return json({ error: 'English PDF must be a secure HTTPS link to a publicly readable PDF.' }, 400);
   }
   const coverUrl = normalizeHttpUrl(body.cover_url);
   if (coverUrl === false) return json({ error: 'Cover image must use an http(s) URL.' }, 400);
@@ -38,12 +45,12 @@ export async function onRequestPost(context) {
   const pdfStatus = pdfUrl ? 'unchecked' : 'missing';
   const pdfNote = pdfUrl ? 'Awaiting validation' : 'No direct PDF URL';
   const result = await context.env.DB.prepare(
-    `INSERT INTO projects (title_ar, title_en, assignee, status, source_url, source_pdf_url, pdf_status, pdf_check_note, google_doc_url, cover_url, start_date, due_date, notes, completed_at, completed_by, published_at, published_by)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `INSERT INTO projects (title_ar, title_en, assignee, status, source_url, source_pdf_url, pdf_status, pdf_check_note, google_doc_url, english_pdf_url, cover_url, start_date, due_date, notes, completed_at, completed_by, published_at, published_by)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
      RETURNING *`
   ).bind(
     body.title_ar.trim(), body.title_en?.trim() || null, assignee, status,
-    body.source_url || null, pdfUrl, pdfStatus, pdfNote, googleDocUrl, coverUrl,
+    body.source_url || null, pdfUrl, pdfStatus, pdfNote, googleDocUrl, englishPdfUrl, coverUrl,
     body.start_date || null, body.due_date || null,
     body.notes || null, completedAt, completedBy, publishedAt, publishedBy,
   ).first();

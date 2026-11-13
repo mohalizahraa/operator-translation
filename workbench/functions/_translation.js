@@ -1,5 +1,11 @@
 import { googleDocIdFromUrl, normalizeProject } from './_lib.js';
 
+// A missing English Book is a setup blocker, not evidence that translation can start.
+export function missingEnglishBook(status, url) {
+  return ['in_progress','review','completed','published'].includes(status) &&
+    !(typeof url === 'string' && url.trim());
+}
+
 export const TRANSLATORS = new Set(['Zahraa','Mohammed','Brother']);
 
 function textOrNull(value) {
@@ -99,8 +105,13 @@ export async function readPublicProgressMarker(project) {
   }
 
   const text = await response.text();
+  if (new TextEncoder().encode(text).length > 10 * 1024 * 1024) {
+    return { status: 413, data: { error: 'English Google Doc export exceeds the safe revision-check limit.' } };
+  }
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+  const exportSha256 = hex(digest);
   const matches = [...text.matchAll(/⟦WBPROGRESS:(\d+):(\d+):(\d+)⟧/g)];
-  if (!matches.length) return { status: 200, data: { marker_found: false, unchanged: true } };
+  if (!matches.length) return { status: 200, data: { marker_found: false, unchanged: true, export_sha256: exportSha256 } };
 
   const match = matches[matches.length - 1];
   const markerProject = Number(match[1]);
@@ -118,14 +129,13 @@ export async function readPublicProgressMarker(project) {
     return { status: 409, data: { error: 'Workbench progress marker does not match the verified physical-PDF denominator.' } };
   }
 
-  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
   return {
     status: 200,
     data: {
       marker_found: true,
       marker_pages: pages,
       marker_total: total,
-      export_sha256: hex(digest),
+      export_sha256: exportSha256,
     },
   };
 }
@@ -207,6 +217,9 @@ function translationResumeInstruction(project, nextSourcePage, totalPages) {
     return 'Translation has not started. Link/open the English Book, verify source identity and the canonical PDF, then begin at physical source page 1.';
   }
   if (project?.status === 'in_progress') {
+    if (missingEnglishBook(project.status, project.google_doc_url)) {
+      return 'The English Book is missing. Create or locate the persistent Google Doc, verify Anyone with the link → Editor in Drive metadata, attach it through the Workbench, and confirm live link readback before translating or publishing progress.';
+    }
     if (Number.isInteger(nextSourcePage) && nextSourcePage > 0) {
       return `Open the linked English Doc, confirm the highest verified WBPROGRESS marker and [[NEXT_BATCH]] sentinel, then continue from physical source page ${nextSourcePage} using the canonical PDF plus any stored recovery witness.`;
     }
@@ -360,4 +373,24 @@ export function assessTranslationEvidence(report, wholeBook=false) {
   if (report?.metrics?.zero_question_streak===true) warnings.push('challenge persistent absence of questions without inventing ambiguity');
   if (report?.metrics?.terminology_drift===true) warnings.push('possible glossary inconsistency');
   return {ready:blockers.length===0,blockers:[...new Set(blockers)],warnings};
+}
+
+export async function readPublicEnglishDocumentRevision(project, fetcher=fetch) {
+  const docId=googleDocIdFromUrl(project?.google_doc_url);
+  if(!docId)return {status:409,data:{error:'English manuscript Google Doc is not linked.'}};
+  let response;
+  try {
+    response=await fetcher('https://docs.google.com/document/d/'+docId+'/export?format=txt',{
+      redirect:'follow',headers:{'user-agent':'Haydari-Translation-Workbench/1.0',cache:'no-store'},
+    });
+  } catch { return {status:502,data:{error:'Could not read the public English Google Doc export.'}}; }
+  if(!response.ok)return {status:502,data:{error:'Public English Google Doc export is unavailable.',source_status:response.status}};
+  const declared=Number(response.headers?.get('content-length')||0);
+  if(declared>10*1024*1024){try{await response.body?.cancel();}catch{}return {status:413,data:{error:'English Google Doc export exceeds the safe revision-check limit.'}};}
+  let body;
+  try{body=await response.text();}catch{return {status:502,data:{error:'Could not read the current manuscript export.'}};}
+  const bytes=new TextEncoder().encode(body);
+  if(bytes.length>10*1024*1024)return {status:413,data:{error:'English Google Doc export exceeds the safe revision-check limit.'}};
+  const digest=await crypto.subtle.digest('SHA-256',bytes);
+  return {status:200,data:{document_id:docId,export_sha256:hex(digest)}};
 }

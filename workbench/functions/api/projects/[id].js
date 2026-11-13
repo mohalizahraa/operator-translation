@@ -1,8 +1,8 @@
 import { actorFromRequest, ensureCatalog, json, normalizeGoogleDocUrl, normalizeHttpUrl, normalizeProject, recordActivity, validDateRange, validIsoDate, verifyGoogleDocLinkAccess } from '../../_lib.js';
-import { syncTranslationFocusForProject,verifyLiveEnglishDocumentRevision } from '../../_translation.js';
+import { missingEnglishBook, syncTranslationFocusForProject,verifyLiveEnglishDocumentRevision } from '../../_translation.js';
 
 const fields = new Set([
-  'title_ar','title_en','assignee','status','source_url','source_pdf_url','google_doc_url','cover_url',
+  'title_ar','title_en','assignee','status','source_url','source_pdf_url','google_doc_url','english_pdf_url','cover_url',
   'start_date','due_date','notes'
 ]);
 const statusOrder = ['not_started','in_progress','review','completed','published'];
@@ -71,7 +71,7 @@ export async function onRequestPatch(context) {
       const attestation=qa?await context.env.DB.prepare(`SELECT id FROM translation_human_review_attestations
         WHERE project_id=? AND source_pdf_sha256=? AND google_doc_revision=? ORDER BY id DESC LIMIT 1`)
         .bind(id,qa.source_pdf_sha256,qa.google_doc_revision).first():null;
-      if(!attestation)return json({error:'Publish Ready requires a reviewer-only credential-backed human attestation tied to this exact post-QA manuscript.',code:'human_review_attestation_required'},409);
+      if(!attestation)return json({error:'Publish Ready requires an explicit human review declaration tied to this exact post-QA manuscript.',code:'human_review_attestation_required'},409);
       const liveRevision=await verifyLiveEnglishDocumentRevision(before,qa.google_doc_revision);
       if(!liveRevision.ok)return json({error:liveRevision.reason,code:liveRevision.code},409);
     }
@@ -102,6 +102,20 @@ export async function onRequestPatch(context) {
       }
     }
     body.google_doc_url = normalized || '';
+  }
+  const targetStatus = body.status ?? before.status;
+  const targetDoc = body.google_doc_url !== undefined ? body.google_doc_url : before.google_doc_url;
+  const movingForward = body.status !== undefined && statusOrder.indexOf(targetStatus) > statusOrder.indexOf(before.status);
+  const removingTarget = body.google_doc_url !== undefined && !targetDoc;
+  if ((movingForward || removingTarget) && missingEnglishBook(targetStatus, targetDoc)) {
+    return json({ error: 'Link a publicly accessible English Book before advancing this workflow stage or unlinking an active manuscript.', code: 'english_book_required' }, 409);
+  }
+  if (body.english_pdf_url !== undefined) {
+    const normalized = normalizeHttpUrl(body.english_pdf_url);
+    if (normalized === false || (normalized && !normalized.startsWith('https://'))) {
+      return json({ error: 'English PDF must be a secure HTTPS link to a publicly readable PDF.' }, 400);
+    }
+    body.english_pdf_url = normalized || '';
   }
   if (body.cover_url !== undefined) {
     const normalized = normalizeHttpUrl(body.cover_url);

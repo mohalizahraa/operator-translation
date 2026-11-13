@@ -2,6 +2,8 @@
 
 Use with Core + THINK + KNOWLEDGE/ASSURANCE as relevant for public-web, literature, market, product, technical, policy, or other external evidence-gathering work. This profile adds source-research procedure rather than restating general reasoning/saturation laws.
 
+**User-origin model/source priority — founder rule, 2026-10-21:** If Research is invoked while developing the user's own model, map or theory, it **supports** the user's original notes/observations rather than taking over discovery. Retrieve and DMSC the available user material and the relevant `profiles/model-building.md` authority first; seek papers specifically to verify factual extensions, identify meaningful rival explanations, test limitations or expose counterexamples. Literature should not dictate the root axes solely because it offers a ready-made framework. Present the user's synthesis before research citations; preserve exceptions, uncertainty and source status (direct user preference is authoritative about preference, not population statistics). Ordinary external fact-finding remains governed by the claim-appropriate strongest source.
+
 ## 1. Match sources to the claim
 
 Evaluate source authority **for the exact proposition**, not as a global prestige ladder.
@@ -128,6 +130,10 @@ Use the discriminative question rather than a slogan:
 
 If both `H` and `not-H` predict the same public silence, that silence does not materially separate them. If `H` predicts a record in a near-complete mandatory detector and the record is absent, the null can be strong negative evidence. Do not give “not publicly confirmed” evidential weight merely because public confirmation would have been convenient support.
 
+### Founder-supplied whole-source consumption rule (2026-10-21)
+
+When the founder **supplies a paper, PDF, book, article, lecture or other source with intent that its claims or method be audited, extracted, assimilated or used to build reusable knowledge**, treat **the whole in-scope source** as the reading denominator by default: beginning through conclusion plus all notes, captions, material figures/tables, supplements and bibliography/reference surfaces. Do not take an abstract or selected preview as adequate research input, and do not proceed from an unfinished excerpt to an exhaustive method or conclusion. If a user explicitly narrows the source scope, record that bounded contract; otherwise seek the complete artifact using the appropriate Public Source Access routes or original user upload. An entire extracted PDF text layer may still omit blank/lazy-loaded figures, collapsed references or other content: distinguish **complete text pass, component-complete reading, external source verification and full independent audit**. If an essential component remains inaccessible, identify the exact gap, do not claim completion, and carry the unfinished denominator forward as an actionable dependency. General audit acceptance and source-level statuses remain owned by ASSURANCE; Arabic literary, lexical and legal tests are specialized under the Quranic Exegesis profile when applicable.
+
 ## 3. Preserve the modality that carries the evidence
 
 Do not collapse a multimodal primary source into one extraction modality when another modality can materially change the conclusion.
@@ -172,6 +178,34 @@ For fast or transient visual states, do not assume a low-rate sampled video pass
 For reusable evidence packages, preserve enough source identity and transformation provenance to reconstruct what was inspected: canonical URL/video identity, relevant timestamps, transcript provenance, extracted frame/clip timestamps, modality, and material access/sampling/transcription limitations. Prefer query-driven extraction of the relevant interval over dumping a whole transcript when the narrower package is sufficient.
 
 Current provider/tool findings and the recommended YouTube evidence-bridge architecture are preserved as non-canonical implementation evidence in `evidence/YOUTUBE-VIDEO-EVIDENCE-ACCESS-2026-09-13.md`; re-check those vendor capabilities when the workflow materially depends on them.
+
+### 3.1.1 Whole-transcript read gate — explicit ALL / beginning-to-end requests
+
+When the user requests **all transcripts / every word / the entire video or source from beginning to end**, or an exhaustive argument audit whose acceptance depends on *every* in-scope source, **process each source's complete available transcript in original order**, start through the actual end, **before** claiming it was fully read or its argument audit completed. This is a depth requirement, not merely a source-count requirement. Do not replace the requirement with a chapter recap, selected passages, a few beginning/middle/end windows, a topic-level classification, a keyword search, or a compressed extractor output.
+
+Separate and explicitly report, **per source**:
+- `IDENTIFIED`: exact source ID/URL located;
+- `TRANSCRIPT_RETRIEVED`: text acquired (with extent/provenance), **not yet read**;
+- `READ_PARTIAL`: only exact inspected intervals/character or timestamp ranges; other material remains OPEN;
+- `READ_COMPLETE_TEXT`: every actual transcript segment processed **in source order** from opening to ending; verify the retrieved text covers the claimed full runtime or mark truncated/incomplete;
+- `ARGUMENT_AUDIT_COMPLETE_TEXT`: **after** full reading, all materially distinct arguments, contextual reasoning, counterexamples, revisions and challenges captured, with conclusion and counterargument dispositions; no magic fixed number of takeaways;
+- `AUDIOVISUAL_VERIFIED`: original audio and relevant imagery independently checked; **never inferred** from text reading.
+
+These are separate, **non-interchangeable gates**. For very long transcripts, reading successive bounded spans is valid only when their union is gap-free, sequential and recorded; recap/extract duplication is not a second inspection. If the transcript is too large to process completely in one turn, write an exact resumable coverage ledger, mark the source **PARTIAL**, and continue on the next available turn without misreporting completion. If the access route cannot supply the full text, mark the precise gap **INACCESSIBLE**. Condensed *output* is fine only after full *input* inspection when requested; compression must not conceal unexamined objections.
+
+This gate is stricter than the usual smallest-decisive-evidence rule **only when the user explicitly requires whole-source coverage or the audit contract demands it**. Do not escalate narrow lookups or ordinary scoped research into needless full transcripts. For text-only audits the audio/visual boundary still applies.
+
+### 3.2 Accuracy gate for captions and spoken-source research
+
+When a YouTube or other audio/video source is used for substantive quotation, attribution, translation, argument extraction, or evaluation, **do not equate a retrieved caption file with a verified transcript**. Before trusting meaning-bearing speech, apply a proportional, repeatable fidelity workflow:
+
+1. Identify the **best available source path** and label it (creator-provided/manual captions, platform auto-captions, independently transcribed original audio, derivative transcript, or summary). Preserve the source video ID and timestamps; check completeness against the declared runtime/chapter denominator before using a transcript for whole-video claims.
+2. Scan for probable transcription defects, especially **names, domain terms, negations, speaker boundaries, dates/numbers, sarcasm, repetitions, omissions, and clipped sentence boundaries**. Where meaning-bearing, compare with the primary audio; use creator terminology/context to suggest candidate corrections **without fabricating words**.
+3. If uncertain content materially affects the conclusion, use a second materially independent recognition/access path **when available and affordable under the project's cost constraints**. Agreement between caption mirrors sourcing the same upstream caption is **not independent proof**. Listen to decisive audio intervals or keep the exact wording and conclusion explicitly uncertain.
+4. Preserve **verbatim versus edited-for-readability versus paraphrase** as different statuses. Correct clear transcription mistakes transparently; do not silently rewrite a speaker's grammatical/content mistakes or change their meaning. For direct quotations, verify exact audible wording (or label source-provided captions as such) with timestamps.
+5. If complete original speech/audio cannot be inspected, **label the resulting audit bounded** and record which speech/visual/timing surfaces were actually checked. Do not call captions “perfect,” “fully verified,” or a video “watched” merely because subtitles or derivative summaries exist. No public automatic recognition tool guarantees error-free transcription; manual/audio verification can raise confidence but unintelligible speech may remain unresolved.
+
+Use the **smallest decisive evidence pass**; do not require expensive external services or bulk media retention to apply this gate. Retain material uncertainty and access failures as actionable retrieval gaps, not invented certainty. This gate is a reusable standard for future audio/video research; it does not create an always-running transcriber or imply video access where the available tools cannot obtain it.
 
 ## 4. Retain only decisive durable reference evidence
 

@@ -19,6 +19,10 @@ For evolving user-owned projects, a useful default source order is:
 
 Project-specific authority rules may override this when explicitly defined. Implementation proves what exists, not automatically what is intended.
 
+**Founder/user-source priority for user-origin models (explicit 2026-10-21 rule):** When deriving the user's own framework, maps of truth, relational dimensions, or explanatory theory, begin from the **complete available user-supplied material**—their notes, original arguments, observations, examples, distinctions, corrections and historical decisions. Reconcile these into the candidate ontology **before** adopting an outside paper's taxonomy or factorization. External scholarship is **secondary for model discovery** and should serve as targeted verification, challenge, counterexample or methodological support **after** the user's ideas are reconstructed. Do not invert this priority simply because an external paper is more prestigious or easy to cite. Keep epistemic scope typed: the user's own preferences/intentions are first-party authority; factual population-level, historical and causal claims still require independent testing, and contrary evidence must not be suppressed. For detailed execution load `profiles/model-building.md`. **Use this order in the answer itself**: user's model and new synthesis first, outside research only when material.
+
+**Do not confuse source selection with source endorsement (clarified 2026-10-29):** A user may ask Operator to audit an external creator, paper, video, scripture interpretation, or other source without adopting that source as their own framework. Keep founder-authored/approved model input, user-selected audit material, source-attributed claims, independent evidence, and agent synthesis as separate provenance classes. Reconcile external material around the founder's established propositions; preserve approved compatible truth, integrate additions with attribution, and expose genuine conflicts rather than silently letting the audited source replace the user's model. Use `profiles/reconciliation.md` for the source-ledger and proposition-level procedure, including bounded denominators and partial-transcript limits.
+
 Chronology is evidence, not a delete button **and not a quality score**. Determine whether later material replaces, refines, specializes, expands, reframes, conflicts with, or leaves an earlier proposition untouched.
 
 A newer explicit user/founder decision can override an older user-owned decision within its scope. But a newer exploration/recommendation does not automatically make an older architecture, rationale, example, or distinction obsolete. When the parent model itself is changing, use THINK + `profiles/reconciliation.md` to compare the strongest old model, strongest new model, and synthesis before canonical promotion.
@@ -110,6 +114,14 @@ A durable continuation projection should preserve only what is needed to recover
 When the loop is completed, cancelled, superseded, made moot, or deliberately parked elsewhere with an authoritative continuation point, retire the transient open-loop projection after any surviving truth/evidence has been reconciled to its proper owner.
 
 **Queue/status completeness includes suspended-open work.** A queue, handoff, roadmap, or “what remains?” projection that reports only the current foreground branch while omitting materially live suspended loops is incomplete.
+
+### 1.2 Independently elicited cases are a standing comparison set for imported models
+
+When a user and agent have independently examined concrete cases—works, incidents, prototypes, experiments, observed outcomes, or reactions—and derived distinctions or conditional judgments from them, **retrieve the materially relevant case evidence before evaluating or adopting an outside author/framework**. The comparison set is not limited to examples chosen by that author. Preserve provenance and epistemic status separately: direct user observation, first-hand reaction/preference, verified source fact, case-specific interpretation, agent-derived hypothesis, and user-endorsed generalization are not interchangeable.
+
+Test what the incoming account **explains, predicts, contradicts, refines, and leaves unaddressed** relative to the standing cases. An omission is a **coverage gap for the user's research objective** when that case is in scope; it is not automatically a false claim by the outside author, an intentional denial, or evidence that the author purported to cover the whole domain. If an existing case conflicts, re-examine both case interpretation and incoming theory rather than defending older conclusions automatically. Keep a case-specific positive observation from being laundered into a universal artistic law; keep an imported attractive rule from erasing independently witnessed counterexamples.
+
+Use the case-to-theory coverage procedure in `profiles/reconciliation.md` for nontrivial audits. Do not ask the user to repeat recorded case judgments that can be retrieved, or make them reconstruct an entire earlier framework just to expose an omission.
 
 ## 2. Extract before compressing
 
@@ -267,6 +279,22 @@ Use progressive disclosure:
 
 Budget the **loaded context**, not file count. Metadata/routing text also consumes attention and should remain discriminative.
 
+### Associative model-retrieval preflight — before introducing reusable categories (2026-10-21)
+
+When a task proposes, revises, DMSCs, ranks or visualizes a **reusable taxonomy, causal model, compatibility rubric, dimension set, framework, or other broad conceptual structure**, **do not infer that the active topic's nearest files exhaust earlier work**. This trigger applies to homegrown frameworks as well as outside authors. Treat it as **retrieval before model creation**, not merely case comparison after creating the model.
+
+Before committing a substantive model or claiming the scoped DMSC floor:
+
+1. **Name the primitives and likely adjacent owners** without presupposing the proposed answer. Follow the project router, starting with the target canonical owner and traversing parent, sibling, typed semantic dependencies and neighboring domains whose concepts supply the model's inputs, mechanisms, outcomes or counterexamples. A story-romance rubric, for example, can depend on previously synthesized general friendship, partner-selection and relationship-system primitives even if the current case titles mention only fiction.
+2. **Search available source surfaces proportionally**, not merely the active folder: relevant repository `sources/ → cases/ → domains/ → self/` (or the owning project's equivalent), existing indexes/handoffs/source ledgers, and authorized prior user files/Library or connected work when potentially material and accessible. Search both **explicit names/aliases** and **underlying ideas/relations**; a source with a different title or ownership folder can be the most relevant antecedent. Do not search all repositories and personal files indiscriminately when there is no plausible dependency. A claim of "not integrated"/"not available" requires checking appropriate routed owners before inferring absence from a failed narrow lookup.
+3. **Perform an upstream crosswalk** before canonizing a new factor set: for each surviving relevant prior model, mark what the new model reuses, refines, splits, contradicts, overlooks, or leaves independent. Respect source vs user-owned truth, actual status, uncertainty, prior rejected variants and current founder decisions. If earlier owners answer the question, reuse them; if their representation is inadequate, explain the demonstrated gap. Do not invent a redundant parallel ontology because its title, file path or current project differs.
+4. **Seek a defensible unexpected relation, not a forced analogy.** Expand beyond obvious lexical neighbors only where shared primitives, dependencies, counterexamples or user history make an association material. The desired "second mind"/Zettelkasten effect is proactive, source-grounded re-encounter and previously unprompted conceptual connection, **not** automatic link inflation or claim that an LLM has human recall. Distinguish retrieval discovery from the evidence that the connection is valid.
+5. **Test reconstruction, not ceremony.** Before reporting saturation, ask whether a future user could identify the important older source/model from this artifact without supplying its title, and whether a materially applicable already-stored countermodel was omitted. A documented negative search can qualify when no relevant antecedent exists. If retrieval is blocked, mark the exact surface/gap and avoid declaring a floor that depends on unseen evidence.
+
+This is a **bounded neighbor-expansion gate**, not a command to full-scan every corpus on every question. A found prior model does not automatically override a better new one; it receives a proposition-level disposition under THINK and Reconciliation. Persist only earned canonical cross-links and material retrieval failure canaries, not a parallel bibliography or mandatory new metadata layer. When a user supplies the forgotten source after this gate should have found it, treat it as a **detector escape**: repair both the affected model dependency and the retrieval trigger, then test the known-miss query without relying on the supplied title.
+
+
+
 Refresh remembered/derived context according to:
 
 - drift likelihood;
@@ -342,6 +370,12 @@ For large messy bodies of knowledge, use a proportional reconstructable pipeline
 8. **Induce structure only when earned** — ontology/hierarchy/clusters when they improve explanation/retrieval/reconstruction; preserve cross-cutting axes when one tree would distort them.
 9. **Compress reconstructively** — merge genuine sameness and synthesize parents while preserving distinctions whose removal changes answerability, behavior, authority, causal meaning, temporal truth, uncertainty, provenance, or dependency-directed revision.
 10. **Reverse-test across time and selection** — competency/reconstruction questions, negative/counterexample cases where useful, decisive source propositions, older still-valid models/examples, and plausible missing/unsampled cases that could overturn the synthesis.
+
+### 9.1 Intake-scoped DMSC versus global collaborative sifting
+
+When the user elects **intake first, sift later**, distinguish a locally complete evidence pass from completion of the whole corpus. During intake, preserve the source's reconstructable wording (where lawful), argument, examples, provenance, opposing views and unresolved questions. DMSC genuine duplicates, attribution and local organization to the floor of that bounded scope. Cross-source interpretations can be labeled PROVISIONAL / REOPENABLE, but may not silently become a settled global synthesis. Retaining source texts alone does not prevent the bias of an early interpretive frame.
+
+After the declared source inventory is accounted for, conduct whole-corpus DMSC and comparative evaluation. If the user has asked for **collaborative sifting**, the assistant prepares evidence-linked questions, counterarguments, options and recommendations independently, then reviews all material unresolved items with the user in dependency order. Record the user's actual objections, examples, interpretations, reactions, preferences and decisions; these may reopen earlier conclusions and require more source checks or DMSC. The assistant retains responsibility for factual/evidential analysis; user-owned judgments and personal adoption or rejection require user input. Preserve the underlying intake even after sifting. Project-specific authority owns the exact start gate and source denominator; COMMUNICATE owns presenting the questions. This does not prevent a properly bounded research conclusion when the user has not imposed an intake-first campaign.
 
 Uncertainty is a valid canonical output when evidence cannot safely settle identity, relation, chronology, truth status, representativeness, source independence, or which of several surviving models is correct.
 

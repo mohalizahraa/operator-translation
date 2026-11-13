@@ -3,3 +3,6 @@
 
 /styles.css
   Cache-Control: no-cache, must-revalidate
+
+/model-core.js
+  Cache-Control: no-cache, must-revalidate

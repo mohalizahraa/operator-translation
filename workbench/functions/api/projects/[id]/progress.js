@@ -1,5 +1,5 @@
 import { actorFromRequest, ensureCatalog, json, normalizeProject } from '../../../_lib.js';
-import { syncTranslationFocusForProject } from '../../../_translation.js';
+import { missingEnglishBook, syncTranslationFocusForProject } from '../../../_translation.js';
 
 function idFrom(context) {
   const n = Number(context.params.id);
@@ -58,6 +58,16 @@ export async function onRequestPatch(context) {
       current_translated_pages: Number(before.translated_pages || 0),
     }, 409);
   }
+
+  // This handler is also directly addressable as /progress. Only the
+  // evidence-bound /progress-sync owner may pass the internal context flag;
+  // public callers cannot manufacture it with an HTTP header or request body.
+  if (translatedPages !== expectedPrevious && context.evidenceBoundSync !== true) {
+    return json({
+      error: 'Translated-page changes must use the evidence-bound sync route with a matching QA receipt and live document readback.',
+      code: 'evidence_bound_sync_required',
+    }, 409);
+  }
   if (translatedPages < expectedPrevious && !correction) {
     return json({ error: 'Translation progress is monotonic. A decrease requires correction=true and a correction_reason.' }, 409);
   }
@@ -69,6 +79,10 @@ export async function onRequestPatch(context) {
   }
   if (!googleDocRevision) {
     return json({ error: 'google_doc_revision is required so the checkpoint is tied to an exact verified target state (native Docs revision or public-export-sha256 identity).' }, 400);
+  }
+
+  if (translatedPages > expectedPrevious && missingEnglishBook('in_progress', before.google_doc_url)) {
+    return json({ error: 'A linked English Book is required before verified translation progress can advance.', code: 'english_book_required' }, 409);
   }
 
   // Strict acceptance is opt-in until the editor key and end-to-end QA writer

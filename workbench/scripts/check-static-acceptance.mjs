@@ -20,6 +20,7 @@ assert(indexSource.includes('/styles.css?v='+release.css_version),'Production CS
 assert(indexSource.includes('id="theme-toggle"') && indexSource.includes("localStorage.getItem('haydariTheme')") && indexSource.includes("prefers-color-scheme: dark"), 'Theme toggle or flash-free saved/system initial state is missing.');
 assert(appSource.includes("localStorage.setItem('haydariTheme', next)") && appSource.includes('syncThemeToggle()'), 'Theme switcher or local persistence is missing.');
 const libSource = await fs.readFile(new URL('functions/_lib.js', root), 'utf8');
+const schemaSource = await fs.readFile(new URL('schema.sql', root), 'utf8');
 const coverProxySource = await fs.readFile(new URL('functions/api/official-cover/[id].js', root), 'utf8');
 const coverSourcesSource = await fs.readFile(new URL('functions/_cover_sources.js', root), 'utf8');
 const stylesSource = await fs.readFile(new URL('public/styles.css', root), 'utf8');
@@ -39,11 +40,14 @@ assert(stylesSource.includes('--oxblood:#BA9194;') && stylesSource.includes('--g
 assert(!['rgba(247,245,239,','rgba(154,131,95,','rgba(38,49,45,','rgba(89,104,97,','rgba(109,67,71,'].some(fragment => stylesSource.includes(fragment)), 'Hardcoded light-theme surface colors remain outside theme tokens.');
 const headersSource = await fs.readFile(new URL('public/_headers', root), 'utf8');
 const projectPatchSource = await fs.readFile(new URL('functions/api/projects/[id].js', root), 'utf8');
+const projectCreateSource = await fs.readFile(new URL('functions/api/projects/index.js', root), 'utf8');
 const revisionSource = await fs.readFile(new URL('functions/api/revision.js', root), 'utf8');
 const progressSyncSource = await fs.readFile(new URL('functions/api/projects/[id]/progress-sync.js', root), 'utf8');
 const translationSource = await fs.readFile(new URL('functions/_translation.js', root), 'utf8');
 const modelCoreSource = await fs.readFile(new URL('public/model-core.js', root), 'utf8');
 const projectsIndexSource = await fs.readFile(new URL('functions/api/projects/index.js', root), 'utf8');
+const syncRunnerSource = await fs.readFile(new URL('scripts/publish-quality-batch.mjs', root), 'utf8');
+const syncHelperSource = await fs.readFile(new URL('scripts/sync-verified-progress.mjs', root), 'utf8');
 
 
 assert(!appSource.includes('state.projects.filter(projectMatchesSearch)'), 'Board/Timeline must not pass optional-argument search predicate directly to Array.filter.');
@@ -115,6 +119,11 @@ assert(appSource.includes('data-work-on-book'), 'Work on Book action is missing 
 assert(appSource.includes("function sortProjects(projects, sort='updated')"), 'Projects sorting behavior is missing.');
 assert(indexSource.includes('id="sort-projects"'), 'Projects sort control is missing.');
 assert(appSource.includes("localStorage.setItem('haydariProjectSort'"), 'Projects sort persistence is missing.');
+assert(schemaSource.includes('english_pdf_url TEXT') && libSource.includes("['english_pdf_url','TEXT']"), 'English PDF schema and migration required.');
+assert(projectPatchSource.includes('body.english_pdf_url') && appSource.includes('englishPdfLinkMarkup(p)') && indexSource.includes('id="english-pdf-url"'), 'English PDF editing and per-book action required.');
+assert(projectCreateSource.includes('const englishPdfUrl = normalizeHttpUrl(body.english_pdf_url)') && projectCreateSource.includes('pdfNote, googleDocUrl, englishPdfUrl, coverUrl'), 'English PDF must survive initial project creation, not only edits.');
+assert(appSource.includes("p.google_doc_url,p.english_pdf_url,p.cover_url"), 'English PDF URL must invalidate the shared-state signature.');
+assert(appSource.includes('return p.english_pdf_url') && appSource.includes('escapeHtml(p.english_pdf_url)'), 'Unlinked books must hide the English PDF action; linked URLs must be escaped.');
 assert(appSource.includes('openEnglishBookDialog(id,true)'), 'Work on Book auto-continue into English Book linking is missing.');
 assert(appSource.includes('reservedPdfWindow'), 'Work on Book post-link popup-safe continuation is missing.');
 assert(indexSource.includes('Anyone with the link → Editor') && indexSource.includes('public Editor links'), 'English Book sharing requirement/boundary is missing from the UI.');
@@ -189,8 +198,10 @@ assert(appSource.includes('const LIVE_REVISION_MS = 2000') && appSource.includes
 assert(appSource.includes("api('/api/revision')") && appSource.includes('function scheduleLiveRevisionPoll('), 'Revision-gated live sync is missing.');
 assert(appSource.includes("cache: options.cache || 'no-store'"), 'Workbench API reads do not explicitly bypass browser caches.');
 assert(revisionSource.includes('MAX(id)') && revisionSource.includes('FROM activity'), 'Live revision endpoint is not derived from shared activity state.');
-assert(appSource.includes('const LIVE_MARKER_SYNC_MS = 5000') && appSource.includes('syncVerifiedTranslationMarkers()'), 'Verified Google Doc marker sync is missing from live polling.');
-assert(appSource.includes("/progress-sync\`,{method:'POST'}"), 'Live client does not publish verified marker checkpoints through the same-origin sync route.');
+assert(appSource.includes('function syncVerifiedTranslationMarkers()') && !appSource.includes('LIVE_MARKER_SYNC_MS'), 'Legacy marker-only browser writes must stay disabled.');
+assert(!appSource.includes("/progress-sync`,{method:'POST'}") && progressSyncSource.includes("code:'qa_receipt_required'"), 'Marker-only progress writes must fail closed.');
+assert(progressSyncSource.includes("sync_mode==='evidence_bound_v1'") && syncRunnerSource.includes('--drive-metadata') && syncRunnerSource.includes('target_permission'), 'Same-session evidence-bound Google Docs sync runner is missing.');
+assert(syncHelperSource.includes('checkpointMatches') && syncHelperSource.includes('liveSnapshot'), 'Safe checkpoint retry and live readback are missing from the shared sync helper.');
 assert(
   translationSource.includes("export?format=txt") &&
   translationSource.includes('WBPROGRESS') &&
@@ -261,4 +272,4 @@ assert(stylesSource.includes('@media (prefers-reduced-motion:reduce)') && styles
 assert(stylesSource.includes('@media (hover:none) and (pointer:coarse)') && stylesSource.includes('.timeline-bar{height:44px;min-height:44px;top:7px}'), 'Coarse-pointer touch-target floor is incomplete.');
 assert(stylesSource.includes('--status-not-started:#D6D5CF') && stylesSource.includes('--status-ready:#805359'), 'Low-light status palette tokens are incomplete.');
 assert(!['#F4EDDC','#F7F0E1','#C7A56E','#D8D1BD','#C6A56A','#D2B980','#B88132','#CAA05D','#829987','#9DAF9F','#8F4844','#A45B55'].some(color=>stylesSource.includes(color)), 'Legacy warm visual literals remain after low-light palette consolidation.');
-assert(/p\.google_doc_url\s*&&\s*p\.page_count_verified/.test(appSource), 'Verified marker sync still includes books without a verified physical-page denominator.');
+assert(progressSyncSource.includes("body.source_page_basis!=='physical_pdf'") && progressSyncSource.includes('!normalized.page_count_verified'), 'Evidence-bound sync must require verified physical-PDF pages.');

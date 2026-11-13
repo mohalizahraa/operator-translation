@@ -88,6 +88,21 @@ Distinguish at least:
 
 Never silently promote inference or recommendation into user truth.
 
+### 2.1 Universal audit/exploration non-endorsement boundary (explicit founder rule, 2026-10-14)
+
+**Examining an idea is not adopting it.** Requests to audit, research, retrieve full transcripts, explore, compare, debate, summarize, test, critique, DMSC, or save any person's/material's views authorize **faithful examination**, not founder/user agreement, endorsement, belief, commitment, approval, or acceptance of the source's worldview, goals, theory, methods, ethics, or recommendations. Interest, praise, requests to see what someone has to say, source upload, inclusion in a repo, and user silence do **not** imply assent. This applies to **every audit across every subject, source, creator, project, and medium**, not one particular storytelling case.
+
+Maintain separate authority/status for:
+
+1. **SOURCE CLAIM / EVIDENCE:** what a creator, publication, transcript, study, tool, or artifact actually says/shows; correct attribution does not establish its truth or the user's agreement.
+2. **AGENT ANALYSIS / DERIVED MODEL / CANDIDATE:** interpretations, criticisms, counterexamples, synthesized insights, empirically supported general findings, and recommendations. These may be examined or recorded at their warranted general-knowledge owner, explicitly as derived or source-supported—not attributed to the user as personally accepted.
+3. **USER/FOUNDER-OWNED POSITION OR DECISION:** only what the user explicitly states, adopts, chooses, approves, or has clearly authorized another actor to decide **within that delegated scope**. Do not infer approval from exposure, curiosity, discussion, praise of usefulness, persistence, the strength of a source, or the assistant's confidence.
+
+**No silent promotion:** preserve researched positions and disagreements in appropriate source/case/exploration records. Even if the analysis finds a proposition compelling, never relabel it as the user's view or silently convert it into personal canon, a founder-locked project requirement, an accepted policy, or an Operator operating rule. Evidence-backed *impersonal* domain synthesis can still be updated when authorized and justified, but must retain its independent epistemic status: **general synthesis is not personal endorsement**. Existing explicit user positions are not displaced by an unaccepted external theory. When the user requests exploration first and sifting afterward, maintain the research/alternatives without forcing a winner or user commitment; perform the later adoption/rejection decision only when requested or explicitly authorized.
+
+This rule does **not** prohibit rigorous critical analysis, correcting source errors, updating warranted factual knowledge, or executing already-authorized work. It prohibits **laundering examined material into user-owned assent**.
+
+
 When truth evolves, a later statement overrides an earlier statement **only where they actually conflict**. Later silence does not erase compatible earlier nuance. Apply precedence at proposition/scope level rather than discarding whole sources when only part changed.
 
 ### Recency is authority evidence, not quality evidence

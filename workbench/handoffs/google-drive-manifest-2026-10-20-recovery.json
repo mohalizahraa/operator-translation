@@ -1,0 +1,1573 @@
+{
+  "record_kind": "Google Drive discovery checkpoint; not certification",
+  "source": "Authenticated Google Drive search, read-only, 2026-10-20, user's correct connected Google account",
+  "source_query": "mimeType = 'application/vnd.google-apps.document' and createdTime > '2026-10-20T00:00:00' and trashed = false",
+  "verification": "Titles and IDs from Drive metadata. Permission + Workbench link statuses per row are not individually checked here. User Work report at 2026-10-20 says only 22/176 public English and 2/23 public Questions; do not advance without Drive metadata.",
+  "parent_operation": "Haydari Workbench one-shot recovery",
+  "notes": [
+    "This records ONLY 152 newly created English scaffolds + 21 new Questions logs created 2026-10-20. Book #12 Questions Log was created in the immediately preceding turn and is not included in this batch.",
+    "Do NOT recreate documents listed here. Restore correct Google account authorization before changing public permissions.",
+    "Do not count scaffold creation as Arabic->English translation or QA. In-progress, review, published statuses remain unchanged."
+  ],
+  "created_english_scaffolds": [
+    {
+      "workbench_project_id": 13,
+      "title": "Encyclopedia of Imamate in Shīʿī Thought",
+      "google_doc_id": "1URkNfcKGWZSeImT_z0C6spZpr6q_K9at5yXzey-UpmY",
+      "url": "https://docs.google.com/document/d/1URkNfcKGWZSeImT_z0C6spZpr6q_K9at5yXzey-UpmY/edit",
+      "created_at": "2026-10-20T06:50:27.985Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 14,
+      "title": "The Book of the Resurrection: Commentary on The Four Journeys of Ṣadr al-Dīn al-Shīrāzī, vol. 6",
+      "google_doc_id": "1bmQZRoB7gwCo-__Xdi05I4wx7zFy3sTM9oqiSBlArgk",
+      "url": "https://docs.google.com/document/d/1bmQZRoB7gwCo-__Xdi05I4wx7zFy3sTM9oqiSBlArgk/edit",
+      "created_at": "2026-10-20T06:52:53.272Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 15,
+      "title": "The Book of the Resurrection: Commentary on The Four Journeys of Ṣadr al-Dīn al-Shīrāzī, vol. 5",
+      "google_doc_id": "1GCTN1oH45MsdzI0lHxyNzNKGUIwzwHU1hU_mwNoYLlI",
+      "url": "https://docs.google.com/document/d/1GCTN1oH45MsdzI0lHxyNzNKGUIwzwHU1hU_mwNoYLlI/edit",
+      "created_at": "2026-10-20T06:52:54.243Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 16,
+      "title": "The Book of the Resurrection: Commentary on The Four Journeys of Ṣadr al-Dīn al-Shīrāzī, vol. 4",
+      "google_doc_id": "1BLjXiXj5zaocytbiBaSsLQFbDxO3nEGGukeqtvCBz6Y",
+      "url": "https://docs.google.com/document/d/1BLjXiXj5zaocytbiBaSsLQFbDxO3nEGGukeqtvCBz6Y/edit",
+      "created_at": "2026-10-20T06:52:55.351Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 17,
+      "title": "The Book of the Resurrection: Commentary on The Four Journeys of Ṣadr al-Dīn al-Shīrāzī, vol. 3",
+      "google_doc_id": "1NeEOhpVg2nSMH--WUcj1NbZhE9nE0s8n4r6kA9pNsXU",
+      "url": "https://docs.google.com/document/d/1NeEOhpVg2nSMH--WUcj1NbZhE9nE0s8n4r6kA9pNsXU/edit",
+      "created_at": "2026-10-20T06:52:56.675Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 18,
+      "title": "The Book of the Resurrection: Commentary on The Four Journeys of Ṣadr al-Dīn al-Shīrāzī, vol. 2",
+      "google_doc_id": "1D8ikix0rrgH7iiOLfydwbRHbaZQMMDNM-FWRtNnc81s",
+      "url": "https://docs.google.com/document/d/1D8ikix0rrgH7iiOLfydwbRHbaZQMMDNM-FWRtNnc81s/edit",
+      "created_at": "2026-10-20T06:53:01.479Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 19,
+      "title": "The Book of the Resurrection: Commentary on The Four Journeys of Ṣadr al-Dīn al-Shīrāzī, vol. 1",
+      "google_doc_id": "1YiQw3eQ_QkTQxze8qfYMM3KSezeSJBBbXK8BW_UUvq4",
+      "url": "https://docs.google.com/document/d/1YiQw3eQ_QkTQxze8qfYMM3KSezeSJBBbXK8BW_UUvq4/edit",
+      "created_at": "2026-10-20T06:53:02.440Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 20,
+      "title": "Commentary on The End of Wisdom, vol. 12",
+      "google_doc_id": "1Q-IjqCP9xxBTNY1woi3UCdd1GX21YYjJPuCH1fsvUWk",
+      "url": "https://docs.google.com/document/d/1Q-IjqCP9xxBTNY1woi3UCdd1GX21YYjJPuCH1fsvUWk/edit",
+      "created_at": "2026-10-20T06:53:03.408Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 21,
+      "title": "Commentary on The End of Wisdom, vol. 11",
+      "google_doc_id": "1QQs-wM9-1sIFPIi8aPCU7S2p3mkmQULmiSiSW10_kOU",
+      "url": "https://docs.google.com/document/d/1QQs-wM9-1sIFPIi8aPCU7S2p3mkmQULmiSiSW10_kOU/edit",
+      "created_at": "2026-10-20T06:53:04.392Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 22,
+      "title": "Commentary on The End of Wisdom, vol. 10",
+      "google_doc_id": "1vLwhl4Ev4RFjlaCy_NSXaXu6-_8RUS92TswlBv-Iy1c",
+      "url": "https://docs.google.com/document/d/1vLwhl4Ev4RFjlaCy_NSXaXu6-_8RUS92TswlBv-Iy1c/edit",
+      "created_at": "2026-10-20T06:53:06.626Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 23,
+      "title": "Commentary on The End of Wisdom, vol. 9",
+      "google_doc_id": "1abnwhXSjxCTGbG4oY3kU-ZaQLaf4Ulkh5FUcPjH6Eu8",
+      "url": "https://docs.google.com/document/d/1abnwhXSjxCTGbG4oY3kU-ZaQLaf4Ulkh5FUcPjH6Eu8/edit",
+      "created_at": "2026-10-20T06:53:11.094Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 24,
+      "title": "Commentary on The End of Wisdom, vol. 8",
+      "google_doc_id": "1TW4VHwogLmV6Pj4SvmJGnSgm9DofSSqDvo6xzasBLKY",
+      "url": "https://docs.google.com/document/d/1TW4VHwogLmV6Pj4SvmJGnSgm9DofSSqDvo6xzasBLKY/edit",
+      "created_at": "2026-10-20T06:53:12.064Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 25,
+      "title": "Commentary on The End of Wisdom, vol. 7",
+      "google_doc_id": "1JkOYcy_6F329C0PS4q0sZ949eV7rbVMY2hkdQcjRNTw",
+      "url": "https://docs.google.com/document/d/1JkOYcy_6F329C0PS4q0sZ949eV7rbVMY2hkdQcjRNTw/edit",
+      "created_at": "2026-10-20T06:53:13.021Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 26,
+      "title": "Commentary on The End of Wisdom, vol. 6",
+      "google_doc_id": "1xQkStszvwiqBxDPhnpSIVexP5C-IoTp0TzDHnBTlUEc",
+      "url": "https://docs.google.com/document/d/1xQkStszvwiqBxDPhnpSIVexP5C-IoTp0TzDHnBTlUEc/edit",
+      "created_at": "2026-10-20T06:53:14.128Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 27,
+      "title": "Commentary on The End of Wisdom, vol. 5",
+      "google_doc_id": "1FhefYiHnOs16R_8_gsAemr7D2a6Cy9Gs4ci9YUf2f08",
+      "url": "https://docs.google.com/document/d/1FhefYiHnOs16R_8_gsAemr7D2a6Cy9Gs4ci9YUf2f08/edit",
+      "created_at": "2026-10-20T06:53:15.298Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 28,
+      "title": "Commentary on The End of Wisdom, vol. 4",
+      "google_doc_id": "1eXKmZVexUZm8Fi07w1tyqoTGBqI-7q0uIDJlE-i99bg",
+      "url": "https://docs.google.com/document/d/1eXKmZVexUZm8Fi07w1tyqoTGBqI-7q0uIDJlE-i99bg/edit",
+      "created_at": "2026-10-20T06:53:19.977Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 29,
+      "title": "Commentary on The End of Wisdom, vol. 3",
+      "google_doc_id": "1aRixsoc5zf09LyF8IoUgV2FydyZhJRDsHsNvYuKDCWY",
+      "url": "https://docs.google.com/document/d/1aRixsoc5zf09LyF8IoUgV2FydyZhJRDsHsNvYuKDCWY/edit",
+      "created_at": "2026-10-20T06:53:21.792Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 30,
+      "title": "Commentary on The End of Wisdom, vol. 2",
+      "google_doc_id": "1QbI0C0r8GJLvyRIPx095PIYJZrS-7YA2Fseomnd7sX0",
+      "url": "https://docs.google.com/document/d/1QbI0C0r8GJLvyRIPx095PIYJZrS-7YA2Fseomnd7sX0/edit",
+      "created_at": "2026-10-20T06:53:20.884Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 31,
+      "title": "Commentary on The End of Wisdom, vol. 1",
+      "google_doc_id": "1iJ_e1Xwk__hV9NBos4pIZmLTVjUJ1M3MT1Z-S9LZmME",
+      "url": "https://docs.google.com/document/d/1iJ_e1Xwk__hV9NBos4pIZmLTVjUJ1M3MT1Z-S9LZmME/edit",
+      "created_at": "2026-10-20T06:53:22.852Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 32,
+      "title": "Encyclopedia of the Commentary on The End of Wisdom",
+      "google_doc_id": "1n5wVvsb1aEd6Rqqh8Hq9JY0lZqF6bx-8no_Z3od82PM",
+      "url": "https://docs.google.com/document/d/1n5wVvsb1aEd6Rqqh8Hq9JY0lZqF6bx-8no_Z3od82PM/edit",
+      "created_at": "2026-10-20T06:53:23.853Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 33,
+      "title": "Mystical Lessons on the Redaction of The Preparation of the Principles",
+      "google_doc_id": "10yVHcsVBM-Xj65bxXFIAFF8xmGeFAMVq3zC2fyrZeko",
+      "url": "https://docs.google.com/document/d/10yVHcsVBM-Xj65bxXFIAFF8xmGeFAMVq3zC2fyrZeko/edit",
+      "created_at": "2026-10-20T06:53:40.193Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 34,
+      "title": "Studies in the Jurisprudence of Muʿāṭāh, vol. 3",
+      "google_doc_id": "1IPGju7CMYozwQqr2A2LglDyf6dcpCPEb4zxz-pfTs9k",
+      "url": "https://docs.google.com/document/d/1IPGju7CMYozwQqr2A2LglDyf6dcpCPEb4zxz-pfTs9k/edit",
+      "created_at": "2026-10-20T06:53:39.200Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 35,
+      "title": "Studies in the Jurisprudence of Muʿāṭāh, vol. 2",
+      "google_doc_id": "1wl11foGaJXt77kj9fUzZWd4OlKtdaFXXTl81oL3-Muw",
+      "url": "https://docs.google.com/document/d/1wl11foGaJXt77kj9fUzZWd4OlKtdaFXXTl81oL3-Muw/edit",
+      "created_at": "2026-10-20T06:53:42.655Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 36,
+      "title": "Studies in the Jurisprudence of Muʿāṭāh, vol. 1",
+      "google_doc_id": "1zfZfxJNLt8hARH3gpoNPlBclPG_D6nXeyWiiI824vSg",
+      "url": "https://docs.google.com/document/d/1zfZfxJNLt8hARH3gpoNPlBclPG_D6nXeyWiiI824vSg/edit",
+      "created_at": "2026-10-20T06:53:43.703Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 37,
+      "title": "Moderation in the Qurʾān",
+      "google_doc_id": "1iF7HQ0bcJkRNFQVXs49cNvpuVZ4-b2T4qEeN0Je6f3A",
+      "url": "https://docs.google.com/document/d/1iF7HQ0bcJkRNFQVXs49cNvpuVZ4-b2T4qEeN0Je6f3A/edit",
+      "created_at": "2026-10-20T06:53:41.289Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 38,
+      "title": "Readings in the Epistemic System of Sayyid Kamal al-Ḥaydarī, vol. 5",
+      "google_doc_id": "1p0PBUfTOq13DZmrn4JAcudivwbCvWR3JdAF8xLCvJoI",
+      "url": "https://docs.google.com/document/d/1p0PBUfTOq13DZmrn4JAcudivwbCvWR3JdAF8xLCvJoI/edit",
+      "created_at": "2026-10-20T06:53:53.725Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 39,
+      "title": "Readings in the Epistemic System of Sayyid Kamal al-Ḥaydarī, vol. 4",
+      "google_doc_id": "1tM6vk0I515dy0Ur78Vyx55eKjY2hYF0Hc4-XDKxBhCA",
+      "url": "https://docs.google.com/document/d/1tM6vk0I515dy0Ur78Vyx55eKjY2hYF0Hc4-XDKxBhCA/edit",
+      "created_at": "2026-10-20T06:53:49.154Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 40,
+      "title": "Readings in the Epistemic System of Sayyid Kamal al-Ḥaydarī, vol. 3",
+      "google_doc_id": "1BNohxuClCHu0kQn2nSDLcX4znrU53HNdmKQqnZ415nk",
+      "url": "https://docs.google.com/document/d/1BNohxuClCHu0kQn2nSDLcX4znrU53HNdmKQqnZ415nk/edit",
+      "created_at": "2026-10-20T06:53:50.212Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 41,
+      "title": "Readings in the Epistemic System of Sayyid Kamal al-Ḥaydarī, vol. 2",
+      "google_doc_id": "11YS9ir9uTOfJT9F1KNfqQRHnz9czs2O8yLc9aGJLoAs",
+      "url": "https://docs.google.com/document/d/11YS9ir9uTOfJT9F1KNfqQRHnz9czs2O8yLc9aGJLoAs/edit",
+      "created_at": "2026-10-20T06:53:52.586Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 42,
+      "title": "Readings in the Epistemic System of Sayyid Kamal al-Ḥaydarī, vol. 1",
+      "google_doc_id": "1s4K-cTp7c5sfjLyIApCW9jmuYkxUnbba5Qg2zG3vais",
+      "url": "https://docs.google.com/document/d/1s4K-cTp7c5sfjLyIApCW9jmuYkxUnbba5Qg2zG3vais/edit",
+      "created_at": "2026-10-20T06:53:51.340Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 44,
+      "title": "Faith: Its Reality, Degrees, and Effects",
+      "google_doc_id": "18tZB3s6xko0xkig7JhefHXb3oxDVT4iVLPfSkNOOuLM",
+      "url": "https://docs.google.com/document/d/18tZB3s6xko0xkig7JhefHXb3oxDVT4iVLPfSkNOOuLM/edit",
+      "created_at": "2026-10-20T06:54:06.405Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 45,
+      "title": "The Project of Religious Marjaʿīyah and the Horizons of the Future",
+      "google_doc_id": "1uFtLoZ77KWENLYl5RZSp-HuDz5raxAeR8iVUo7HI2t0",
+      "url": "https://docs.google.com/document/d/1uFtLoZ77KWENLYl5RZSp-HuDz5raxAeR8iVUo7HI2t0/edit",
+      "created_at": "2026-10-20T06:54:07.544Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 46,
+      "title": "The Greatest Name: Its Reality and Manifestations",
+      "google_doc_id": "1b50OhXKNkZm3zTcV3zGnF1bUaICCwSZ38umCteUCS_Y",
+      "url": "https://docs.google.com/document/d/1b50OhXKNkZm3zTcV3zGnF1bUaICCwSZ38umCteUCS_Y/edit",
+      "created_at": "2026-10-20T06:54:08.558Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 48,
+      "title": "Symbolism and Parable in the Qurʾānic Text",
+      "google_doc_id": "18Eq-s3B9wP7mnQ08kNpl8o71jUqogAfX9tK6nqxMFyk",
+      "url": "https://docs.google.com/document/d/18Eq-s3B9wP7mnQ08kNpl8o71jUqogAfX9tK6nqxMFyk/edit",
+      "created_at": "2026-10-20T06:54:05.263Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 49,
+      "title": "The Exegetical Method of ʿAllāmah al-Ḥaydarī",
+      "google_doc_id": "132hU9l4D2Y6A_xcjub6LJsbGWKRj3gvDuPeEmhFZ-KM",
+      "url": "https://docs.google.com/document/d/132hU9l4D2Y6A_xcjub6LJsbGWKRj3gvDuPeEmhFZ-KM/edit",
+      "created_at": "2026-10-20T06:54:09.721Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 50,
+      "title": "Truthfulness: Perspectives on Its Concept, Domains, and Outcomes",
+      "google_doc_id": "1YS8ZRILrAU-gZtF1FN4lB6aNOVeQ31632OG4YMt36W4",
+      "url": "https://docs.google.com/document/d/1YS8ZRILrAU-gZtF1FN4lB6aNOVeQ31632OG4YMt36W4/edit",
+      "created_at": "2026-10-20T06:54:17.909Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 51,
+      "title": "Discourses on Imamate",
+      "google_doc_id": "1XyxiEp1lrUyenaEsxX8HkO-xe4y816n65JPNExghfl4",
+      "url": "https://docs.google.com/document/d/1XyxiEp1lrUyenaEsxX8HkO-xe4y816n65JPNExghfl4/edit",
+      "created_at": "2026-10-20T06:54:14.989Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 52,
+      "title": "Encyclopedia of the Commentary on The Lessons in Uṣūl",
+      "google_doc_id": "1DAXYfZEVFUfShnh9mHmgdMXzQHQpyWFPTys0aX-y3aY",
+      "url": "https://docs.google.com/document/d/1DAXYfZEVFUfShnh9mHmgdMXzQHQpyWFPTys0aX-y3aY/edit",
+      "created_at": "2026-10-20T06:54:17.014Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 53,
+      "title": "Methodological Introductions to the Science of Legal Theory",
+      "google_doc_id": "1lv95Vl0XZnMvX9QtA0i9hAuMS0zbDpJJ7POknVn2wh0",
+      "url": "https://docs.google.com/document/d/1lv95Vl0XZnMvX9QtA0i9hAuMS0zbDpJJ7POknVn2wh0/edit",
+      "created_at": "2026-10-20T06:54:15.818Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 54,
+      "title": "Commentary on the First Lesson",
+      "google_doc_id": "1dke2dtPkycrUBPlD4YyEcT-vHIOuUygdQT3GGxgNtSQ",
+      "url": "https://docs.google.com/document/d/1dke2dtPkycrUBPlD4YyEcT-vHIOuUygdQT3GGxgNtSQ/edit",
+      "created_at": "2026-10-20T06:54:19.160Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 55,
+      "title": "Commentary on the Second Lesson, part 1",
+      "google_doc_id": "1MLrU8svHOLza-rgF4HdsOnnG9EBbdL3sRcxd-_qBv-g",
+      "url": "https://docs.google.com/document/d/1MLrU8svHOLza-rgF4HdsOnnG9EBbdL3sRcxd-_qBv-g/edit",
+      "created_at": "2026-10-20T06:54:37.699Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 56,
+      "title": "Commentary on the Second Lesson, part 2",
+      "google_doc_id": "131Bu1WvBtOPXNZdSYSFRTPPUWkvwxm8Zu04cHDHStWE",
+      "url": "https://docs.google.com/document/d/131Bu1WvBtOPXNZdSYSFRTPPUWkvwxm8Zu04cHDHStWE/edit",
+      "created_at": "2026-10-20T06:54:41.041Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 57,
+      "title": "Commentary on the Second Lesson, part 3",
+      "google_doc_id": "1DRFynxqEJPwxtDU04hiIDXJ5c_lOJZHBXuXztSaZn8I",
+      "url": "https://docs.google.com/document/d/1DRFynxqEJPwxtDU04hiIDXJ5c_lOJZHBXuXztSaZn8I/edit",
+      "created_at": "2026-10-20T06:54:38.983Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 58,
+      "title": "Commentary on the Second Lesson, vol. 4",
+      "google_doc_id": "1AKmp8vsAfwVdZ4yjtL2CnA7KdRAoXGOflJM5sXPQhWc",
+      "url": "https://docs.google.com/document/d/1AKmp8vsAfwVdZ4yjtL2CnA7KdRAoXGOflJM5sXPQhWc/edit",
+      "created_at": "2026-10-20T06:54:36.421Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 59,
+      "title": "Commentary on the Third Lesson: The Scriptural Proof, vol. 1",
+      "google_doc_id": "1QYrYppehZ-TLqww-LAqiHsprth_wo-gjzGtFrRY1azQ",
+      "url": "https://docs.google.com/document/d/1QYrYppehZ-TLqww-LAqiHsprth_wo-gjzGtFrRY1azQ/edit",
+      "created_at": "2026-10-20T06:54:40.167Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 60,
+      "title": "Commentary on the Third Lesson: The Scriptural Proof, vol. 2",
+      "google_doc_id": "1bNmEPyKM7A4wOHynulIO-t6Fp-4r5YgNkSFSBfVglUk",
+      "url": "https://docs.google.com/document/d/1bNmEPyKM7A4wOHynulIO-t6Fp-4r5YgNkSFSBfVglUk/edit",
+      "created_at": "2026-10-20T06:54:50.632Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 61,
+      "title": "Commentary on the Third Lesson: The Scriptural Proof, vol. 3",
+      "google_doc_id": "1AszAzFnYKjL6ksl1X7NHBaG9EUU7bKkgBGvhcDv5uxE",
+      "url": "https://docs.google.com/document/d/1AszAzFnYKjL6ksl1X7NHBaG9EUU7bKkgBGvhcDv5uxE/edit",
+      "created_at": "2026-10-20T06:54:48.262Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 62,
+      "title": "Commentary on the Third Lesson: The Scriptural Proof, vol. 4",
+      "google_doc_id": "1OaISGkvyVbDdyneijMkYDXgN4qzH1hgKwUEfDxtQ17I",
+      "url": "https://docs.google.com/document/d/1OaISGkvyVbDdyneijMkYDXgN4qzH1hgKwUEfDxtQ17I/edit",
+      "created_at": "2026-10-20T06:54:47.136Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 63,
+      "title": "Commentary on the Third Lesson: The Scriptural Proof, vol. 5",
+      "google_doc_id": "1f_fi7VYvicjjECc5TrMD2NkfJ4qQ9nI3D4c9NW7nGkU",
+      "url": "https://docs.google.com/document/d/1f_fi7VYvicjjECc5TrMD2NkfJ4qQ9nI3D4c9NW7nGkU/edit",
+      "created_at": "2026-10-20T06:54:46.144Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 64,
+      "title": "Commentary on the Third Lesson: The Rational Proof, vol. 1",
+      "google_doc_id": "1DXB__zgSaVdpbA9JxvHOxoIjAup8bGZKYnoNHq9pdp0",
+      "url": "https://docs.google.com/document/d/1DXB__zgSaVdpbA9JxvHOxoIjAup8bGZKYnoNHq9pdp0/edit",
+      "created_at": "2026-10-20T06:54:49.586Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 65,
+      "title": "Commentary on the Third Lesson: The Rational Proof, vol. 2",
+      "google_doc_id": "1p5Zz7lVKCStUXTk9BbrtTmJxd-09tHqmnuShDQmj-DY",
+      "url": "https://docs.google.com/document/d/1p5Zz7lVKCStUXTk9BbrtTmJxd-09tHqmnuShDQmj-DY/edit",
+      "created_at": "2026-10-20T06:54:55.960Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 66,
+      "title": "Commentary on the Third Lesson: The Rational Proof, vol. 3",
+      "google_doc_id": "1PAMzoQfFgBYjOxjbUkmz2sxxO8msgsYeYrhYp1d25dc",
+      "url": "https://docs.google.com/document/d/1PAMzoQfFgBYjOxjbUkmz2sxxO8msgsYeYrhYp1d25dc/edit",
+      "created_at": "2026-10-20T06:54:58.365Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 67,
+      "title": "Commentary on the Third Lesson: Practical Principles, vol. 1",
+      "google_doc_id": "1Umw7VDp6MP4o8fCQHUQYsIv0i6XJ7zzlScy2j0-yyqA",
+      "url": "https://docs.google.com/document/d/1Umw7VDp6MP4o8fCQHUQYsIv0i6XJ7zzlScy2j0-yyqA/edit",
+      "created_at": "2026-10-20T06:55:00.748Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 68,
+      "title": "Commentary on the Third Lesson: Practical Principles, vol. 2",
+      "google_doc_id": "1YHuuaJY-wXVoxETWVed6T_UhHahAAhmfiIG1CDLJzNg",
+      "url": "https://docs.google.com/document/d/1YHuuaJY-wXVoxETWVed6T_UhHahAAhmfiIG1CDLJzNg/edit",
+      "created_at": "2026-10-20T06:54:57.493Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 69,
+      "title": "Commentary on the Third Lesson: Practical Principles, vol. 3",
+      "google_doc_id": "1y6BL9HwKY8TI0IcqbtMa8Jq537rW4jw3BfxSBsXK7nA",
+      "url": "https://docs.google.com/document/d/1y6BL9HwKY8TI0IcqbtMa8Jq537rW4jw3BfxSBsXK7nA/edit",
+      "created_at": "2026-10-20T06:54:59.423Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 70,
+      "title": "Commentary on the Third Lesson: Practical Principles, vol. 4",
+      "google_doc_id": "1Ut-SMqJnDbcoOzwdCKHyb6SUq9vYr9xwDuQLOc47Gbc",
+      "url": "https://docs.google.com/document/d/1Ut-SMqJnDbcoOzwdCKHyb6SUq9vYr9xwDuQLOc47Gbc/edit",
+      "created_at": "2026-10-20T06:55:06.044Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 71,
+      "title": "Commentary on the Third Lesson: Practical Principles, vol. 5",
+      "google_doc_id": "1CixE9nH8U8BOYO8o1xsCwH3KltfB-GigQuj59dmKhpg",
+      "url": "https://docs.google.com/document/d/1CixE9nH8U8BOYO8o1xsCwH3KltfB-GigQuj59dmKhpg/edit",
+      "created_at": "2026-10-20T06:55:10.645Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 72,
+      "title": "Commentary on the Third Lesson: Practical Principles, vol. 6",
+      "google_doc_id": "1gT0QtlkE4aIgdtZ1mk-fcq_1nFbDMckUQdawBFZTRaU",
+      "url": "https://docs.google.com/document/d/1gT0QtlkE4aIgdtZ1mk-fcq_1nFbDMckUQdawBFZTRaU/edit",
+      "created_at": "2026-10-20T06:55:09.459Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 73,
+      "title": "Encyclopedia of Divine Justice, vol. 3",
+      "google_doc_id": "1PVWtaz1DKNDv16JdjdiY5ag_4DiRFjZr2q4ecEQu4KQ",
+      "url": "https://docs.google.com/document/d/1PVWtaz1DKNDv16JdjdiY5ag_4DiRFjZr2q4ecEQu4KQ/edit",
+      "created_at": "2026-10-20T06:55:07.206Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 74,
+      "title": "Encyclopedia of Divine Justice, vol. 2",
+      "google_doc_id": "1PAbddhcjphbKzTW-n45AoMhIy0LmMsIfbLkiz6QsATU",
+      "url": "https://docs.google.com/document/d/1PAbddhcjphbKzTW-n45AoMhIy0LmMsIfbLkiz6QsATU/edit",
+      "created_at": "2026-10-20T06:55:08.292Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 75,
+      "title": "Encyclopedia of Divine Justice, vol. 1",
+      "google_doc_id": "159sUTk49-0_SvE7stEHKEFYPlBihERrclidV3Cdr85U",
+      "url": "https://docs.google.com/document/d/159sUTk49-0_SvE7stEHKEFYPlBihERrclidV3Cdr85U/edit",
+      "created_at": "2026-10-20T06:55:25.135Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 76,
+      "title": "Divine Knowledge: Commentary on The Four Journeys of Ṣadr al-Dīn al-Shīrāzī, vol. 2",
+      "google_doc_id": "1Z847_Aql0IGVUEsafvIxTSW-rxLRLUXOxnoB-sas2Uo",
+      "url": "https://docs.google.com/document/d/1Z847_Aql0IGVUEsafvIxTSW-rxLRLUXOxnoB-sas2Uo/edit",
+      "created_at": "2026-10-20T06:55:22.341Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 77,
+      "title": "Divine Knowledge: Commentary on The Four Journeys of Ṣadr al-Dīn al-Shīrāzī, vol. 1",
+      "google_doc_id": "1o1ueN0cg6zjU9MDl9Nxm_Fw2Ix5M4lu8c6jnyIYhKzs",
+      "url": "https://docs.google.com/document/d/1o1ueN0cg6zjU9MDl9Nxm_Fw2Ix5M4lu8c6jnyIYhKzs/edit",
+      "created_at": "2026-10-20T06:55:23.427Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 79,
+      "title": "Reforming the Soul",
+      "google_doc_id": "1V0u4xrhAkLuu27G5pdVts6RXU55j4f1tIsrVY8EpF80",
+      "url": "https://docs.google.com/document/d/1V0u4xrhAkLuu27G5pdVts6RXU55j4f1tIsrVY8EpF80/edit",
+      "created_at": "2026-10-20T06:55:21.102Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 80,
+      "title": "Our Ethics",
+      "google_doc_id": "1xZ2Mu1EZcCrKaaEyYTrDHRNiH2B0acqnzzqLpYPbaHI",
+      "url": "https://docs.google.com/document/d/1xZ2Mu1EZcCrKaaEyYTrDHRNiH2B0acqnzzqLpYPbaHI/edit",
+      "created_at": "2026-10-20T06:55:24.261Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 81,
+      "title": "Qurʾānic Signification",
+      "google_doc_id": "1GaedhRyedjr-0gcLNrTlRidjKqv40ZmQf8ELNTpCJ58",
+      "url": "https://docs.google.com/document/d/1GaedhRyedjr-0gcLNrTlRidjKqv40ZmQf8ELNTpCJ58/edit",
+      "created_at": "2026-10-20T06:55:32.102Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 82,
+      "title": "The Cosmic Vision in Theoretical Mysticism",
+      "google_doc_id": "1sh-gNbEAj7k680qKvX0RZLgZbYni85On_6jdkPmcxag",
+      "url": "https://docs.google.com/document/d/1sh-gNbEAj7k680qKvX0RZLgZbYni85On_6jdkPmcxag/edit",
+      "created_at": "2026-10-20T06:55:31.221Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 83,
+      "title": "Commentary on The Eleventh Chapter, vol. 2",
+      "google_doc_id": "1fLKUANOXDm6Zu-f2M6p7iPjwqKIoO2ymW2bhcuznrzM",
+      "url": "https://docs.google.com/document/d/1fLKUANOXDm6Zu-f2M6p7iPjwqKIoO2ymW2bhcuznrzM/edit",
+      "created_at": "2026-10-20T06:55:35.023Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 84,
+      "title": "Commentary on The Eleventh Chapter, vol. 1",
+      "google_doc_id": "1WXGaR2n6P9nVFKst5de_A7CYz5BoEnXdun5BXR2h06Q",
+      "url": "https://docs.google.com/document/d/1WXGaR2n6P9nVFKst5de_A7CYz5BoEnXdun5BXR2h06Q/edit",
+      "created_at": "2026-10-20T06:55:34.094Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 85,
+      "title": "Commentary on the Book of Logic, vol. 3",
+      "google_doc_id": "1qqtgREGw9_S_S1jHbg4fUhQ8EnCiDEwBqZsVEe7ubAc",
+      "url": "https://docs.google.com/document/d/1qqtgREGw9_S_S1jHbg4fUhQ8EnCiDEwBqZsVEe7ubAc/edit",
+      "created_at": "2026-10-20T06:55:33.067Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 86,
+      "title": "Commentary on the Book of Logic, vol. 2",
+      "google_doc_id": "1aDrZirhkiV9yOARx-cqK40oJe12bLuQf3R8CooDkSDo",
+      "url": "https://docs.google.com/document/d/1aDrZirhkiV9yOARx-cqK40oJe12bLuQf3R8CooDkSDo/edit",
+      "created_at": "2026-10-20T06:55:43.770Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 87,
+      "title": "Commentary on the Book of Logic, vol. 1",
+      "google_doc_id": "19sw7OFPfrG0vl0zTKsSEsUzdakR7rezQFWVCTjWBzU8",
+      "url": "https://docs.google.com/document/d/19sw7OFPfrG0vl0zTKsSEsUzdakR7rezQFWVCTjWBzU8/edit",
+      "created_at": "2026-10-20T06:55:42.761Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 88,
+      "title": "Tawḥīd: Analytical Studies in Its Levels and Implications, vol. 2",
+      "google_doc_id": "1-XtipDYDsowyivR7NfnYxXPbGtRN9M5IZ0OGt21xZxk",
+      "url": "https://docs.google.com/document/d/1-XtipDYDsowyivR7NfnYxXPbGtRN9M5IZ0OGt21xZxk/edit",
+      "created_at": "2026-10-20T06:55:45.401Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 89,
+      "title": "Tawḥīd: Analytical Studies in Its Levels and Implications, vol. 1",
+      "google_doc_id": "1HF7nfLCxgWIJPki21xoWoDDRYWdRUmq5aaiBYUa-Fds",
+      "url": "https://docs.google.com/document/d/1HF7nfLCxgWIJPki21xoWoDDRYWdRUmq5aaiBYUa-Fds/edit",
+      "created_at": "2026-10-20T06:55:41.792Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 90,
+      "title": "The Ḥadīth Legacy: Between Formation and Influence",
+      "google_doc_id": "1nwXC-fPdIcbid8SVVSwxdqFTaQT4avHYM2w0t_e9PlY",
+      "url": "https://docs.google.com/document/d/1nwXC-fPdIcbid8SVVSwxdqFTaQT4avHYM2w0t_e9PlY/edit",
+      "created_at": "2026-10-20T06:55:40.794Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 91,
+      "title": "Commentary on The Beginning of Wisdom, vol. 1",
+      "google_doc_id": "1mtLEXE1mY7uxDDoZrx-WxYgdDHD97UzTtNmur88hwnw",
+      "url": "https://docs.google.com/document/d/1mtLEXE1mY7uxDDoZrx-WxYgdDHD97UzTtNmur88hwnw/edit",
+      "created_at": "2026-10-20T06:55:52.660Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 92,
+      "title": "Commentary on The Beginning of Wisdom, vol. 2",
+      "google_doc_id": "1wqpo7cloPkmxy5PI7-zLC3honbDFiiol1amUBIaYjCY",
+      "url": "https://docs.google.com/document/d/1wqpo7cloPkmxy5PI7-zLC3honbDFiiol1amUBIaYjCY/edit",
+      "created_at": "2026-10-20T06:55:51.857Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 93,
+      "title": "Commentary on The Preparation of the Principles in the Science of Theoretical Mysticism, vol. 2",
+      "google_doc_id": "1jx1hBDPz0NO11yBQuEeiyCOzU8G9YAMOBK54a2yS8XQ",
+      "url": "https://docs.google.com/document/d/1jx1hBDPz0NO11yBQuEeiyCOzU8G9YAMOBK54a2yS8XQ/edit",
+      "created_at": "2026-10-20T06:55:54.917Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 94,
+      "title": "Commentary on The Preparation of the Principles in the Science of Theoretical Mysticism, vol. 1",
+      "google_doc_id": "1A5sM4ionhpA3cKYcgvG3DRqWU-YSJerO41Qb7SF9aqk",
+      "url": "https://docs.google.com/document/d/1A5sM4ionhpA3cKYcgvG3DRqWU-YSJerO41Qb7SF9aqk/edit",
+      "created_at": "2026-10-20T06:55:53.798Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 96,
+      "title": "The Theory of the Primacy of Existence: An Attempt to Present a New Vision, vol. 2",
+      "google_doc_id": "1UMdh9RX8MXxGmg244CcW_Ds1bxDZhlhjmuy0NhfCoQY",
+      "url": "https://docs.google.com/document/d/1UMdh9RX8MXxGmg244CcW_Ds1bxDZhlhjmuy0NhfCoQY/edit",
+      "created_at": "2026-10-20T06:55:50.614Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 97,
+      "title": "The Theory of the Primacy of Existence: An Attempt to Present a New Vision, vol. 1",
+      "google_doc_id": "1Z-AtvNdKMwRkoghz2PYu5SZlZuyGqDNcee394EL3Iz8",
+      "url": "https://docs.google.com/document/d/1Z-AtvNdKMwRkoghz2PYu5SZlZuyGqDNcee394EL3Iz8/edit",
+      "created_at": "2026-10-20T06:56:09.023Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 98,
+      "title": "Features of Umayyad Islam: From Defaming the Pure Prophetic Household to Violating Its Sanctity",
+      "google_doc_id": "1dQ5L0a6tmzCrHy7-OaLW1VxR9EirDPfboBPVUU5wq1Q",
+      "url": "https://docs.google.com/document/d/1dQ5L0a6tmzCrHy7-OaLW1VxR9EirDPfboBPVUU5wq1Q/edit",
+      "created_at": "2026-10-20T06:56:07.941Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 99,
+      "title": "The Resurrection: A Qurʾānic Vision, vol. 2",
+      "google_doc_id": "1Mba-IWwkW_SPA69zDZPu3XuMHw3oYDQa1lesQ-wlmAU",
+      "url": "https://docs.google.com/document/d/1Mba-IWwkW_SPA69zDZPu3XuMHw3oYDQa1lesQ-wlmAU/edit",
+      "created_at": "2026-10-20T06:56:05.451Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 100,
+      "title": "The Resurrection: A Qurʾānic Vision, vol. 1",
+      "google_doc_id": "1cNvbH2odG_W48MIeWBykxBjTaVBx6_RtILJkV41p5C8",
+      "url": "https://docs.google.com/document/d/1cNvbH2odG_W48MIeWBykxBjTaVBx6_RtILJkV41p5C8/edit",
+      "created_at": "2026-10-20T06:56:10.167Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 101,
+      "title": "Philosophy: Theology in the General Sense, vol. 3",
+      "google_doc_id": "1c64jcW_D5s1V3CqeIZFNgOffZs-1szu6M6WEyJHlbVU",
+      "url": "https://docs.google.com/document/d/1c64jcW_D5s1V3CqeIZFNgOffZs-1szu6M6WEyJHlbVU/edit",
+      "created_at": "2026-10-20T06:56:06.751Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 102,
+      "title": "Philosophy: Theology in the General Sense, vol. 2",
+      "google_doc_id": "1j8eP7uv_urDzd9jWojlI7vSgnoxYr-CvhWI4HW4sefU",
+      "url": "https://docs.google.com/document/d/1j8eP7uv_urDzd9jWojlI7vSgnoxYr-CvhWI4HW4sefU/edit",
+      "created_at": "2026-10-20T06:56:17.027Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 103,
+      "title": "Philosophy, vol. 1",
+      "google_doc_id": "1wfbFLycgvnzA8IubPeAkK-jp-MYvSMbVb7bQ4vLxCPA",
+      "url": "https://docs.google.com/document/d/1wfbFLycgvnzA8IubPeAkK-jp-MYvSMbVb7bQ4vLxCPA/edit",
+      "created_at": "2026-10-20T06:56:18.259Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 104,
+      "title": "Āyat al-Kursī: Exegesis and Hermeneutical Interpretation",
+      "google_doc_id": "1QL5Zefek5q-4kQK_AvilADNUEL3D2w8a3ncx7mZyAIU",
+      "url": "https://docs.google.com/document/d/1QL5Zefek5q-4kQK_AvilADNUEL3D2w8a3ncx7mZyAIU/edit",
+      "created_at": "2026-10-20T06:56:19.312Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 105,
+      "title": "Spiritual Education",
+      "google_doc_id": "1cIe8BBGzkelP1wxTBh74jSnIJ_snEMaRlapKoaFWEBY",
+      "url": "https://docs.google.com/document/d/1cIe8BBGzkelP1wxTBh74jSnIJ_snEMaRlapKoaFWEBY/edit",
+      "created_at": "2026-10-20T06:56:20.298Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 106,
+      "title": "The Spirituality of Acts of Worship",
+      "google_doc_id": "1e97DN1nXIxvpssigH46DKbWPtniAeu-vkjzMAWCOqgU",
+      "url": "https://docs.google.com/document/d/1e97DN1nXIxvpssigH46DKbWPtniAeu-vkjzMAWCOqgU/edit",
+      "created_at": "2026-10-20T06:56:21.221Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 107,
+      "title": "The Path of the Righteous: Fatwas of His Eminence the Religious Marjaʿ Sayyid Kamal al-Ḥaydarī",
+      "google_doc_id": "1ICRZ0Ag2yxQsNLGxtlvcmCOxXPab4czoBdI4kAdLWkY",
+      "url": "https://docs.google.com/document/d/1ICRZ0Ag2yxQsNLGxtlvcmCOxXPab4czoBdI4kAdLWkY/edit",
+      "created_at": "2026-10-20T06:56:28.428Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 108,
+      "title": "The Ḥadīth of the Two Weighty Things: Transmission and Signification",
+      "google_doc_id": "12fDVCN0rEGEZa8e1CXJOSJ4Blodkyl_y2cvVpyEgigM",
+      "url": "https://docs.google.com/document/d/12fDVCN0rEGEZa8e1CXJOSJ4Blodkyl_y2cvVpyEgigM/edit",
+      "created_at": "2026-10-20T06:56:30.451Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 109,
+      "title": "The Stations and Responsibilities of the Imams of the Ahl al-Bayt, Peace Be upon Them",
+      "google_doc_id": "1dz1xFJx3hgR7FnlF0WRxCErP5nqsmZQEOUlcYJ3znLA",
+      "url": "https://docs.google.com/document/d/1dz1xFJx3hgR7FnlF0WRxCErP5nqsmZQEOUlcYJ3znLA/edit",
+      "created_at": "2026-10-20T06:56:27.422Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 110,
+      "title": "The Human Being between Compulsion and Delegation: An Introduction to the Theory of the Matter between the Two Matters",
+      "google_doc_id": "1Xq2NRVdkz_5OFuAqJPDsguzTFMm1EGTtp7e_ZpL2uyk",
+      "url": "https://docs.google.com/document/d/1Xq2NRVdkz_5OFuAqJPDsguzTFMm1EGTtp7e_ZpL2uyk/edit",
+      "created_at": "2026-10-20T06:56:29.525Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 111,
+      "title": "From the Centrality of Ḥadīth-Islam to the Centrality of Qurʾān-Islam",
+      "google_doc_id": "1cNRa0fpo4wbUBdaJn1WwV-f8pJBhVAaPYnsjWCiJzQg",
+      "url": "https://docs.google.com/document/d/1cNRa0fpo4wbUBdaJn1WwV-f8pJBhVAaPYnsjWCiJzQg/edit",
+      "created_at": "2026-10-20T06:56:26.373Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 112,
+      "title": "Intercession: Studies in Its Reality, Divisions, and Implications",
+      "google_doc_id": "15bdt4on7kJlh29kkw2Tja1AWPn7vTBd8AZnzqJf7C2U",
+      "url": "https://docs.google.com/document/d/15bdt4on7kJlh29kkw2Tja1AWPn7vTBd8AZnzqJf7C2U/edit",
+      "created_at": "2026-10-20T06:56:40.422Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 113,
+      "title": "Knowledge of God, vol. 2",
+      "google_doc_id": "1o6mUf5DOeLHkz48kSgwyuBzOtmmK51pYGvBG8-MNZwI",
+      "url": "https://docs.google.com/document/d/1o6mUf5DOeLHkz48kSgwyuBzOtmmK51pYGvBG8-MNZwI/edit",
+      "created_at": "2026-10-20T06:56:37.031Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 114,
+      "title": "Knowledge of God, vol. 1",
+      "google_doc_id": "1Dy6E5y1tSlao7AwdfX_jvFawELhfdPpSu_cpbXIp1tU",
+      "url": "https://docs.google.com/document/d/1Dy6E5y1tSlao7AwdfX_jvFawELhfdPpSu_cpbXIp1tU/edit",
+      "created_at": "2026-10-20T06:56:37.992Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 115,
+      "title": "An Introduction to the Epistemic System of the Mechanism for Understanding the Qurʾān",
+      "google_doc_id": "1nQ92K_Ic2q1LksKUaqvXaMEKziZDSWhQtzLRYi29rxQ",
+      "url": "https://docs.google.com/document/d/1nQ92K_Ic2q1LksKUaqvXaMEKziZDSWhQtzLRYi29rxQ/edit",
+      "created_at": "2026-10-20T06:56:36.079Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 116,
+      "title": "ʿAllāmah al-Ḥaydarī: Rereading Shīʿī Thought, Excavating the Heritage and Interrogating the Sacred",
+      "google_doc_id": "1vC3gEKXbS0az9Sidb0qrSNYRYfFsFJsz0pMa3zKl5r0",
+      "url": "https://docs.google.com/document/d/1vC3gEKXbS0az9Sidb0qrSNYRYfFsFJsz0pMa3zKl5r0/edit",
+      "created_at": "2026-10-20T06:56:39.012Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 117,
+      "title": "Philosophical Schools in the Islamic Era",
+      "google_doc_id": "1khJfYvb2WuwqKf-AAV5E1eV5daC_hnDbseG_NouUdFU",
+      "url": "https://docs.google.com/document/d/1khJfYvb2WuwqKf-AAV5E1eV5daC_hnDbseG_NouUdFU/edit",
+      "created_at": "2026-10-20T06:56:56.145Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 120,
+      "title": "Jurisprudential Treatises",
+      "google_doc_id": "1zgMIfeGRgbYRkIL7Wguw2zUiH3-_eWHo9V2SP9d5gzI",
+      "url": "https://docs.google.com/document/d/1zgMIfeGRgbYRkIL7Wguw2zUiH3-_eWHo9V2SP9d5gzI/edit",
+      "created_at": "2026-10-20T06:56:54.983Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 121,
+      "title": "Methods of Qurʾānic Exegesis",
+      "google_doc_id": "1p0g3YKPYumEKAA-s3cxqSZ5PKumE8rYShkc60jrzwgc",
+      "url": "https://docs.google.com/document/d/1p0g3YKPYumEKAA-s3cxqSZ5PKumE8rYShkc60jrzwgc/edit",
+      "created_at": "2026-10-20T06:56:53.053Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 123,
+      "title": "General Principles of the Jurisprudence of Forbidden Earnings",
+      "google_doc_id": "1zK0aMT-creGVGxm3hWagltmDHsknZIZqCTwDGebkDHo",
+      "url": "https://docs.google.com/document/d/1zK0aMT-creGVGxm3hWagltmDHsknZIZqCTwDGebkDHo/edit",
+      "created_at": "2026-10-20T06:56:52.173Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 124,
+      "title": "Studies in the Jurisprudence of the Sale Contract",
+      "google_doc_id": "1nwT54bEDas2yq11blyij0EkRitFpWJ65NxPkGE9KAbE",
+      "url": "https://docs.google.com/document/d/1nwT54bEDas2yq11blyij0EkRitFpWJ65NxPkGE9KAbE/edit",
+      "created_at": "2026-10-20T06:56:51.269Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 126,
+      "title": "The Fixed and the Changing in Religious Knowledge",
+      "google_doc_id": "1uEiyr6I7xs75tfOUI63SBXgb4Xln8TS_o-18B1lVBeA",
+      "url": "https://docs.google.com/document/d/1uEiyr6I7xs75tfOUI63SBXgb4Xln8TS_o-18B1lVBeA/edit",
+      "created_at": "2026-10-20T06:57:04.628Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 127,
+      "title": "The Theory of Taʾwīl in the Qurʾān",
+      "google_doc_id": "11N4nGtG2YDOmNXdHZuRHZ3SBI_qvnOplsImS59f1uUE",
+      "url": "https://docs.google.com/document/d/11N4nGtG2YDOmNXdHZuRHZ3SBI_qvnOplsImS59f1uUE/edit",
+      "created_at": "2026-10-20T06:57:03.357Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 128,
+      "title": "Tawḥīd according to Shaykh Ibn Taymīyah",
+      "google_doc_id": "1VSxoFpPiSUQaLyHtXa4coqBUHdzdffANuCoNxnhvJjo",
+      "url": "https://docs.google.com/document/d/1VSxoFpPiSUQaLyHtXa4coqBUHdzdffANuCoNxnhvJjo/edit",
+      "created_at": "2026-10-20T06:57:01.210Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 129,
+      "title": "Jurisprudential Fatwas, vol. 3: Transactions",
+      "google_doc_id": "1TTBCT-_JAL0CICXTxWRuHDps4uFYBzWLTpZvXGZ4-dI",
+      "url": "https://docs.google.com/document/d/1TTBCT-_JAL0CICXTxWRuHDps4uFYBzWLTpZvXGZ4-dI/edit",
+      "created_at": "2026-10-20T06:57:02.200Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 130,
+      "title": "Jurisprudential Fatwas, vol. 1: Acts of Worship",
+      "google_doc_id": "1ZB8936-1y7Z5bgrw37VJxnSKgRy87b7kgOBk8Msrxtg",
+      "url": "https://docs.google.com/document/d/1ZB8936-1y7Z5bgrw37VJxnSKgRy87b7kgOBk8Msrxtg/edit",
+      "created_at": "2026-10-20T06:57:05.778Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 131,
+      "title": "Jurisprudential Fatwas, vol. 2: Acts of Worship",
+      "google_doc_id": "1zZ7X87AUpGXUCo0ruocpWEDam2Ru1vg-Lo1jwnJIeho",
+      "url": "https://docs.google.com/document/d/1zZ7X87AUpGXUCo0ruocpWEDam2Ru1vg-Lo1jwnJIeho/edit",
+      "created_at": "2026-10-20T06:57:13.903Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 132,
+      "title": "Authority and the Making of Fabrication and Interpretation",
+      "google_doc_id": "1iPBSWuOyiT_gyE0bA_Koa99aXdDM1_7jQwdRDzfkGLI",
+      "url": "https://docs.google.com/document/d/1iPBSWuOyiT_gyE0bA_Koa99aXdDM1_7jQwdRDzfkGLI/edit",
+      "created_at": "2026-10-20T06:57:15.921Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 135,
+      "title": "The Innovations of ʿAllāmah al-Ḥaydarī in Method, Tawḥīd, and Imamate",
+      "google_doc_id": "1Ur9bEMkKYquP4JE2TasVvERHrcDj6uQ8o4WWLG92bLk",
+      "url": "https://docs.google.com/document/d/1Ur9bEMkKYquP4JE2TasVvERHrcDj6uQ8o4WWLG92bLk/edit",
+      "created_at": "2026-10-20T06:57:14.874Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 136,
+      "title": "Divine Decree and Destiny and the Problem of Disabling Human Action",
+      "google_doc_id": "10hSVvBcj_6Sq_Jt555CYE9v5GdsO11Gl0oc9dMgY-Q8",
+      "url": "https://docs.google.com/document/d/10hSVvBcj_6Sq_Jt555CYE9v5GdsO11Gl0oc9dMgY-Q8/edit",
+      "created_at": "2026-10-20T06:57:12.829Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 137,
+      "title": "Badāʾ and How It Occurs in Divine Knowledge",
+      "google_doc_id": "18JTrcIPMvQkHss0_jzQOqKyjQjR1hf5-M0Lk1wuDops",
+      "url": "https://docs.google.com/document/d/18JTrcIPMvQkHss0_jzQOqKyjQjR1hf5-M0Lk1wuDops/edit",
+      "created_at": "2026-10-20T06:57:16.979Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 138,
+      "title": "Exaggeration: Its Reality and Divisions",
+      "google_doc_id": "18NVZ4ofTMsQ7MxIFY6LJOIbTjRG141vjhtLI251FMuE",
+      "url": "https://docs.google.com/document/d/18NVZ4ofTMsQ7MxIFY6LJOIbTjRG141vjhtLI251FMuE/edit",
+      "created_at": "2026-10-20T06:57:25.803Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 139,
+      "title": "Selected Rites of Ḥajj and ʿUmrah",
+      "google_doc_id": "1HJDEeI8QlCOtEjyPRiuhvAVlm0obc3KOAYPpa5hN4Pk",
+      "url": "https://docs.google.com/document/d/1HJDEeI8QlCOtEjyPRiuhvAVlm0obc3KOAYPpa5hN4Pk/edit",
+      "created_at": "2026-10-20T06:57:24.068Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 140,
+      "title": "The Logic of Understanding the Qurʾān: Methodological Foundations of Exegesis and Taʾwīl in Light of Āyat al-Kursī, vol. 3",
+      "google_doc_id": "1ybJKCa3EMRIU-RNFX682jQ7SgQ1JkLE1kKZ4I3giFuk",
+      "url": "https://docs.google.com/document/d/1ybJKCa3EMRIU-RNFX682jQ7SgQ1JkLE1kKZ4I3giFuk/edit",
+      "created_at": "2026-10-20T06:57:21.950Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 141,
+      "title": "The Logic of Understanding the Qurʾān: Methodological Foundations of Exegesis and Taʾwīl in Light of Āyat al-Kursī, vol. 2",
+      "google_doc_id": "1HWw1bvISad7ICGi-zjCob7gpVegP0I1W9GiwrGWNwAA",
+      "url": "https://docs.google.com/document/d/1HWw1bvISad7ICGi-zjCob7gpVegP0I1W9GiwrGWNwAA/edit",
+      "created_at": "2026-10-20T06:57:24.885Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 142,
+      "title": "The Logic of Understanding the Qurʾān: Methodological Foundations of Exegesis and Taʾwīl in Light of Āyat al-Kursī, vol. 1",
+      "google_doc_id": "1bei0ycYyKeMU1hkRUBxdKtmpKQ2Y6Y6LBgl-mUBx3ks",
+      "url": "https://docs.google.com/document/d/1bei0ycYyKeMU1hkRUBxdKtmpKQ2Y6Y6LBgl-mUBx3ks/edit",
+      "created_at": "2026-10-20T06:57:23.039Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 143,
+      "title": "Khums on Business Profits: Jurisprudential Fatwas, 2",
+      "google_doc_id": "1qKKvn-phSiYbg6frxnG6SeENFv4jPBuUgOyGEXCDeyI",
+      "url": "https://docs.google.com/document/d/1qKKvn-phSiYbg6frxnG6SeENFv4jPBuUgOyGEXCDeyI/edit",
+      "created_at": "2026-10-20T06:57:38.605Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 144,
+      "title": "Selections from the Rulings Pertaining to Women",
+      "google_doc_id": "1V0iYSbMd-6uMBDi4nPAIixx0WDtyJnd7xqYhJRDdeqU",
+      "url": "https://docs.google.com/document/d/1V0iYSbMd-6uMBDi4nPAIixx0WDtyJnd7xqYhJRDdeqU/edit",
+      "created_at": "2026-10-20T06:57:37.405Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 145,
+      "title": "Lessons in Transcendent Wisdom, 1",
+      "google_doc_id": "1TIymy20MyMlw1_L5B5oA98GvoSutYa5_LIzIziVdIno",
+      "url": "https://docs.google.com/document/d/1TIymy20MyMlw1_L5B5oA98GvoSutYa5_LIzIziVdIno/edit",
+      "created_at": "2026-10-20T06:57:36.376Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 146,
+      "title": "Lessons in Transcendent Wisdom, 2",
+      "google_doc_id": "110QMJNcfP9hslZ1lGTCAhWDqOnza43L5eF95DjsBvNE",
+      "url": "https://docs.google.com/document/d/110QMJNcfP9hslZ1lGTCAhWDqOnza43L5eF95DjsBvNE/edit",
+      "created_at": "2026-10-20T06:57:40.084Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 147,
+      "title": "Studies in Philosophical Psychology",
+      "google_doc_id": "17rXeSLTjEXq9huj53gV7gIQNyfFsC0t5DwUc34eZsPM",
+      "url": "https://docs.google.com/document/d/17rXeSLTjEXq9huj53gV7gIQNyfFsC0t5DwUc34eZsPM/edit",
+      "created_at": "2026-10-20T06:57:41.190Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 148,
+      "title": "The Intrinsic Doctrine in Epistemology",
+      "google_doc_id": "1-I7SFqoQRrUOjFVZvkhuUwm9QTgF9e9UfiHHRuMly-w",
+      "url": "https://docs.google.com/document/d/1-I7SFqoQRrUOjFVZvkhuUwm9QTgF9e9UfiHHRuMly-w/edit",
+      "created_at": "2026-10-20T06:57:46.359Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 149,
+      "title": "An Introduction to the Methods of Knowledge among Islamic Thinkers",
+      "google_doc_id": "1ut6NqBcL81zKUXIuVWrB6TTmXhDFm_JyiNIiHxMZdBw",
+      "url": "https://docs.google.com/document/d/1ut6NqBcL81zKUXIuVWrB6TTmXhDFm_JyiNIiHxMZdBw/edit",
+      "created_at": "2026-10-20T06:57:50.080Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 150,
+      "title": "Infallibility",
+      "google_doc_id": "1Wmo21W5gPFMr_WhH-SBC_Dj3EapWkMOjTXwHPXoAASA",
+      "url": "https://docs.google.com/document/d/1Wmo21W5gPFMr_WhH-SBC_Dj3EapWkMOjTXwHPXoAASA/edit",
+      "created_at": "2026-10-20T06:57:49.114Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 151,
+      "title": "Gaining Juristic Understanding in Religion",
+      "google_doc_id": "1fpUSsRRG8mpzYddE50KZrprYS2372_9Q-vmd-FYuHIo",
+      "url": "https://docs.google.com/document/d/1fpUSsRRG8mpzYddE50KZrprYS2372_9Q-vmd-FYuHIo/edit",
+      "created_at": "2026-10-20T06:57:48.216Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 152,
+      "title": "In the Shades of Creed and Ethics",
+      "google_doc_id": "1iWt5gZhCMdNMoJqASp1PmVzGdjvsWPM_wS9xM_2sVyA",
+      "url": "https://docs.google.com/document/d/1iWt5gZhCMdNMoJqASp1PmVzGdjvsWPM_wS9xM_2sVyA/edit",
+      "created_at": "2026-10-20T06:57:47.378Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 153,
+      "title": "The Concept of Intercession in the Qurʾān",
+      "google_doc_id": "15OmUCsBadgdddQo2v8NCNnH6Sz-HCfmtZeRX-GO7Nm4",
+      "url": "https://docs.google.com/document/d/15OmUCsBadgdddQo2v8NCNnH6Sz-HCfmtZeRX-GO7Nm4/edit",
+      "created_at": "2026-10-20T06:57:58.569Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 154,
+      "title": "The Degrees of Wayfaring and Spiritual Journeying to God: From Creation to the Real",
+      "google_doc_id": "19H96dEAdNVs_4tLLGpdE3UGil7TaHEgXrwOgiCPSos4",
+      "url": "https://docs.google.com/document/d/19H96dEAdNVs_4tLLGpdE3UGil7TaHEgXrwOgiCPSos4/edit",
+      "created_at": "2026-10-20T06:57:57.627Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 155,
+      "title": "Shīʿī Mysticism: Perspectives on Its Theoretical Foundations and Practical Paths",
+      "google_doc_id": "1R0jS8F8cFeWG_HZxWzC80wKP8sNRZmSLSN9LXffd0Sw",
+      "url": "https://docs.google.com/document/d/1R0jS8F8cFeWG_HZxWzC80wKP8sNRZmSLSN9LXffd0Sw/edit",
+      "created_at": "2026-10-20T06:57:56.631Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 157,
+      "title": "Conjecture: A Study of Its Probative Force, Divisions, and Rulings",
+      "google_doc_id": "1DYqVlJ3SwmoLCmmq-CGhFxAl4LGN630DMtAKrIhx4Fk",
+      "url": "https://docs.google.com/document/d/1DYqVlJ3SwmoLCmmq-CGhFxAl4LGN630DMtAKrIhx4Fk/edit",
+      "created_at": "2026-10-20T06:57:55.658Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 158,
+      "title": "Certainty",
+      "google_doc_id": "1_pLxfOsaLD6TLaVmVG6B5nXgz3AJ87eE8HN3lUEoKUQ",
+      "url": "https://docs.google.com/document/d/1_pLxfOsaLD6TLaVmVG6B5nXgz3AJ87eE8HN3lUEoKUQ/edit",
+      "created_at": "2026-10-20T06:58:00.213Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 159,
+      "title": "Neither Harm nor Reciprocating Harm",
+      "google_doc_id": "19nBbcd-p4Z5PEGxZ8FGQMAfj_wW8jfYxR1OWb2zHGVk",
+      "url": "https://docs.google.com/document/d/19nBbcd-p4Z5PEGxZ8FGQMAfj_wW8jfYxR1OWb2zHGVk/edit",
+      "created_at": "2026-10-20T06:58:05.732Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 160,
+      "title": "The Jurisprudential Method of ʿAllāmah al-Ḥaydarī: The Jurisprudence of Forbidden Issues as a Model",
+      "google_doc_id": "17Jr9V0CYzAQvbmeAG1iyD_NVQyFOrHPP7OO_wlw3fxI",
+      "url": "https://docs.google.com/document/d/17Jr9V0CYzAQvbmeAG1iyD_NVQyFOrHPP7OO_wlw3fxI/edit",
+      "created_at": "2026-10-20T06:58:07.609Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 161,
+      "title": "The Philosophy of Ṣadr al-Mutaʾallihīn: A Reading of the Foundations of Transcendent Wisdom",
+      "google_doc_id": "1lIUAtqYxhmxUS9Tx3bwgZI1qt36VXlZqg6ppaYCtiPA",
+      "url": "https://docs.google.com/document/d/1lIUAtqYxhmxUS9Tx3bwgZI1qt36VXlZqg6ppaYCtiPA/edit",
+      "created_at": "2026-10-20T06:58:09.576Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 162,
+      "title": "The Divine Forms: Analytical Studies in Plato’s Theory",
+      "google_doc_id": "1ehFY8TDvxRgIIwx42lgggc-9sx5ptCol-EwXSr_88Ug",
+      "url": "https://docs.google.com/document/d/1ehFY8TDvxRgIIwx42lgggc-9sx5ptCol-EwXSr_88Ug/edit",
+      "created_at": "2026-10-20T06:58:08.639Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 163,
+      "title": "The Essence in the Exegesis of the Book",
+      "google_doc_id": "181wcHxxf7Wx9o95YBMfc50p9RQ7r-xi3XmNcZY-l1pQ",
+      "url": "https://docs.google.com/document/d/181wcHxxf7Wx9o95YBMfc50p9RQ7r-xi3XmNcZY-l1pQ/edit",
+      "created_at": "2026-10-20T06:58:06.620Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 164,
+      "title": "Principles of Exegesis and Taʾwīl",
+      "google_doc_id": "1RWKzgF9J8v-Zh3WbDBqFTyW9McY8WHb7kv5aP-C1sXE",
+      "url": "https://docs.google.com/document/d/1RWKzgF9J8v-Zh3WbDBqFTyW9McY8WHb7kv5aP-C1sXE/edit",
+      "created_at": "2026-10-20T06:58:26.646Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 165,
+      "title": "Miracle and Inimitability between Theory and Application",
+      "google_doc_id": "1KUUORULmVz40wgkMqm5He3E4g9LOfRx4XUFXEBTFMXA",
+      "url": "https://docs.google.com/document/d/1KUUORULmVz40wgkMqm5He3E4g9LOfRx4XUFXEBTFMXA/edit",
+      "created_at": "2026-10-20T06:58:21.659Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 166,
+      "title": "Godwariness in the Qurʾān",
+      "google_doc_id": "10AU4bxvm3sbWGAG84ZG1sjNUbIaiNhlBXV1B-lcsscg",
+      "url": "https://docs.google.com/document/d/10AU4bxvm3sbWGAG84ZG1sjNUbIaiNhlBXV1B-lcsscg/edit",
+      "created_at": "2026-10-20T06:58:23.934Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 167,
+      "title": "Joseph the Truthful",
+      "google_doc_id": "1GCzudfN6xpcGIx0q4IvaMJTqU9KMYRFyofpurtpavlM",
+      "url": "https://docs.google.com/document/d/1GCzudfN6xpcGIx0q4IvaMJTqU9KMYRFyofpurtpavlM/edit",
+      "created_at": "2026-10-20T06:58:25.421Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 168,
+      "title": "Those Firmly Rooted in Knowledge",
+      "google_doc_id": "1DNA6d2vd4lv-X-jTDjMmavUnTUxOjLFJXz7172BdiDs",
+      "url": "https://docs.google.com/document/d/1DNA6d2vd4lv-X-jTDjMmavUnTUxOjLFJXz7172BdiDs/edit",
+      "created_at": "2026-10-20T06:58:22.721Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 170,
+      "title": "Ontological Walāyah: Its Reality and Manifestations",
+      "google_doc_id": "1ajF08_E-15n5AawOQrDCR2sgv2DHgqgp_0pFnqSvydI",
+      "url": "https://docs.google.com/document/d/1ajF08_E-15n5AawOQrDCR2sgv2DHgqgp_0pFnqSvydI/edit",
+      "created_at": "2026-10-20T06:58:35.165Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 171,
+      "title": "Studies in Creed, 1",
+      "google_doc_id": "1GkUHFHjmYwR7kXF7ZfxMqzNMT86eE3yVO5qEZ3Qyl2Y",
+      "url": "https://docs.google.com/document/d/1GkUHFHjmYwR7kXF7ZfxMqzNMT86eE3yVO5qEZ3Qyl2Y/edit",
+      "created_at": "2026-10-20T06:58:36.105Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 172,
+      "title": "Lessons in Tawḥīd",
+      "google_doc_id": "1ivuRDNfVRtfQXlEB7XU5h6FFsRhMeQ5agwCbIPOQH28",
+      "url": "https://docs.google.com/document/d/1ivuRDNfVRtfQXlEB7XU5h6FFsRhMeQ5agwCbIPOQH28/edit",
+      "created_at": "2026-10-20T06:58:32.156Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 173,
+      "title": "The Knowledge of the Imam: Studies in the Reality and Degrees of the Knowledge of the Infallible Imams, Peace Be upon Them",
+      "google_doc_id": "1zWwZ3cbs_92T1tsnrGq6y4TDW8HejgwaLZM3qHwuj8s",
+      "url": "https://docs.google.com/document/d/1zWwZ3cbs_92T1tsnrGq6y4TDW8HejgwaLZM3qHwuj8s/edit",
+      "created_at": "2026-10-20T06:58:34.272Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 174,
+      "title": "Studies in Creed, vol. 2",
+      "google_doc_id": "1AHF2nLtx_f3HFvTiDp9cb3jPZmTYpFA0ISpKG8L4cfw",
+      "url": "https://docs.google.com/document/d/1AHF2nLtx_f3HFvTiDp9cb3jPZmTYpFA0ISpKG8L4cfw/edit",
+      "created_at": "2026-10-20T06:58:33.262Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 175,
+      "title": "Kamal al-Ḥaydarī: A Reading of His Biography and Method, vol. 2",
+      "google_doc_id": "19KpbU18rH8-27aP71wXCoeF4_1oZkX_xO6ipz0MRbho",
+      "url": "https://docs.google.com/document/d/19KpbU18rH8-27aP71wXCoeF4_1oZkX_xO6ipz0MRbho/edit",
+      "created_at": "2026-10-20T06:58:41.739Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 176,
+      "title": "Kamal al-Ḥaydarī: A Reading of His Biography and Method, vol. 1",
+      "google_doc_id": "1SgywmqiLJLoUZoe_Eo6yFvmtgiE3Zri9I-O_ZACdX8U",
+      "url": "https://docs.google.com/document/d/1SgywmqiLJLoUZoe_Eo6yFvmtgiE3Zri9I-O_ZACdX8U/edit",
+      "created_at": "2026-10-20T06:58:42.772Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    }
+  ],
+  "created_questions_logs": [
+    {
+      "workbench_project_id": 1,
+      "title": "The Infallibility of the Prophets in the Noble Qurʾān",
+      "google_doc_id": "1oDZ25F-xNqtNW9R-VpS8xKlw13Am4O8yRNQ0pIZdXb0",
+      "url": "https://docs.google.com/document/d/1oDZ25F-xNqtNW9R-VpS8xKlw13Am4O8yRNQ0pIZdXb0/edit",
+      "created_at": "2026-10-20T06:58:58.632Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 2,
+      "title": "The Prophetic Measures for Preserving the Divine Message",
+      "google_doc_id": "10qTOcIudfPzSM6vfq5SATN70d1JDiyi_8xQLbN64BNk",
+      "url": "https://docs.google.com/document/d/10qTOcIudfPzSM6vfq5SATN70d1JDiyi_8xQLbN64BNk/edit",
+      "created_at": "2026-10-20T06:58:53.963Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 3,
+      "title": "Repentance: Its Reality, Conditions, and Effects",
+      "google_doc_id": "1zjsctaWm16giW6lNF028ORVjvvMZ8yPV8VJ0XeYwO4I",
+      "url": "https://docs.google.com/document/d/1zjsctaWm16giW6lNF028ORVjvvMZ8yPV8VJ0XeYwO4I/edit",
+      "created_at": "2026-10-20T06:59:17.710Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 4,
+      "title": "Supplication: Its Illuminations and Implications",
+      "google_doc_id": "149adC687XrjHXRW3omYpE9bFMm_qyqjBHSu1_dW-zr4",
+      "url": "https://docs.google.com/document/d/149adC687XrjHXRW3omYpE9bFMm_qyqjBHSu1_dW-zr4/edit",
+      "created_at": "2026-10-20T06:59:25.841Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 5,
+      "title": "Seeking Intercession through the Possessor of the Means",
+      "google_doc_id": "1wZ0D6g6HQh-fzb6O9VQiUZtLnBu3Ze6wJ0BL3CSEjqA",
+      "url": "https://docs.google.com/document/d/1wZ0D6g6HQh-fzb6O9VQiUZtLnBu3Ze6wJ0BL3CSEjqA/edit",
+      "created_at": "2026-10-20T06:58:56.214Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 6,
+      "title": "The Attributes of the Servants of the All-Merciful in the Qurʾān",
+      "google_doc_id": "1CFkIe4dROKFC6LtcbS0HBwB55Szb1G4ybpzKEWBiyIE",
+      "url": "https://docs.google.com/document/d/1CFkIe4dROKFC6LtcbS0HBwB55Szb1G4ybpzKEWBiyIE/edit",
+      "created_at": "2026-10-20T06:58:57.291Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 7,
+      "title": "Features of Jurisprudential Renewal",
+      "google_doc_id": "15N0VlStzWaTDNfQDatSLNqEsFdNQOa8V4r4bypJft7M",
+      "url": "https://docs.google.com/document/d/15N0VlStzWaTDNfQDatSLNqEsFdNQOa8V4r4bypJft7M/edit",
+      "created_at": "2026-10-20T06:59:24.858Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 8,
+      "title": "The Jurisprudence of Fasting: Questions and Answers",
+      "google_doc_id": "1ea2YwWT8Hsd61jBu_serm3YsCunbW0I-SoR0MS3PCYI",
+      "url": "https://docs.google.com/document/d/1ea2YwWT8Hsd61jBu_serm3YsCunbW0I-SoR0MS3PCYI/edit",
+      "created_at": "2026-10-20T06:58:55.084Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 9,
+      "title": "ʿAllāmah al-Ṭabāṭabāʾī: Aspects of His Biography and Scholarly Method",
+      "google_doc_id": "1V9o66_r7nBrgq1iagGp1_l_VgKh8tSb3L8kk2WUVjfU",
+      "url": "https://docs.google.com/document/d/1V9o66_r7nBrgq1iagGp1_l_VgKh8tSb3L8kk2WUVjfU/edit",
+      "created_at": "2026-10-20T06:59:04.875Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 10,
+      "title": "The Religious Marjaʿ Sayyid Kamal al-Ḥaydarī: A Sketch of His Life, Method, and Reformist Project",
+      "google_doc_id": "1awUkDMR6v2p3cagv9eMZxbKESTJIE9cJPGE6uwbxP68",
+      "url": "https://docs.google.com/document/d/1awUkDMR6v2p3cagv9eMZxbKESTJIE9cJPGE6uwbxP68/edit",
+      "created_at": "2026-10-20T06:59:05.755Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 11,
+      "title": "Rites of Ḥajj",
+      "google_doc_id": "1VXxwSvbT548BqptAgX5X7CceVRZUgQ2Dt7VjqQANHd0",
+      "url": "https://docs.google.com/document/d/1VXxwSvbT548BqptAgX5X7CceVRZUgQ2Dt7VjqQANHd0/edit",
+      "created_at": "2026-10-20T06:59:03.743Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 12,
+      "title": "The Ethics of Ḥajj and Visitation",
+      "google_doc_id": "1O-yIE1vsAcpbBQpj8UvK05Fizu64buWr_07qGj81qak",
+      "url": "https://docs.google.com/document/d/1O-yIE1vsAcpbBQpj8UvK05Fizu64buWr_07qGj81qak/edit",
+      "created_at": "2026-10-20T06:18:12.838Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 43,
+      "title": "Junctures in the Reform of Shīʿī Thought",
+      "google_doc_id": "1FLdjMut3O22CGAZt3WqzUyGfjmNmY99Ewqqt0iLg4xY",
+      "url": "https://docs.google.com/document/d/1FLdjMut3O22CGAZt3WqzUyGfjmNmY99Ewqqt0iLg4xY/edit",
+      "created_at": "2026-10-20T06:59:22.776Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 47,
+      "title": "From a Ḥadīth-Centered Islam to a Qurʾān-Centered Islam",
+      "google_doc_id": "11cmclgeI84BXhfA7ulQnHfJT6d9IkrudiSqtTjIvcLs",
+      "url": "https://docs.google.com/document/d/11cmclgeI84BXhfA7ulQnHfJT6d9IkrudiSqtTjIvcLs/edit",
+      "created_at": "2026-10-20T06:59:07.850Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 78,
+      "title": "The Criterion for Correcting the Ḥadīth Legacy",
+      "google_doc_id": "1h47ecxNSJs67aP1gpeSoUudNUwo3r7tI6Ckee1bJVUo",
+      "url": "https://docs.google.com/document/d/1h47ecxNSJs67aP1gpeSoUudNUwo3r7tI6Ckee1bJVUo/edit",
+      "created_at": "2026-10-20T06:59:27.007Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 119,
+      "title": "Methods of Researching Imamate: Between Theory and Application",
+      "google_doc_id": "1kbtIesd5_7616lEHrn3pFN9YTr4VLvtdYgmGvza0Z3o",
+      "url": "https://docs.google.com/document/d/1kbtIesd5_7616lEHrn3pFN9YTr4VLvtdYgmGvza0Z3o/edit",
+      "created_at": "2026-10-20T06:59:06.670Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 125,
+      "title": "A Study on Imamate",
+      "google_doc_id": "1XENgOycG_vvT1ZsC9X7hZ734De27J8TPUeyakgtw77U",
+      "url": "https://docs.google.com/document/d/1XENgOycG_vvT1ZsC9X7hZ734De27J8TPUeyakgtw77U/edit",
+      "created_at": "2026-10-20T06:59:23.734Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 133,
+      "title": "Methodological Priorities in Understanding Religious Teachings",
+      "google_doc_id": "12SkyNZBQcsM_VUFC0shC_31A05sK2XflaNG3AHrHeWI",
+      "url": "https://docs.google.com/document/d/12SkyNZBQcsM_VUFC0shC_31A05sK2XflaNG3AHrHeWI/edit",
+      "created_at": "2026-10-20T06:59:15.762Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 134,
+      "title": "The Preservation of the Qurʾān from Distortion",
+      "google_doc_id": "1gdGHdNM3XqgBkdvg5TVHDnpoMaPbNRi7WBU61NXr7z4",
+      "url": "https://docs.google.com/document/d/1gdGHdNM3XqgBkdvg5TVHDnpoMaPbNRi7WBU61NXr7z4/edit",
+      "created_at": "2026-10-20T06:59:14.846Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 156,
+      "title": "An Introduction to the Science of Ethics",
+      "google_doc_id": "1ddaAxC1sl2kiUPaIE9WRmvoFclYt_dzy-0KsRlfYtzc",
+      "url": "https://docs.google.com/document/d/1ddaAxC1sl2kiUPaIE9WRmvoFclYt_dzy-0KsRlfYtzc/edit",
+      "created_at": "2026-10-20T06:59:16.751Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    },
+    {
+      "workbench_project_id": 169,
+      "title": "Philosophy of Religion",
+      "google_doc_id": "138pc7huzmH_Nb4IhdPoFOHISH2Fnr8Y-I52thV8S0zc",
+      "url": "https://docs.google.com/document/d/138pc7huzmH_Nb4IhdPoFOHISH2Fnr8Y-I52thV8S0zc/edit",
+      "created_at": "2026-10-20T06:59:13.636Z",
+      "drive_permission_check": "not_individually_verified",
+      "workbench_link_check": "not_individually_verified"
+    }
+  ]
+}
