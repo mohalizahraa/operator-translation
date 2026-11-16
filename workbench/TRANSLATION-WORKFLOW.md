@@ -54,6 +54,12 @@ Run the read-only `node scripts/compare-manuscript-native.mjs /private/original-
 
 **Regression:** `npm run check` runs `manuscript-migration-preflight.test.mjs` with positive and negative evidence cases, including an existing substantive manuscript incorrectly targeted for blank replacement, a restricted source, an inaccessible live API and duplicate destination identities. These tests validate the **planner's rules**, not live Google/Workbench integration. Staging/live API and Drive readback remain separately required.
 
+### Bounded rendered-source witness when PDF extraction is corrupt
+
+For **public original Arabic PDFs only**, the one-time self-hosted source visualization route `.github/workflows/workbench-source-visual.yml` accepts an owner-authored GitHub issue with the exact title `Workbench render: #<book ID> physical <first>-<last>` (at most four consecutive physical pages). The runner retrieves the canonical `/api/pdf/<ID>` source, checks the PDF signature/size, and renders the requested physical pages with macOS PDFKit. Base64 JPEG page images are emitted only into the workflow run log so the translation worker can inspect the actual typography and notes; temporary PDF files are removed. **The Actions logs are public in this public repository**: never use this mechanism with private sources or manuscripts. Do not paste the source Arabic, private Doc IDs, or credentials into the issue or logs. Keep render ranges bounded and use the existing public-original source only.
+
+This is **visual access evidence, not OCR/semantic verification or a translation checkpoint**. Review the images and any source-text witness together, preserve note anchors, mark ambiguous source passages OPEN, and keep the target uncredited until source↔English comparison and the live Workbench readback gates succeed. No per-book workflow edit or paid hosted runner is required; issue triggers reuse the same tested runner path.
+
 ## Prepare and hand off without losing authority
 
 1. Resolve the exact active Workbench project and linked English target through the current fast-start/resume contract. Record the canonical Arabic PDF identity/hash, verified physical-page denominator, target document identity, and verified resume boundary. Do not rediscover or substitute a different source when the context supplies the correct one.
