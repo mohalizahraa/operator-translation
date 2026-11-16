@@ -10,7 +10,7 @@ const base=()=>({
     sourcePageProgress:0,observedThisRun:true,apiWritable:true,linkBefore:null},
   expectedLinkBefore:null,
   inventoryComplete:true,sourceSearchComplete:true,
-  sourceCandidates:[{fileId:sourceId,contentState:'nonempty',contentVerified:true}],
+  sourceCandidates:[{fileId:sourceId,contentState:'nonempty',contentVerified:true,editionVerified:true}],
   destinationCandidates:[],action:'copy_existing',copySourceFileId:sourceId
 });
 const withCopy=()=>{const x=base();x.action='attach_target';x.destinationCandidates=[{
@@ -92,4 +92,17 @@ test('incomplete source and destination census blocks mutation',()=>{
   const row=base();row.sourceSearchComplete=false;row.inventoryComplete=false;
   assert.ok(reasons(row).includes('source_search_incomplete'));
   assert.ok(reasons(row).includes('inventory_incomplete'));
+});
+
+test('a source of the wrong or unverified edition is never copied',()=>{
+  const row=base();row.sourceCandidates[0].editionVerified=false;
+  assert.ok(reasons(row).includes('copy_source_edition_unverified'));
+});
+test('conflicting or inaccessible alternative source witnesses block copying',()=>{
+  const row=base();row.sourceCandidates.push({fileId:'d'.repeat(28),contentState:'unknown',contentVerified:false});
+  assert.ok(reasons(row).includes('multiple_or_unresolved_source_manuscripts'));
+});
+test('audit-only cannot accidentally authorize a write',()=>{
+  const row=base();row.action='audit_only';
+  assert.ok(reasons(row).includes('invalid_action'));
 });
