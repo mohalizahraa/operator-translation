@@ -1,0 +1,59 @@
+name: Workbench read-only live catalogue census
+
+on:
+  push:
+    paths:
+      - '.github/workflows/workbench-live-census.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  census:
+    # Self-hosted only: founder lock prohibits potentially billable runners.
+    runs-on: [self-hosted, operator-translation, macOS, ARM64]
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Read and validate live public Workbench state (no writes, no document URLs logged)
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import { assertCompleteWorkbenchSnapshot, planWorkQueue } from './workbench/scripts/plan-workbench-priority.mjs';
+          const origin = 'https://haydari-translation-workbench.pages.dev';
+          async function live(path) {
+            const r=await fetch(origin+path, {
+              headers:{'accept':'application/json','cache-control':'no-cache'},
+              signal:AbortSignal.timeout(20000),
+            });
+            if(!r.ok) throw new Error(path+': HTTP '+r.status);
+            return r.json();
+          }
+          try {
+            const [health,data]=await Promise.all([live('/api/health'),live('/api/projects')]);
+            if(health.ok !== true || health.projects !== 176)
+              throw new Error('Health incomplete or project count mismatch');
+            assertCompleteWorkbenchSnapshot(data.projects);
+            const plan=planWorkQueue(data.projects);
+            const statuses=Object.fromEntries([...new Set(data.projects.map(p=>p.status))].sort()
+              .map(s=>[s,data.projects.filter(p=>p.status===s).length]));
+            const groups=plan.phases.map(t=>({tier:t.priority,group:t.label,
+              count:t.projects.length,projectIds:t.projects.map(p=>p.id)}));
+            const report={
+              source:'live Workbench production GET /api/health + /api/projects',
+              observedAt:new Date().toISOString(),total:plan.count,eligible:plan.included,
+              excludedIds:plan.excluded.map(x=>x.id),statuses,
+              linkedEnglishBookCount:data.projects.filter(p=>Boolean(p.google_doc_url)).length,
+              positivePageCounterCount:data.projects.filter(p=>Number(p.translated_pages)>0).length,
+              writeProtection:health.write_protection,qualityGate:health.quality_gate,
+              groups,
+              disclaimer:'No private Docs URLs/IDs, Arabic content or credentials output; counts are live website state, not quality certification.'
+            };
+            console.log('LIVE_WORKBENCH_CENSUS '+JSON.stringify(report));
+          }catch(err){
+            console.error('LIVE_WORKBENCH_CENSUS_BLOCKED '+String(err?.name||'Error')+': '+String(err?.message||'unavailable').slice(0,250));
+            process.exitCode=1;
+          }
+          NODE
