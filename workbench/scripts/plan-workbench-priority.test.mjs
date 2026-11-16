@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { planWorkQueue } from './plan-workbench-priority.mjs';
+import { planWorkQueue, assertCompleteWorkbenchSnapshot } from './plan-workbench-priority.mjs';
 
 const p=(id,title_en,assignee,status='not_started')=>({id,title_en,assignee,status,pages:400,translated_pages:0});
 const source=()=>[
@@ -40,4 +40,17 @@ test('duplicate project identity and unknown assignee block planning',()=>{
 test('empty, non-array and invalid project identities block planning',()=>{
   assert.throws(()=>planWorkQueue([]),/full live project inventory/);
   assert.throws(()=>planWorkQueue([{}]),/exact project identity/);
+});
+
+const fullSnapshot=()=>Array.from({length:176},(_,i)=>{
+  const id=i+1;
+  return p(id,id===90?'The Ḥadīth Legacy: Between Formation and Influence':
+    id===106?'The Spirituality of Acts of Worship':`Sample project ${id}`,'Unassigned');
+});
+test('complete catalogue gate rejects truncated and shifted 176-project data',()=>{
+  const all=fullSnapshot();
+  assert.equal(assertCompleteWorkbenchSnapshot(all),true);
+  assert.throws(()=>assertCompleteWorkbenchSnapshot(all.slice(1)),/incomplete live/);
+  const shifted=fullSnapshot();shifted[35]=p(177,'Unrelated book','Unassigned');
+  assert.throws(()=>assertCompleteWorkbenchSnapshot(shifted),/missing live project ID/);
 });

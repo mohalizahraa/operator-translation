@@ -17,6 +17,18 @@ const strip = x => String(x || '').normalize('NFKD')
   .replace(/\p{M}/gu,'').replace(/[^a-zA-Z0-9]+/g, ' ').trim().toLowerCase();
 const excludedNames = new Set(EXCLUDED_BOOKS.map(x => strip(x.title)));
 
+// Exact full-corpus gate for the current founder-authorized 176-book programme.
+// A truncated or shifted API response cannot silently become today's queue.
+export function assertCompleteWorkbenchSnapshot(projects) {
+  const count=176;
+  if(!Array.isArray(projects) || projects.length!==count)
+    throw new Error('WORK_QUEUE_BLOCKED: incomplete live 176-project snapshot');
+  const ids=new Set(projects.map(p=>p?.id));
+  for(let id=1;id<=count;id++)
+    if(!ids.has(id)) throw new Error('WORK_QUEUE_BLOCKED: missing live project ID #'+id);
+  return true;
+}
+
 function tier(p) {
   if (p.assignee === 'Mohammed' || p.assignee === 'Brother') return 1;
   if (p.assignee === 'Zahraa') return 2;
@@ -68,6 +80,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
       // Require an explicit same-run observation and do not accept cached handoffs.
       if (data.observedLiveThisRun !== true || !Array.isArray(data.projects))
         throw new Error('Missing live current-run /api/projects provenance');
+      assertCompleteWorkbenchSnapshot(data.projects);
       const result=planWorkQueue(data.projects);
       // Emit project IDs/titles only; no private Doc URLs in logging projection.
       console.log(JSON.stringify({

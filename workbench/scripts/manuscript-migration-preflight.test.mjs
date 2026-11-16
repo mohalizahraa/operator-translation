@@ -16,7 +16,8 @@ const base=()=>({
 const withCopy=()=>{const x=base();x.action='attach_target';x.destinationCandidates=[{
   fileId:copyId,kind:'native_copy',sourceFileId:sourceId,ownerEmail:owner,
   ownerVerified:true,textEquivalent:true,structureEquivalent:true,
-  stylesEquivalent:true,notesEquivalent:true,manuscriptRevisionVerified:true,
+  stylesEquivalent:true,notesEquivalent:true,renderEquivalent:true,
+  sourceRevisionVerified:true,manuscriptRevisionVerified:true,
   permission:{type:'anyone',role:'writer'},anonymousAccessible:true
 }];return x;};
 const reasons=(row)=>assessMigration(row,owner).blockers;
@@ -47,6 +48,31 @@ test('verified empty source can justify a new draft only for unstarted book',()=
 test('structural counts alone do not prove exact-copy fidelity',()=>{
   const row=withCopy();row.destinationCandidates[0].textEquivalent=false;
   assert.ok(reasons(row).includes('exact_copy_not_verified'));
+});
+test('native copy requires render parity and verified original revision',()=>{
+  const row=withCopy();row.destinationCandidates[0].renderEquivalent=false;
+  assert.ok(reasons(row).includes('exact_copy_not_verified'));
+  row.destinationCandidates[0].renderEquivalent=true;
+  row.destinationCandidates[0].sourceRevisionVerified=false;
+  assert.ok(reasons(row).includes('exact_copy_not_verified'));
+});
+test('new draft is not linkable with missing or existing page progress',()=>{
+  const row=base();row.action='attach_target';
+  row.sourceCandidates[0]={fileId:sourceId,contentState:'empty',contentVerified:true};
+  row.destinationCandidates=[{fileId:copyId,kind:'new_draft',ownerVerified:true,
+    ownerEmail:owner,permission:{type:'anyone',role:'writer'},anonymousAccessible:true,
+    manuscriptRevisionVerified:true}];
+  assert.deepEqual(reasons(row),[]);
+  row.live.sourcePageProgress=2;
+  assert.ok(reasons(row).includes('existing_progress_requires_recovery'));
+  delete row.live.sourcePageProgress;
+  assert.ok(reasons(row).includes('source_progress_not_verified'));
+});
+test('draft creation requires known zero-page count',()=>{
+  const row=base();row.action='create_draft';
+  row.sourceCandidates[0]={fileId:sourceId,contentState:'empty',contentVerified:true};
+  delete row.live.sourcePageProgress;
+  assert.ok(reasons(row).includes('source_progress_not_verified'));
 });
 test('source-backed native copy can be attached after full evidence',()=>{
   assert.deepEqual(reasons(withCopy()),[]);

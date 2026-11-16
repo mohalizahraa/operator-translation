@@ -52,7 +52,9 @@ export function assessMigration(row, expectedOwner) {
     block(errors, anyNonempty, 'existing_manuscript_requires_copy');
     block(errors, unresolved, 'source_content_unknown');
     block(errors, row?.live?.status !== 'not_started', 'draft_does_not_preserve_workflow_state');
-    block(errors, row?.live?.sourcePageProgress > 0, 'existing_progress_requires_recovery');
+    block(errors, !Number.isSafeInteger(row?.live?.sourcePageProgress) || row.live.sourcePageProgress < 0,
+      'source_progress_not_verified');
+    block(errors, row?.live?.sourcePageProgress !== 0, 'existing_progress_requires_recovery');
   }
   if (action === 'copy_existing') {
     block(errors, active.length > 0, 'destination_already_exists');
@@ -76,11 +78,15 @@ export function assessMigration(row, expectedOwner) {
         x?.contentVerified === true && x?.editionVerified === true) || unresolved,
         'source_revision_unresolved');
       block(errors, current?.textEquivalent !== true || current?.structureEquivalent !== true ||
-        current?.stylesEquivalent !== true || current?.notesEquivalent !== true,
+        current?.stylesEquivalent !== true || current?.notesEquivalent !== true ||
+        current?.renderEquivalent !== true || current?.sourceRevisionVerified !== true,
         'exact_copy_not_verified');
     } else {
       block(errors, anyNonempty || unresolved, 'blank_draft_may_erase_manuscript');
       block(errors, row?.live?.status !== 'not_started', 'blank_draft_wrong_stage');
+      block(errors, !Number.isSafeInteger(row?.live?.sourcePageProgress) || row.live.sourcePageProgress < 0,
+        'source_progress_not_verified');
+      block(errors, row?.live?.sourcePageProgress !== 0, 'existing_progress_requires_recovery');
     }
     block(errors, current?.permission?.type !== 'anyone' || current?.permission?.role !== 'writer',
       'public_editor_permission_missing');
