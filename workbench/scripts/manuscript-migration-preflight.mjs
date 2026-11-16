@@ -11,7 +11,7 @@ import fs from 'node:fs';
 import { pathToFileURL } from 'node:url';
 
 const CONTENT = new Set(['nonempty', 'empty', 'unknown']);
-const ACTIONS = new Set(['copy_existing', 'create_draft', 'attach_target', 'audit_only']);
+const ACTIONS = new Set(['copy_existing', 'create_draft', 'attach_target']);
 const ID = /^[a-zA-Z0-9_-]{20,}$/;
 const normalized = value => typeof value === 'string' ? value.trim().toLowerCase() : '';
 const validId = value => typeof value === 'string' && ID.test(value);
@@ -59,6 +59,9 @@ export function assessMigration(row, expectedOwner) {
     block(errors, !validId(row?.copySourceFileId) || !sameExistingSource, 'copy_source_not_in_inventory');
     block(errors, sameExistingSource?.contentState !== 'nonempty' || sameExistingSource?.contentVerified !== true,
       'copy_source_content_unverified');
+    block(errors, sameExistingSource?.editionVerified !== true, 'copy_source_edition_unverified');
+    block(errors, unresolved || source.filter(x => x?.contentState === 'nonempty').length !== 1,
+      'multiple_or_unresolved_source_manuscripts');
   }
 
   // Existing copies must not be promoted to "exact" by element counts alone.
@@ -69,7 +72,8 @@ export function assessMigration(row, expectedOwner) {
     block(errors, current?.kind !== 'native_copy' && current?.kind !== 'new_draft',
       'destination_kind_unknown');
     if (current?.kind === 'native_copy') {
-      block(errors, !source.some(x => x?.fileId === current?.sourceFileId && x?.contentState === 'nonempty'),
+      block(errors, !source.some(x => x?.fileId === current?.sourceFileId && x?.contentState === 'nonempty' &&
+        x?.contentVerified === true && x?.editionVerified === true) || unresolved,
         'source_revision_unresolved');
       block(errors, current?.textEquivalent !== true || current?.structureEquivalent !== true ||
         current?.stylesEquivalent !== true || current?.notesEquivalent !== true,
