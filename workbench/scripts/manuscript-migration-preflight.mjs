@@ -10,7 +10,6 @@
 import fs from 'node:fs';
 import { pathToFileURL } from 'node:url';
 
-const EMAIL = 'ohwellbitxh78@gmail.com';
 const CONTENT = new Set(['nonempty', 'empty', 'unknown']);
 const ACTIONS = new Set(['copy_existing', 'create_draft', 'attach_target', 'audit_only']);
 const ID = /^[a-zA-Z0-9_-]{20,}$/;
@@ -24,7 +23,7 @@ function block(errors, when, code) { if (when) errors.push(code); }
  * A source marked empty must be verified through native content readback; Drive
  * size or a filename is not proof. "unknown" is never silently treated as empty.
  */
-export function assessMigration(row, expectedOwner = EMAIL) {
+export function assessMigration(row, expectedOwner) {
   const errors = [];
   const p = row?.project || {};
   const source = Array.isArray(row?.sourceCandidates) ? row.sourceCandidates : [];
@@ -97,10 +96,10 @@ export function assessMigration(row, expectedOwner = EMAIL) {
 
   return { projectId: p.id ?? null, action, safe: errors.length === 0, blockers: [...new Set(errors)] };
 }
-export function auditMigration(manifest) {
+export function auditMigration(manifest, approvedDestinationOwner) {
   const rows = manifest?.rows;
   if (!Array.isArray(rows) || !rows.length) throw new Error('Private migration manifest requires rows.');
-  if (normalized(manifest.destinationOwner) !== EMAIL) {
+  if (!normalized(approvedDestinationOwner) || normalized(manifest.destinationOwner) !== normalized(approvedDestinationOwner)) {
     throw new Error('Destination owner does not match authorized account.');
   }
   const seenProject = new Set(), seenTarget = new Set();
@@ -127,7 +126,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     process.exitCode = 2;
   } else {
     try {
-      const report = auditMigration(JSON.parse(fs.readFileSync(file, 'utf8')));
+      const report = auditMigration(JSON.parse(fs.readFileSync(file, 'utf8')), process.env.MIGRATION_APPROVED_OWNER_EMAIL);
       // Never emit document IDs, URLs, source text or ownership identity into logs.
       console.log(JSON.stringify({ safe: report.safe, allowed: report.allowed,
         blocked: report.blocked, blocks: report.results.filter(x => !x.safe)
