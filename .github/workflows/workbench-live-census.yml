@@ -41,7 +41,13 @@ jobs:
               .map(s=>[s,data.projects.filter(p=>p.status===s).length]));
             const groups=plan.phases.map(t=>({tier:t.priority,group:t.label,
               count:t.projects.length,projectIds:t.projects.map(p=>p.id)}));
+            const first=data.projects.find(p=>p.id===12);
+            if(!first) throw new Error('Project #12 missing from live snapshot');
             const report={
+              firstMohammedCheckpoint:{id:first.id,title:first.title_en,assignee:first.assignee,
+                status:first.status,sourcePages:first.pages,translatedPages:first.translated_pages,
+                pdfStatus:first.pdf_status,sourcePdfUrl:first.source_pdf_url||null,
+                hasLinkedEnglishDoc:Boolean(first.google_doc_url)},
               source:'live Workbench production GET /api/health + /api/projects',
               observedAt:new Date().toISOString(),total:plan.count,eligible:plan.included,
               excludedIds:plan.excluded.map(x=>x.id),statuses,
