@@ -1,0 +1,50 @@
+name: Workbench bounded public source-page visual witness
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: workbench-source-visual-macos
+  cancel-in-progress: false
+
+jobs:
+  render:
+    # Self-hosted, owner-authored, exact project/page request only.
+    # The source is a publicly distributed first-party PDF; do not use
+    # this route for private manuscripts or confidential source documents.
+    if: >-
+      github.repository == 'mohalizahraa/operator-translation' &&
+      github.event.issue.user.login == github.repository_owner &&
+      startsWith(github.event.issue.title, 'Workbench render:')
+    runs-on: [self-hosted, operator-translation, macOS, ARM64]
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate owner request and bounded source render
+        id: request
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check workbench/scripts/parse-source-visual-request.mjs
+          node --test workbench/scripts/parse-source-visual-request.test.mjs
+          GITHUB_OUTPUT="$GITHUB_OUTPUT" node workbench/scripts/parse-source-visual-request.mjs
+      - name: Retrieve canonical public PDF and render four-or-fewer page images
+        shell: bash
+        env:
+          SOURCE_ID: ${{ steps.request.outputs.id }}
+          FROM_PAGE: ${{ steps.request.outputs.from }}
+          TO_PAGE: ${{ steps.request.outputs.to }}
+        run: |
+          set -euo pipefail
+          src="$(mktemp "$RUNNER_TEMP/workbench-visual-source-XXXXXX.pdf")"
+          trap 'rm -f "$src"' EXIT
+          rm -f "$src"
+          node workbench/scripts/fetch-workbench-source.mjs "$SOURCE_ID" "$src" |
+            sed -E 's/("sha256":")[a-f0-9]{64}/\1[redacted]/'
+          # Render public physical pages only; output is a short-lived
+          # source-image witness in public CI logs, never a manuscript or QA receipt.
+          swift workbench/scripts/render-source-page-images.swift "$src" "$FROM_PAGE" "$TO_PAGE"
