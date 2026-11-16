@@ -43,8 +43,7 @@ jobs:
           src="$(mktemp "$RUNNER_TEMP/workbench-visual-source-XXXXXX.pdf")"
           trap 'rm -f "$src"' EXIT
           rm -f "$src"
-          node workbench/scripts/fetch-workbench-source.mjs "$SOURCE_ID" "$src" |
-            sed -E 's/("sha256":")[a-f0-9]{64}/\1[redacted]/'
+          node workbench/scripts/fetch-workbench-source.mjs "$SOURCE_ID" "$src"
           # Render public physical pages only; output is a short-lived
           # source-image witness in public CI logs, never a manuscript or QA receipt.
           swift workbench/scripts/render-source-page-images.swift "$src" "$FROM_PAGE" "$TO_PAGE"
