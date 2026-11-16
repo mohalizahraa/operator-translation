@@ -33,6 +33,12 @@ The read-only /api/projects/:id/draft-progress endpoint obtains the last page la
 
 The response includes only counts, canonical source mutation time, and observation time—not book text, private notes, Doc URLs, reviewer names or secrets. If the guarded evidence tables are unavailable, the endpoint returns a 503 instead of breaking existing `/api/projects`. This is a prospective source API until the exact Cloudflare deployment and actual D1 readback are checked; it must never be called an independently verified completed-translation or published-book count.
 
+## Current translation-priority and account-migration policy
+
+The current founder instruction is: **Mohammed's direct-assigned books first**, excluding **The Ḥadīth Legacy** and **The Spirituality of Acts of Worship**; **Zahraa's remaining books second**; **all remaining Shared/Unassigned books third**. Both excluded titles are outside the active translation queue. Never treat a status label, historical page count, or a newly created blank Doc as translation-complete evidence.
+
+[`TRANSLATION-WORKFLOW.md`](TRANSLATION-WORKFLOW.md) defines the authoritative per-book priority, exact-copy and destination-owner preflight, and **same-batch website progress readback**. The source-of-truth remains live Workbench D1 and the exact verified manuscript; `scripts/plan-workbench-priority.mjs` is a read-only queue projection from a fresh live snapshot. The `scripts/manuscript-migration-preflight.mjs` tool blocks blank replacement of existing manuscripts, unverified original-to-copy equivalence, duplicate destinations, restricted public links and site writes that cannot be read back. Both planners have regression tests in `npm run check`. Passing tests does **not** itself perform Google Drive sharing or a production Workbench update.
+
 ## Book-processing workflow
 
 [TRANSLATION-WORKFLOW.md](TRANSLATION-WORKFLOW.md) owns the approved project execution plan: prepare once, reuse verified source text, let Mac OCR feed Windows translation in coherent batches, complete each batch's applicable review/formatting/verification, then immediately synchronize and read back its Workbench checkpoint. Keep one writer per final manuscript; finish with whole-book QA. This is a measured starting plan, not a benchmark-proven fastest configuration or a runner-routing change. The scoped [agent instructions](AGENTS.md) route book work through it; the current Operator profiles and this README's progress/status contract remain governing.
