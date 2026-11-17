@@ -90,7 +90,7 @@ export function planWorkQueue(projects) {
       {priority:2,label:'Zahraa',projects:phases[1]},
       {priority:3,label:'Shared and remaining website books',projects:phases[2]},
     ],
-    note:'Site statuses review/completed/published are excluded from BOTH translation and formatting work queues; separate QA metrics do not reopen them.',
+    note:'Site statuses review/completed/published are excluded from BOTH translation and formatting work queues; this is separate from source-page QA, and QA metrics do not reopen them.',
   };
 }
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
