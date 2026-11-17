@@ -70,8 +70,8 @@ export function planWorkQueue(projects) {
   for (const rows of phases) rows.sort((a,b)=>a.id-b.id);
   const includedProjects = phases.flat();
   const statusCounts = Object.fromEntries(['not_started','in_progress',...STATUS_TRANSLATED]
-    .map(status=>[status,includedProjects.filter(x=>x.status===status).length]));
-  const statusTranslatedProjects = includedProjects.filter(isStatusTranslated);
+    .map(status=>[status,[...includedProjects,...completed].filter(x=>x.status===status).length]));
+  const statusTranslatedProjects = completed;
   const newTranslationProjects = includedProjects.filter(x=>!isStatusTranslated(x));
   return {
     count:projects.length,
