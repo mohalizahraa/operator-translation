@@ -2,6 +2,19 @@
 
 Status: user-approved execution plan, captured 2026-10-09. This project-owned file survives translation-projection synchronization. The current [Operator router](../AGENTS.md), [Arabic-book profile](../profiles/arabic-book-translation.md), and [Workbench contract](README.md) govern fidelity, formatting, access, progress, and publication. This plan adds scheduling and handoff guidance, not a weaker quality standard.
 
+## Source PDF line/page-index preflight for source-absence decisions (2026-11-16)
+
+**Recovered failure:** An indexed PDF witness such as `L1354@P38` labels a **global extracted-text line** (`L1354`) and a **zero-based physical PDF page index** (`P38` → physical PDF page **39**). A previous translation QA pass mistakenly interpreted `L736` as physical source page 736/39 and, as a result, wrongfully removed a source-related paragraph and native footnote from Book #12. Those were restored. PDF page index and any **printed page number** are also distinct where front matter affects pagination.
+
+Before a consequential assertion that source text, quotation or footnote is **absent**, before deleting source-related manuscript content, or before changing a citation on indexed-PDF evidence:
+
+1. Identify the exact source PDF/edition and physical PDF page, and distinguish it from a printed page number or global text-extraction line ID.
+2. For `Lnnn@Pxx` web/PDF-index witnesses, privately validate the page arithmetic using `node scripts/source-unit-overlap-preflight.mjs --check-pdf-page /private/pdf-page-witness.json`. The private JSON contains `{\"sourceLocator\":\"L1354@P38\",\"physicalPage\":39,\"sourcePageCount\":486}`. An inconsistent `L736@P24` asserted as physical page 39 **must fail**.
+3. Independently inspect the actual source page (prefer its rendered same-edition image), including **body and every source note**, check any page continuation, and compare it to the fresh native target revision before a bounded correction. If that proof cannot be recovered, classify the proposed deletion or citation change **BLOCKED** rather than inferring absence from garbled or partial text extraction.
+4. Keep input witnesses, source-content excerpts, private Docs IDs and evidentiary decisions in the **private QA record** only. Never embed private source/manuscript text or IDs in a public GitHub issue, action log or test fixture. Preserve already written translation during uncertainty.
+
+The CLI tests **coordinate consistency only**. A pass does not authenticate a PDF, prove an omission, authorize any deletion, establish semantic fidelity or credit an accepted source page. This applies alongside the existing one-writer/revision/idempotency preflight and every Arabic-translation assurance rule.
+
 ## Fail-closed source-unit idempotency before manuscript appends (2026-11-16)
 
 **Verified incident:** In Book #12, a revision-guarded append duplicated Arabic physical source pp.37–40 that a designated writer had already translated in the live English target. The later duplicated block was removed with verified target readback; earlier work was preserved. A fresh revision check alone does **not** establish that a source unit is still untranslated.
