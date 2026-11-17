@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { planWorkQueue, assertCompleteWorkbenchSnapshot } from './plan-workbench-priority.mjs';
+import { planWorkQueue, assertCompleteWorkbenchSnapshot, isStatusTranslated } from './plan-workbench-priority.mjs';
 
 const p=(id,title_en,assignee,status='not_started')=>({id,title_en,assignee,status,pages:400,translated_pages:0});
 const source=()=>[
@@ -53,4 +53,36 @@ test('complete catalogue gate rejects truncated and shifted 176-project data',()
   assert.throws(()=>assertCompleteWorkbenchSnapshot(all.slice(1)),/incomplete live/);
   const shifted=fullSnapshot();shifted[35]=p(177,'Unrelated book','Unassigned');
   assert.throws(()=>assertCompleteWorkbenchSnapshot(shifted),/missing live project ID/);
+});
+
+test('founder treats translated site statuses as counted done, not independent QA', () => {
+  const plan = planWorkQueue(source());
+  assert.equal(isStatusTranslated({status:'review'}), true);
+  assert.equal(isStatusTranslated({status:'completed'}), true);
+  assert.equal(isStatusTranslated({status:'published'}), true);
+  assert.equal(isStatusTranslated({status:'in_progress'}), false);
+  assert.equal(plan.statusTranslatedCount,1);
+  assert.deepEqual(plan.statusTranslatedBookIds,[1]);
+  assert.equal(plan.newTranslationCount,5);
+  assert.deepEqual(plan.newTranslationBookIds,[10,12,40,50,70]);
+  assert.equal(plan.statusCounts.review,1);
+  assert.equal(plan.statusCounts.completed,0);
+  assert.match(plan.note,/separate from source-page QA/i);
+});
+
+test('complete status-translated books remain visible, never requeued for NEW translation',()=>{
+  const projects=fullSnapshot();
+  projects[0].status='review';
+  projects[1].status='completed';
+  projects[2].status='published';
+  projects[11].status='in_progress';
+  const plan=planWorkQueue(projects);
+  assert.equal(plan.included,174);
+  assert.equal(plan.statusTranslatedCount,3);
+  assert.equal(plan.newTranslationCount,171);
+  assert.deepEqual(plan.statusTranslatedBookIds,[1,2,3]);
+  assert.ok(plan.newTranslationBookIds.includes(12));
+  assert.ok(!plan.newTranslationBookIds.includes(1));
+  assert.ok(!plan.newTranslationBookIds.includes(90));
+  assert.ok(!plan.newTranslationBookIds.includes(106));
 });
