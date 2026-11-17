@@ -62,7 +62,36 @@ export function assertSafeSourceAppend({ projectId, currentTargetRevision, sourc
   };
 }
 
+/**
+ * Validate a PDF search result's location: L is a global extraction line ID,
+ * while P is a zero-based physical PDF page index. A line number is NEVER
+ * evidence of the physical page number. This is metadata validation only:
+ * it does not prove source-content absence, edition identity or fidelity.
+ */
+export function assertSourcePdfPageLocator({ sourceLocator, physicalPage, sourcePageCount }) {
+  if (typeof sourceLocator !== 'string') fail('INVALID_SOURCE_PAGE_LOCATOR');
+  const match = /^L([0-9]+)@P([0-9]+)$/.exec(sourceLocator);
+  if (!match) fail('INVALID_SOURCE_PAGE_LOCATOR');
+  const globalLine = Number(match[1]);
+  const pdfPageIndex = Number(match[2]);
+  if (!Number.isSafeInteger(sourcePageCount) || sourcePageCount < 1
+      || !Number.isSafeInteger(globalLine) || !Number.isSafeInteger(pdfPageIndex)
+      || pdfPageIndex < 0 || pdfPageIndex >= sourcePageCount)
+    fail('INVALID_SOURCE_PDF_PAGE_RANGE');
+  if (!Number.isSafeInteger(physicalPage) || physicalPage < 1
+      || physicalPage > sourcePageCount || physicalPage !== pdfPageIndex + 1)
+    fail('PDF_SOURCE_PAGE_MISMATCH');
+  return { sourceGlobalLine: globalLine, pdfPageIndex, physicalPage, sourcePageCount };
+}
+
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
+  if (process.argv[2] === '--check-pdf-page') {
+    if (process.argv.length !== 4) fail('USAGE: --check-pdf-page /private/witness.json');
+    const witness = JSON.parse(readFileSync(process.argv[3], 'utf8'));
+    const result = assertSourcePdfPageLocator(witness);
+    process.stdout.write('PDF_PAGE_LOCATOR_PREFLIGHT_PASS ' + JSON.stringify(result) + '\n');
+    process.exit(0);
+  }
   const [manifestPath, proposalPath] = process.argv.slice(2);
   if (!manifestPath || !proposalPath) fail('USAGE: manifest.json proposal.json');
   const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
