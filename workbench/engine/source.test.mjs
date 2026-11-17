@@ -5,6 +5,7 @@ import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { extractNativeSourcePages, compareNativeSourceUnits, stageNativeSourceAlignedBatch } from './source.mjs';
+import { assessNativeTextHealth } from './native-text-health.mjs';
 
 async function fixture(fn) {
   const root=await mkdtemp(join(tmpdir(),'haydari-native-source-'));
@@ -224,3 +225,38 @@ test('non-Arabic PDF native text does not certify Arabic source even on substrin
     }),/no readable Arabic/);
     assert.equal(called,false);
   }));
+
+
+test('rejects malformed native PDF extraction even when some Arabic words survive', async () =>
+  fixture(async options => {
+    const text='طلب العلم' + ' .'.repeat(140);
+    const {run}=popplerStub([text, 'تعليق مهم', 'المقدمة']);
+    const witness=await extractNativeSourcePages({...options,run});
+    assert.equal(witness.pages[0].status,'NATIVE_TEXT_UNRELIABLE_VISUAL_REVIEW_REQUIRED');
+    assert.equal(witness.pages[0].nativeTextHealthReason,'LOW_LETTER_DENSITY');
+    const manifest={
+      source:{projectId:9,pdfSha256:options.pdfSha256,pageCount:3},
+      target:{documentId:'english',expectedRevision:'before'},
+      batch:{verifiedThrough:0,fromPage:1,toPage:3},
+      units:[
+        {id:'a',page:1,kind:'text',surface:'body',sourceRef:'source p1',sourceText:'طلب العلم'},
+        {id:'b',page:2,kind:'text',surface:'footnote',sourceRef:'source p2',sourceText:'تعليق مهم'},
+        {id:'c',page:3,kind:'text',surface:'body',sourceRef:'source p3',sourceText:'المقدمة'},
+      ]
+    };
+    let translated=false;
+    await assert.rejects(stageNativeSourceAlignedBatch({
+      manifest,pdfPath:options.pdfPath,outputDir:'/private/unneeded',backend:'poppler',run,
+      translateUnit:async()=>{translated=true;return {english:'draft'};},
+      critiqueUnit:async()=>({status:'PASS',findings:[],criticId:'critic'})
+    }),/OCR or visual review required/);
+    assert.equal(translated,false);
+  }));
+
+test('source-health screen catches private-font glyphs, bidi floods and replacements', () => {
+  assert.equal(assessNativeTextHealth('جملة عربية مرئية').usableAsNativeCandidate,true);
+  assert.equal(assessNativeTextHealth('جملة \uF020').reason,'PRIVATE_USE_FONT_GLYPH');
+  assert.equal(assessNativeTextHealth('هذه \uFFFD جملة').reason,'REPLACEMENT_CHARACTER');
+  assert.equal(assessNativeTextHealth('قال الامام'+('\u202A\u202C كلمة').repeat(45)).reason,'EXCESSIVE_BIDI_CONTROLS');
+  assert.equal(assessNativeTextHealth('هذه آية'+(' .'.repeat(120))).reason,'LOW_LETTER_DENSITY');
+});
