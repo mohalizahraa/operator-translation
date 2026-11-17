@@ -27,7 +27,7 @@ test('exclusions are global: neither excluded book falls through to tier 3',()=>
 test('site status is carried without being treated as QA completion',()=>{
   const plan=planWorkQueue(source());
   assert.equal(plan.phases[1].projects[0].status,'review');
-  assert.match(plan.note,/no status.*certified/i);
+  assert.match(plan.note,/separate from source-page QA/i);
 });
 test('catalogue ID/title drift refuses to silently exclude or translate wrong book',()=>{
   assert.throws(()=>planWorkQueue([p(90,'Different book','Mohammed')]),/exclusion identity conflict/);
@@ -85,4 +85,8 @@ test('complete status-translated books remain visible, never requeued for NEW tr
   assert.ok(!plan.newTranslationBookIds.includes(1));
   assert.ok(!plan.newTranslationBookIds.includes(90));
   assert.ok(!plan.newTranslationBookIds.includes(106));
+});
+
+test('invalid live status blocks completion counts rather than silently falling back',()=>{
+  assert.throws(()=>planWorkQueue([p(1,'A','Zahraa','invalid')]),/unknown live status/);
 });
