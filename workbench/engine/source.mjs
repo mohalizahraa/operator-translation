@@ -6,6 +6,7 @@ import { open, stat } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { isAbsolute } from 'node:path';
 import { sha256File, validateBatch, stageTranslationBatch } from './batch.mjs';
+import { assessNativeTextHealth } from './native-text-health.mjs';
 
 const runProcess = promisify(execFile);
 const SHA = /^[a-f0-9]{64}$/;
@@ -50,6 +51,7 @@ function normalizePages(raw, first, last) {
     if (!row || row.page !== physicalPage || typeof row.text !== 'string')
       fail('native reader returned a missing, duplicate or misnumbered page');
     const text = row.text;
+    const health = assessNativeTextHealth(text);
     if (Buffer.byteLength(text, 'utf8') > 2 * 1024 * 1024)
       fail('a single extracted page exceeds the safe text limit');
     return {
@@ -57,9 +59,12 @@ function normalizePages(raw, first, last) {
       nativeText: text,
       nativeTextSha256: textSha256(text),
       hasArabic: ARABIC.test(text),
+      nativeTextHealthReason: health.reason,
       status: !text.trim() || !ARABIC.test(text)
         ? 'NEEDS_OCR_OR_VISUAL_SOURCE_REVIEW'
-        : 'NATIVE_TEXT_NEEDS_PDF_VISUAL_ALIGNMENT'
+        : !health.usableAsNativeCandidate
+          ? 'NATIVE_TEXT_UNRELIABLE_VISUAL_REVIEW_REQUIRED'
+          : 'NATIVE_TEXT_NEEDS_PDF_VISUAL_ALIGNMENT'
     };
   });
 }
@@ -205,6 +210,10 @@ export async function stageNativeSourceAlignedBatch({
   if (witness.pages.some(page => !page.hasArabic))
     fail('native source page contains no readable Arabic; OCR or visual review required on physical page(s): ' +
       witness.pages.filter(page => !page.hasArabic).map(page => page.physicalPage).join(', '));
+  if (witness.pages.some(page => page.status === 'NATIVE_TEXT_UNRELIABLE_VISUAL_REVIEW_REQUIRED'))
+    fail('native PDF extraction is unreliable; OCR or visual review required on physical page(s): ' +
+      witness.pages.filter(page => page.status === 'NATIVE_TEXT_UNRELIABLE_VISUAL_REVIEW_REQUIRED')
+        .map(page => page.physicalPage).join(', '));
   const exceptions = alignment.units.filter(
     unit => unit.result !== 'NATIVE_EXACT_TEXT_CANDIDATE'
   );
