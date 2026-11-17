@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { assertSafeSourceAppend } from './source-unit-overlap-preflight.mjs';
+import { assertSafeSourceAppend, assertSourcePdfPageLocator } from './source-unit-overlap-preflight.mjs';
 
 const sha = 'a'.repeat(64);
 const revision = 'revision-unique-20261116';
@@ -68,4 +68,41 @@ test('invalid page numbering, source unit and project IDs fail closed', () => {
 });
 test('repeated IDs in existing mapping fail rather than trusting a damaged map', () => {
   rejects(x => { x.manifest.existingUnits.push({sourceUnitId:'sanctity-37-40',fromPage:500,toPage:501}); }, 'DUPLICATE_EXISTING_SOURCE_UNIT_ID');
+});
+
+test('PDF locator interprets P as zero-based physical page, never L as page', () => {
+  assert.deepEqual(assertSourcePdfPageLocator({
+    sourceLocator: 'L1354@P38', physicalPage: 39, sourcePageCount: 486,
+  }), { sourceGlobalLine: 1354, pdfPageIndex: 38, physicalPage: 39, sourcePageCount: 486 });
+});
+
+test('false physical page claims from global text-line IDs fail closed', () => {
+  assert.throws(() => assertSourcePdfPageLocator({
+    sourceLocator: 'L736@P24', physicalPage: 39, sourcePageCount: 486,
+  }), /PDF_SOURCE_PAGE_MISMATCH/);
+});
+
+test('missing or ambiguous PDF page labels are not source-location proof', () => {
+  for (const sourceLocator of ['L736', 'L736@P24-25', 'P24', 'L1@P-1', '', 'Lx@P24']) {
+    assert.throws(() => assertSourcePdfPageLocator({
+      sourceLocator, physicalPage: 25, sourcePageCount: 486,
+    }), /INVALID_SOURCE_PAGE_LOCATOR/);
+  }
+});
+
+test('out-of-range PDF source index and invalid page counts fail closed', () => {
+  for (const proof of [
+    {sourceLocator: 'L1@P486', physicalPage: 487, sourcePageCount: 486},
+    {sourceLocator: 'L1@P0', physicalPage: 1, sourcePageCount: 0},
+    {sourceLocator: 'L1@P999999999999999999999', physicalPage: 1, sourcePageCount: 486},
+  ]) assert.throws(() => assertSourcePdfPageLocator(proof), /INVALID_SOURCE_PDF_PAGE_RANGE/);
+});
+
+test('page-location check is not manuscript or semantic source-fidelity approval', () => {
+  const result = assertSourcePdfPageLocator({
+    sourceLocator: 'L1@P0', physicalPage: 1, sourcePageCount: 486,
+  });
+  assert.equal(result.pdfPageIndex, 0);
+  assert.equal(result.physicalPage, 1);
+  assert.equal('contentVerified' in result, false);
 });
