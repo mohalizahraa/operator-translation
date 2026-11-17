@@ -30,6 +30,10 @@ const staged = await stageTranslationBatch({
 
 The adapter functions above are integration placeholders; neither is bundled and no model invocation is claimed. Do **not** send book text or credentials through public CI, console logs, repository commits or arbitrary external services.
 
+### Fail-closed native text extraction quality (2026-11-17)
+
+Native PDF text is candidate source evidence only. The engine checks for replacement codepoints, private-use custom-font glyphs, excessive bidirectional controls and unusually low letter density. Suspect pages are flagged `NATIVE_TEXT_UNRELIABLE_VISUAL_REVIEW_REQUIRED`; the connected translator route refuses them until OCR/transcription and visual source inspection resolve the issue. A clean heuristic result does **not** certify page completeness, image/footnote coverage or Arabic→English fidelity. This addresses the real Book #12 case where the official 486-page PDF rendered correctly but its native text layer was mostly corrupted.
+
 ## Native PDF source witness (second engine slice)
 
 `source.mjs` is a read-only source adapter. It verifies the **actual file hash** against the manifest, opens the PDF using macOS PDFKit (`swift pdfkit-source.swift`) or an installed Poppler `pdfinfo`/`pdftotext`, checks the physical page count and extracts **one candidate witness per physical PDF page**. Every page carries its original text, a SHA-256 hash of that extracted text and a distinct warning when native text is missing, non-Arabic, or needs visual alignment. Native extraction is **not OCR** and cannot prove scanned-page content or detect all missing footnotes.
