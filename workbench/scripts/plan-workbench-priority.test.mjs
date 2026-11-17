@@ -15,10 +15,11 @@ const source=()=>[
 ];
 test('founder priority: Mohammed, remaining Zahraa, then Shared/Unassigned',()=>{
   const plan=planWorkQueue(source());
-  assert.deepEqual(plan.phases.map(x=>x.projects.map(p=>p.id)),[[12,50],[1,10],[40,70]]);
+  assert.deepEqual(plan.phases.map(x=>x.projects.map(p=>p.id)),[[12,50],[10],[40,70]]);
   assert.deepEqual(plan.excluded.map(x=>x.id).sort((a,b)=>a-b),[90,106]);
   assert.equal(plan.count,8);
-  assert.equal(plan.included,6);
+  assert.equal(plan.included,5);
+  assert.deepEqual(plan.completedBookIds,[1]);
 });
 test('exclusions are global: neither excluded book falls through to tier 3',()=>{
   const plan=planWorkQueue(source());
@@ -26,7 +27,8 @@ test('exclusions are global: neither excluded book falls through to tier 3',()=>
 });
 test('site status is carried without being treated as QA completion',()=>{
   const plan=planWorkQueue(source());
-  assert.equal(plan.phases[1].projects[0].status,'review');
+  assert.ok(plan.phases.every(phase=>phase.projects.every(project=>project.status!=='review')));
+  assert.deepEqual(plan.completedBookIds,[1]);
   assert.match(plan.note,/separate from source-page QA/i);
 });
 test('catalogue ID/title drift refuses to silently exclude or translate wrong book',()=>{
@@ -77,7 +79,7 @@ test('complete status-translated books remain visible, never requeued for NEW tr
   projects[2].status='published';
   projects[11].status='in_progress';
   const plan=planWorkQueue(projects);
-  assert.equal(plan.included,174);
+  assert.equal(plan.included,171);
   assert.equal(plan.statusTranslatedCount,3);
   assert.equal(plan.newTranslationCount,171);
   assert.deepEqual(plan.statusTranslatedBookIds,[1,2,3]);
@@ -89,4 +91,19 @@ test('complete status-translated books remain visible, never requeued for NEW tr
 
 test('invalid live status blocks completion counts rather than silently falling back',()=>{
   assert.throws(()=>planWorkQueue([p(1,'A','Zahraa','invalid')]),/unknown live status/);
+});
+
+test('completed statuses never enter either translation or formatting queues',()=>{
+  const projects=fullSnapshot();
+  projects[0].status='review';
+  projects[1].status='completed';
+  projects[2].status='published';
+  projects[0].assignee='Mohammed';
+  projects[1].assignee='Zahraa';
+  projects[2].assignee='Both';
+  const plan=planWorkQueue(projects);
+  const queued=new Set(plan.phases.flatMap(phase=>phase.projects.map(x=>x.id)));
+  for(const id of [1,2,3,90,106]) assert.ok(!queued.has(id));
+  assert.deepEqual(plan.completedBookIds,[1,2,3]);
+  assert.equal(plan.completedCount,3);
 });
