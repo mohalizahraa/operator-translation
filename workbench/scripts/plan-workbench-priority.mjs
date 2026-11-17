@@ -45,7 +45,7 @@ export function planWorkQueue(projects) {
     throw new Error('WORK_QUEUE_BLOCKED: full live project inventory required');
   const ids=new Set();
   const allowedStatuses = new Set(['not_started','in_progress',...STATUS_TRANSLATED]);
-  const phases=[[],[],[]],excluded=[];
+  const phases=[[],[],[]],excluded=[],completed=[];
   for (const p of projects) {
     if (!Number.isSafeInteger(p?.id) || p.id < 1 || typeof p?.title_en !== 'string' ||
         !p.title_en.trim()) throw new Error('WORK_QUEUE_BLOCKED: missing exact project identity');
@@ -58,6 +58,10 @@ export function planWorkQueue(projects) {
     if (byId !== byTitle || (byId && name !== strip(expected.get(p.id))))
       throw new Error('WORK_QUEUE_BLOCKED: exclusion identity conflict at project #' + p.id);
     if (byId) { excluded.push({id:p.id,title_en:p.title_en,assignee:p.assignee}); continue; }
+    if (isStatusTranslated(p)) {
+      completed.push({id:p.id,title_en:p.title_en,status:p.status});
+      continue; // Never enter translation OR formatting work queues.
+    }
     const group=tier(p);
     phases[group-1].push({id:p.id,title_en:p.title_en,assignee:p.assignee,
       status:p.status,google_doc_url:p.google_doc_url ?? null,
@@ -73,6 +77,9 @@ export function planWorkQueue(projects) {
     count:projects.length,
     included:phases.reduce((n,x)=>n+x.length,0),
     excluded,
+    completed,
+    completedCount:completed.length,
+    completedBookIds:completed.map(x=>x.id).sort((a,b)=>a-b),
     statusCounts,
     statusTranslatedCount:statusTranslatedProjects.length,
     statusTranslatedBookIds:statusTranslatedProjects.map(x=>x.id).sort((a,b)=>a-b),
@@ -83,7 +90,7 @@ export function planWorkQueue(projects) {
       {priority:2,label:'Zahraa',projects:phases[1]},
       {priority:3,label:'Shared and remaining website books',projects:phases[2]},
     ],
-    note:'Site statuses review/completed/published count as founder-approved translation DONE; this is separate from source-page QA, formatting, human review and actual publication.',
+    note:'Site statuses review/completed/published are excluded from BOTH translation and formatting work queues; separate QA metrics do not reopen them.',
   };
 }
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
@@ -107,6 +114,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
         remainingNewTranslation:result.newTranslationCount,
         remainingNewTranslationBookIds:result.newTranslationBookIds,
         excluded:result.excluded.map(x=>x.id),
+        completedExcluded:result.completedBookIds,
         priorities:result.phases.map(x=>({priority:x.priority,group:x.label,
           count:x.projects.length,projectIds:x.projects.map(y=>y.id)}))
       }));
