@@ -89,7 +89,7 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
     if (process.argv.length !== 4) fail('USAGE: --check-pdf-page /private/witness.json');
     const witness = JSON.parse(readFileSync(process.argv[3], 'utf8'));
     const result = assertSourcePdfPageLocator(witness);
-    process.stdout.write('PDF_PAGE_LOCATOR_PREFLIGHT_PASS ' + JSON.stringify(result) + '\\n');
+    process.stdout.write('PDF_PAGE_LOCATOR_PREFLIGHT_PASS ' + JSON.stringify(result) + '\n');
     process.exit(0);
   }
   const [manifestPath, proposalPath] = process.argv.slice(2);
