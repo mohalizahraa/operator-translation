@@ -44,12 +44,14 @@ export function planWorkQueue(projects) {
   if (!Array.isArray(projects) || projects.length === 0)
     throw new Error('WORK_QUEUE_BLOCKED: full live project inventory required');
   const ids=new Set();
+  const allowedStatuses = new Set(['not_started','in_progress',...STATUS_TRANSLATED]);
   const phases=[[],[],[]],excluded=[];
   for (const p of projects) {
     if (!Number.isSafeInteger(p?.id) || p.id < 1 || typeof p?.title_en !== 'string' ||
         !p.title_en.trim()) throw new Error('WORK_QUEUE_BLOCKED: missing exact project identity');
     if (ids.has(p.id)) throw new Error('WORK_QUEUE_BLOCKED: duplicate project ID #' + p.id);
     ids.add(p.id);
+    if (!allowedStatuses.has(p.status)) throw new Error('WORK_QUEUE_BLOCKED: unknown live status at project #'+p.id);
     const name = strip(p.title_en);
     const byId = expected.has(p.id), byTitle = excludedNames.has(name);
     // The two exclusions must resolve to their actual live project identities.
