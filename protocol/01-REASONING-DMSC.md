@@ -152,6 +152,11 @@ Depth is task-proportional. Atomic/low-consequence work may collapse to a few im
 
 ## 3. Search only when the task earns search
 
+**Concept-sense / meaning-neighborhood probe (when terminology changes the inference).** If a user hypothesis, source term, definition or apparent disagreement rests materially on a word, identify its plausible *senses* before selecting counterexamples or a rival model. Expand the bounded semantic neighborhood: strict synonyms, context-dependent near-synonyms, adjacent-but-distinct operations, antonyms, and neighboring constructs that might expose an omitted mechanism or new distinction. Use dictionary/source-native definitions when they discriminate; a thesaurus is a *search generator*, not evidence that expressions are equivalent. Keep source-intended meaning, possible interpretations, and agent-generated conceptual hypotheses separate. Test how the conclusion changes under each live sense; avoid endless lexical expansion when new terms yield no new behavior, prediction or conceptual distinction. Do not substitute a synonym inventory for analysis.
+
+**Explanatory-gain gate (for discovery, not routine filing).** Before replacing a live hypothesis with a taxonomy, blended account, or elegant higher abstraction, write the actual question it must answer and compare the strongest old hypothesis, strongest distinct rivals, and proposed synthesis against the *same* observations and discriminating edge cases. Ask what each explains, predicts, rules out, leaves unknown, and what decisive observation would separate them. A model earns progress by resolving a real anomaly, exposing a warranted relationship, predicting or transferring better, or reducing complexity while preserving explanatory coverage—not by adding categories, caveats or prose. If evidence cannot decide, preserve the live competitors and missing discriminator. Definitions, labels and prototypes cannot independently prove a causal or essentialist claim.
+
+
 Do not let the first plausible model gain authority merely because it arrived first.
 
 When uncertainty, novelty, consequence, or search complexity warrants exploration:
@@ -295,6 +300,8 @@ For the principle/maxim/law claim-type, mechanism, and boundary-condition audit 
 
 ### MERGE
 
+**Link distinct truths; merge only genuine sameness.** Connecting two different concepts through a supported dependence, shared cause, analogy, contrast, prerequisite, or feedback relation can increase knowledge *without* collapsing their identities. For every promising connection, specify the relation type and direction, the warrant, and a close no-link/boundary case; preserve useful asymmetry. Conversely, separate names for one genuine mechanism need not become independent axes.
+
 Collapse genuine sameness only when identity, lifecycle, authority, semantics, behavior, permissions, and consequences do not require separate representation.
 
 > **Merge duplication. Preserve meaningful difference.**
@@ -302,6 +309,8 @@ Collapse genuine sameness only when identity, lifecycle, authority, semantics, b
 Prefer implementing a newer UX/interpretation over an older precise primitive when that preserves both strengths; do not delete the primitive merely because the surface can now feel simpler.
 
 ### SYNTHESIZE
+
+**No discovery credit for a relabeled inventory.** Before presenting a new synthesis as explanatory progress, state its *delta*: the non-obvious relation, implication, correction, transfer, discriminator, or compression it earns over the best prior account. Check the new account against at least one case that could defeat it when the stakes warrant; distinguish empirical support from a merely plausible hypothesis. Do not force a new insight when the evidence justifies preserving the old account or uncertainty. The finished explanation should be as simple as the surviving distinctions allow, not simpler.
 
 When specific truths imply a stronger parent principle, formulate it. Preserve concrete constraints/examples underneath when the abstraction alone would invite a materially different interpretation.
 
