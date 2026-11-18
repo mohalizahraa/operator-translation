@@ -37,6 +37,12 @@ Prepare the active book once, then overlap source preparation/OCR for upcoming b
 
 Actual translation content stays on one book at a time unless the user explicitly authorizes interleaving. Deterministic mechanical preparation may span books, as the current execution-substrate profile permits. Never trade source fidelity, complete text-surface coverage, or checkpoint verification for throughput.
 
+## Completed-book scope exclusion and verified-throughput improvement (2026-11-17)
+
+**Founder correction:** Website books whose current site status is `review`, `completed`, or `published` are DONE for work-queue scope and must not enter **either translation or formatting queues**, irrespective of incomplete independent source-QA records. Keep their originals intact; exact-copy account migration and final portfolio reconciliation are separate workflows, not authorization to retranslate or reformat. Preserve global exclusions #90 and #106. Fail closed on missing or unknown live status. The read-only `scripts/plan-workbench-priority.mjs` now emits only eligible active work in `phases`, and reports completed status separately. Always validate a fresh full 176-book live snapshot before running its CLI; never infer status from a historical handoff.
+
+For further optimization use [VERIFIED-THROUGHPUT-OPTIMIZATION.md](VERIFIED-THROUGHPUT-OPTIMIZATION.md) as a **proposed experiment and instrumentation plan**, not an override of the approved workflow or proof of performance. Measure end-to-end independently accepted units and correction burden; keep one active book's content translation and one final-manuscript writer until explicitly authorized otherwise. No website mutation before founder-directed final synchronization.
+
 ## Founder directive: fastest possible execution with every quality rule intact (2026-11-16)
 
 **Optimize for the shortest real elapsed time to fully verified, release-quality completion—not maximum raw pages drafted or apparent activity.** This is a standing instruction for all 174 included books and their source reconciliation, translation, first-pass formatting, final integration, independent assurance, private tracking and eventual final website sync. Apply the entire current Operator Protocol, all task-relevant profiles, project rules and every still-applicable founder instruction; **no speed optimization may lower or skip a required quality, provenance, permissions, privacy, accuracy, human-review or verification gate**. Missing evidence remains open rather than silently downgraded.
