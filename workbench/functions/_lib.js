@@ -65,6 +65,25 @@ export async function ensureCatalog(db) {
     FOREIGN KEY(question_id) REFERENCES translation_questions(id) ON DELETE CASCADE
   )`).run();
   await db.prepare('CREATE INDEX IF NOT EXISTS idx_question_events_question ON translation_question_events(question_id,id)').run();
+  await db.prepare(`CREATE TABLE IF NOT EXISTS translation_question_comments (
+    question_id INTEGER PRIMARY KEY,
+    google_doc_id TEXT NOT NULL,
+    comment_id TEXT NOT NULL,
+    anchor_id TEXT NOT NULL,
+    tab_id TEXT NOT NULL,
+    quoted_text TEXT NOT NULL,
+    document_revision TEXT NOT NULL,
+    observed_state TEXT NOT NULL DEFAULT 'unknown' CHECK (observed_state IN ('open','resolved','unknown')),
+    last_observed_revision TEXT,
+    last_observed_at TEXT,
+    verification_status TEXT NOT NULL DEFAULT 'client_reported_unverified',
+    recorded_by TEXT NOT NULL,
+    recorded_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (google_doc_id, comment_id),
+    FOREIGN KEY (question_id) REFERENCES translation_questions(id) ON DELETE CASCADE
+  )`).run();
+  await db.prepare('CREATE INDEX IF NOT EXISTS idx_translation_comment_document ON translation_question_comments(google_doc_id,comment_id)').run();
+
   await db.prepare(`CREATE TABLE IF NOT EXISTS translation_quality_evidence (
     id INTEGER PRIMARY KEY AUTOINCREMENT, project_id INTEGER NOT NULL,
     from_page INTEGER NOT NULL, to_page INTEGER NOT NULL, source_pdf_sha256 TEXT NOT NULL,

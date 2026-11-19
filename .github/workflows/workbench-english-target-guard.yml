@@ -23,6 +23,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Verify full Workbench check suite
+      - name: Verify Workbench acceptance suite (includes source target checks)
         working-directory: workbench
-        run: npm run check
+        run: npm run check:acceptance
