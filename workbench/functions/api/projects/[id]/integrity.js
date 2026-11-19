@@ -10,7 +10,7 @@ export async function onRequestGet(context){
  let checkpoint,questions,receipts,attestations;
  try{
  [checkpoint,questions,receipts,attestations]=await Promise.all([
-   db.prepare('SELECT source_pdf_sha256,google_doc_revision,to_pages FROM translation_progress_checkpoints WHERE project_id=? ORDER BY id DESC LIMIT 1').bind(id).first(),
+   db.prepare('SELECT from_pages,to_pages,source_total_pages,source_page_basis,source_pdf_sha256,google_doc_revision,created_at FROM translation_progress_checkpoints WHERE project_id=? ORDER BY id DESC LIMIT 1').bind(id).first(),
    db.prepare(`SELECT status,severity,COUNT(*) AS count FROM translation_questions WHERE project_id=? GROUP BY status,severity`).bind(id).all(),
    db.prepare('SELECT from_page,to_page,source_pdf_sha256,google_doc_revision FROM translation_quality_evidence WHERE project_id=? ORDER BY from_page,to_page').bind(id).all(),
    db.prepare('SELECT reviewer_name,source_pdf_sha256,google_doc_revision,approved_at FROM translation_human_review_attestations WHERE project_id=? ORDER BY id DESC').bind(id).all()
@@ -36,6 +36,9 @@ export async function onRequestGet(context){
   project_id:id,book_title:project.title_en||project.title_ar,phase:project.status,
   source:{physical_pages:total,page_count_verified:norm.page_count_verified===true,pdf_status:project.pdf_status,
     current_checkpoint_pages:Number(project.translated_pages||0),source_sha256:hash},
+  checkpoint:checkpoint?{from_page:Number(checkpoint.from_pages)+1,to_page:Number(checkpoint.to_pages),
+    source_total_pages:Number(checkpoint.source_total_pages),source_page_basis:checkpoint.source_page_basis,
+    source_pdf_sha256:checkpoint.source_pdf_sha256,google_doc_revision:checkpoint.google_doc_revision,created_at:checkpoint.created_at}:null,
   questions:{unresolved,blocking_open:openBlocking,answered_not_applied:counter('answered','review')+counter('answered','blocking')},
   evidence:{receipts:relevant.length,covered_pages:qaCovered,total_pages:total,whole_book_receipt:Boolean(whole),
     note:'Presence checks, not independent Arabic accuracy certification.'},

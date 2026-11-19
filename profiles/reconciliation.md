@@ -23,6 +23,26 @@ Do not mark a source complete unless the whole relevant source was processed.
 
 When the observed source set itself may be biased, also track enough to understand the **selection/dependence mechanism**: supplied-only vs discovered, success/failure coverage, primary vs derivative source, copied/shared upstream evidence, and relevant missing classes.
 
+### Founder-authored model vs user-selected audit material (standing rule, clarified 2026-10-29)
+
+Before synthesis, type each input by **what it is authorized to establish**. Do not collapse these source classes merely because they arrive in the same user message or concern the same topic:
+
+- **Founder/user-authored framework, lived report, correction, or explicit approval:** primary authority for what the user means, experienced, prefers, and has deliberately established in their personal model, within the stated scope.
+- **Founder/user-selected external source for audit:** a request to inspect and reconcile that source within the supplied denominator. Selection, linking, praise, or interest is **not** blanket endorsement of the source's claims and does not transfer authority over the user's model to that source.
+- **External creator/research/scripture/third-party account:** evidence for what that source says, with its own provenance, completeness, reliability, and epistemic status. It is not automatically the user's belief or an approved canonical rule.
+- **Agent interpretation or proposed synthesis:** derived material until it is accepted or otherwise authorized under the project's decision rules.
+
+When an external source is introduced into an already-established founder-owned model, use **founder-first, proposition-level reconciliation**, not wholesale replacement:
+
+1. Retrieve the current canonical model, the founder's original/approved source material, prior corrections and relevant worked cases, plus the actual accessible content of the newly selected source.
+2. Reconstruct the founder's established propositions and distinctions before evaluating the external source's taxonomy or claims. Treat approved/locked propositions as constraints within their scope; do not silently remove them because a creator says something more categorical, newer, or more famous.
+3. Compare each material external proposition against the founder model and existing evidence. Mark it compatible, additive, clarifying, conflicting, unsupported, source-ambiguous, or out of scope. Integrate compatible additions with attribution; preserve unresolved conflicts side by side; revise a founder-owned proposition only when the founder explicitly changes it or the applicable authority rules justify a narrowly scoped factual correction. Never use a source audit as implicit permission to rewrite the user's worldview.
+4. Keep **what the source claims**, **what the founder reports or believes**, **what independent evidence supports**, and **what the agent recommends** visibly distinct. A first-person report is evidence of the reported experience and interpretation, not automatically proof of a universal causal law. External criticism may qualify a generalization without overwriting the founder's account of what they meant or experienced.
+5. Preserve the source denominator and retrieval state. A user-supplied list means audit those listed items, not an entire channel or surrounding corpus. Distinguish original media, official transcript/captions, derivative transcript, metadata/summary only, partial access, and unread/unresolved items. Never present metadata or one derivative transcript as a completed audit of all selected sources.
+6. After source retrieval and proposition-level DMSC, surface only genuine remaining founder-owned questions. Order them by dependency, foundationality, leverage, information gain, and rework avoided; ask parent decisions before dependent details, then recompute the remaining question graph after every material answer. Do not ask the founder to resolve questions that further agent-owned retrieval or reasoning can settle.
+
+This rule is a specialization of KNOWLEDGE's founder/user-source priority and this profile's source/proposition ledger; it does not exempt factual, historical, causal, or population-level claims from appropriate evidence checks.
+
 ### Case-to-theory coverage check
 
 In a cumulative research or framework audit, retrieve earlier user–assistant worked cases and observations that materially bear on the new theory, not only the theorist's own examples. Build a bounded comparison of what each case actually shows, what the user explicitly judged, and what remains an agent inference. Keep analysis levels separate (scene, episode, season, series, whole work).
@@ -194,7 +214,26 @@ For consequential or conflict-heavy reconciliation, use THINK's proportional rea
 
 The correction should change the evidence/model, not merely attach a bias label.
 
-## 3. Resolve evidence first; ask only genuine remaining ambiguities
+## 3. Resolve evidence first; surface material conflicts visibly
+
+**Founder standing rule — reconciliation conflict register (2026-10-30):** Substantive reconciliation must not silently compress away a material conflict point merely because the agent can recommend or derive a resolution. Keep a compact conflict register while reconciling, and surface its material entries to the founder/user at the next useful checkpoint. **Reporting a conflict is not the same as asking the user to decide it.** The agent remains responsible for resolving evidence-owned questions and continuing independent work; only genuine user-owned forks require a decision.
+
+A conflict point is material when it could change the answer or synthesis, a source's interpretation/authority, a founder/user-owned proposition, a durable project rule/model, a downstream decision, or the confidence/status assigned to any of these. Do not inflate the register with trivial wording differences, duplicates, or alternatives already shown to be immaterial.
+
+For each material entry, record the smallest useful set:
+
+- **Conflict / proposition:** the exact dimension that appears incompatible;
+- **Competing positions:** each materially distinct claim, interpretation, or source reading, with provenance;
+- **What the evidence settles:** authority, scope, chronology, source dependence, definitions, and decisive evidence/counterevidence;
+- **Disposition:** `RESOLVED_BY_EVIDENCE`, `PARTIALLY_RESOLVED`, `OPEN_EVIDENCE_OWNED`, `USER_DECISION_REQUIRED`, or `NOT_MATERIAL`;
+- **Agent synthesis/recommendation:** if earned, explicitly distinguished from source/user truth;
+- **Founder input:** whether input is actually needed, why, and the narrowest useful question; otherwise invite correction without turning it into a blocking decision;
+- **Downstream effect / next test:** what changes if the point is reopened and the next admissible action.
+
+At a natural reconciliation checkpoint, surface **all currently material unresolved conflicts and material conflicts resolved by the agent that affected the synthesis** in one concise, numbered **Conflict points for review** section. Include the evidence-backed disposition and recommendation, but do not demand confirmation of facts the user does not own. Keep the register in the canonical case/evidence artifact when the work is persistent. Re-surface changed entries when new evidence alters them; do not repeat unchanged entries on unrelated turns or leave them permanently buried in a dossier.
+
+Before asking the founder to choose, apply the existing authority/provenance and SPECIFY gates: reconcile what can be settled, distinguish source disagreement from genuine contradiction, and ask only when a residual material choice belongs to the founder/user or when user-held evidence is the only meaningful discriminator. Never silently adjudicate a founder-owned fork; never transfer agent-owned research or synthesis back to the user just because sources disagree.
+
 
 Use source authority/chronology and safe derivation to settle everything that can be settled without the user.
 

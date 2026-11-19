@@ -16,6 +16,14 @@ Before substantial mutation:
 
 Do not execute from a stale plan or remembered snapshot when current state can materially differ.
 
+### Founder repository-update completion contract (explicit correction, 2026-11-13)
+
+When the founder says **add, put, update, apply, incorporate, reconcile, or save something in a repository** (or equivalent), interpret the authorized parent outcome as **DMSC-integrated and merged into the intended canonical target branch** (normally `main`), not merely drafted, written to a feature branch, committed, or proposed in a PR. The founder should not need to separately say “DMSC” or “merge.” Preserve project-specific routing, authority, and safety requirements; reconcile the change against existing canon, propagate affected owners/consumers, run applicable verification, complete the merge, and verify the resulting target-branch state before calling it done.
+
+A branch commit, open PR, green mergeability flag, or review-ready status is **intermediate work**, never the finish line. Do not turn a verification gap into an implicit founder decision or repeatedly ask the founder to restate the merge intent. If required checks, permissions, conflicts, or other real gates prevent safe integration, exhaust authorized remedies, preserve the exact pending work and blocker, and report **NOT MERGED / NOT DONE** until the gate is actually resolved. Do not bypass mandatory checks merely to satisfy the merge objective. An explicit user instruction to stage, draft, propose only, or target a different branch overrides this default within its scope.
+
+
+
 ### Admission checkpoint: resolve the actual prerequisites, not merely the queued task
 
 Before admitting a substantial implementation or mutation, apply SPECIFY's **decision-to-work admission** classification against current authoritative project decisions and the action's real prerequisites. Look upstream of the next backlog item: would any OPEN, INTENTIONALLY OPEN, recently reopened or deferred founder decision change this action's necessity, substrate, ownership, approach, migration cost, or acceptance? If so, stop the dependent branch until resolved; do not treat recording a decision in another issue as sufficient separation. A task graph and a previously approved queue enforce only the dependencies they actually contain.

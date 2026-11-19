@@ -1,0 +1,41 @@
+name: Workbench bounded PDF physical-page witness
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: workbench-source-pages-macos
+  cancel-in-progress: false
+
+jobs:
+  read-pages:
+    if: >-
+      github.repository == 'mohalizahraa/operator-translation' &&
+      github.event.issue.user.login == github.repository_owner &&
+      startsWith(github.event.issue.title, 'Workbench PDF pages: #')
+    runs-on: [self-hosted, operator-translation, macOS, ARM64]
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate exact-ID PDF page retrieval
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check workbench/scripts/source-pages-job.mjs
+          node --test workbench/scripts/source-pages-job.test.mjs
+          swift --version
+      - name: Retrieve up to four physical source pages without Actions artifacts
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          node workbench/scripts/source-pages-job.mjs

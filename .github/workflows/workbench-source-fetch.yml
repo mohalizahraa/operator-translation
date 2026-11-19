@@ -1,0 +1,88 @@
+name: Workbench canonical Arabic PDF access bridge
+
+on:
+  issues:
+    types: [opened]
+  push:
+    branches: [main]
+    paths:
+      - workbench/source-access-request.txt
+  workflow_dispatch:
+    inputs:
+      project_id:
+        description: Exact Workbench project ID to retrieve
+        required: true
+        type: string
+      evidence_issue:
+        description: Existing private issue for outcome evidence
+        required: false
+        type: string
+
+permissions:
+  contents: read
+  issues: write
+
+# Separate from the legacy Windows-only queue, which has held source fetches.
+concurrency:
+  group: workbench-source-fetch-macos-v2
+  cancel-in-progress: false
+
+jobs:
+  source-fetch:
+    if: >-
+      github.repository == 'mohalizahraa/operator-translation' &&
+      (github.event_name != 'issues' ||
+      (github.event.issue.user.login == github.repository_owner &&
+      startsWith(github.event.issue.title, 'Workbench PDF source: #')))
+    runs-on: [self-hosted, operator-translation, macOS, ARM64]
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify source bridge and fail-closed tests
+        id: verify
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check workbench/scripts/fetch-workbench-source.mjs
+          node --check workbench/scripts/source-access-job.mjs
+          node --test workbench/scripts/fetch-workbench-source.test.mjs workbench/scripts/source-access-job.test.mjs
+          node workbench/scripts/check-source-access-bridge.mjs
+      - name: Download exact canonical source PDF
+        id: fetch
+        shell: bash
+        env:
+          INPUT_PROJECT_ID: ${{ inputs.project_id }}
+          INPUT_EVIDENCE_ISSUE: ${{ inputs.evidence_issue }}
+        run: |
+          set -euo pipefail
+          node workbench/scripts/source-access-job.mjs stage
+      - name: Upload short-lived verified PDF artifact
+        id: upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: workbench-source-pdf
+          path: ${{ steps.fetch.outputs.path }}
+          if-no-files-found: error
+          retention-days: 1
+      - name: Remove source bytes from runner temporary storage
+        if: always()
+        shell: bash
+        run: |
+          rm -f "$RUNNER_TEMP/workbench-source.pdf"
+      - name: Report run outcome to private verification issue
+        if: always()
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          INPUT_PROJECT_ID: ${{ inputs.project_id }}
+          INPUT_EVIDENCE_ISSUE: ${{ inputs.evidence_issue }}
+          VERIFY_OUTCOME: ${{ steps.verify.outcome }}
+          FETCH_OUTCOME: ${{ steps.fetch.outcome }}
+          UPLOAD_OUTCOME: ${{ steps.upload.outcome }}
+          FETCH_SHA256: ${{ steps.fetch.outputs.sha256 }}
+          FETCH_BYTES: ${{ steps.fetch.outputs.bytes }}
+        run: |
+          node workbench/scripts/source-access-job.mjs report

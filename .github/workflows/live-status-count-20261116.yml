@@ -1,0 +1,50 @@
+name: Live Workbench status-only translation count
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/live-status-count-20261116.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  status-count:
+    runs-on: [self-hosted, operator-translation, macOS, ARM64]
+    timeout-minutes: 10
+    steps:
+      - name: Read current public Workbench project statuses without private manuscript data
+        shell: bash
+        run: |
+          set -euo pipefail
+          snapshot="$(mktemp)"
+          trap 'rm -f "$snapshot"' EXIT
+          curl -fSL --retry 3 --connect-timeout 20 --max-time 100 \
+            'https://haydari-translation-workbench.pages.dev/api/projects' -o "$snapshot"
+          node --input-type=module - "$snapshot" <<'NODE'
+          import { readFileSync } from 'node:fs';
+          const response = JSON.parse(readFileSync(process.argv[2], 'utf8'));
+          const all = response?.projects;
+          if (!Array.isArray(all) || all.length !== 176) throw Error('INCOMPLETE_PROJECT_SNAPSHOT');
+          const ids = new Set();
+          const allowed = new Set(['not_started','in_progress','review','completed','published']);
+          for (const p of all) {
+            if (!Number.isSafeInteger(p.id) || p.id<1 || p.id>176 || ids.has(p.id) || !allowed.has(p.status))
+              throw Error('INVALID_ID_OR_STATUS');
+            ids.add(p.id);
+          }
+          for(let id=1;id<=176;id++) if(!ids.has(id)) throw Error('MISSING_PROJECT_'+id);
+          const included = all.filter(p => p.id!==90 && p.id!==106);
+          const counts = Object.fromEntries([...allowed].map(s=>[s,included.filter(p=>p.status===s).length]));
+          const translatedIds = included.filter(p=>['review','completed','published'].includes(p.status)).map(p=>p.id).sort((a,b)=>a-b);
+          const needsReviewOrReady = counts.completed+counts.published;
+          const statusTranslated = counts.review+needsReviewOrReady;
+          const actualPublished = included.filter(p=>Boolean(p.published)).length;
+          console.log('LIVE_STATUS_ONLY_COUNT '+JSON.stringify({
+            observedAt: new Date().toISOString(),total:all.length,eligible:included.length,excluded:[90,106],
+            statuses:counts,translatedStatusBookCount:statusTranslated,
+            needsReviewOrPublishReadyCount:needsReviewOrReady,
+            actuallyPublishedCount:actualPublished,
+            statusTranslatedBookIds:translatedIds,
+            note:'Status-based translated counting is founder-requested; it does not independently certify translated source pages, source fidelity, human review, or publication.'
+          }));
+          NODE

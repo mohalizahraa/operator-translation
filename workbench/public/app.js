@@ -40,17 +40,16 @@ const savedViewScope = localStorage.getItem('haydariViewScope') || localStorage.
 const savedMobileBoardStatus = localStorage.getItem('haydariBoardStatus');
 const savedActivityActor = localStorage.getItem('haydariActivityActor');
 const savedActivityType = localStorage.getItem('haydariActivityType');
-const state = { projects: [], activity: [], paceEvents: [], liveSignature: '', liveRevision: null, pdfAudit: null, coverMap: {}, seriesMap: {groups:{},books:{}}, coverObjectUrls: new Map(), coverLoads: new Map(), selectedIds: new Set(), view: 'dashboard', actor: ['Zahraa', 'Mohammed'].includes(savedActor) ? savedActor : 'Zahraa', projectSort: SORT_VALUES.includes(savedProjectSort) ? savedProjectSort : 'updated', projectGrouping: savedProjectGrouping === 'series' ? 'series' : 'none', viewScope: VIEW_SCOPES.includes(savedViewScope) ? savedViewScope : 'Shared', mobileBoardStatus: MOBILE_BOARD_STATUSES.includes(savedMobileBoardStatus) ? savedMobileBoardStatus : 'all', activityActorFilter: ACTIVITY_ACTORS.includes(savedActivityActor) ? savedActivityActor : 'all', activityTypeFilter: ACTIVITY_TYPES.includes(savedActivityType) ? savedActivityType : 'all', pendingWorkOnLink: null, activityLoaded:false, activityError:null };
+const state = { projects: [], activity: [], paceEvents: [], liveSignature: '', liveRevision: null, pdfAudit: null, coverMap: {}, seriesMap: {groups:{},books:{}}, coverObjectUrls: new Map(), coverLoads: new Map(), selectedIds: new Set(), view: 'dashboard', actor: ['Zahraa', 'Mohammed'].includes(savedActor) ? savedActor : 'Zahraa', projectSort: SORT_VALUES.includes(savedProjectSort) ? savedProjectSort : 'updated', projectGrouping: savedProjectGrouping === 'series' ? 'series' : 'none', viewScope: VIEW_SCOPES.includes(savedViewScope) ? savedViewScope : 'Shared', mobileBoardStatus: MOBILE_BOARD_STATUSES.includes(savedMobileBoardStatus) ? savedMobileBoardStatus : 'all', activityActorFilter: ACTIVITY_ACTORS.includes(savedActivityActor) ? savedActivityActor : 'all', activityTypeFilter: ACTIVITY_TYPES.includes(savedActivityType) ? savedActivityType : 'all', pendingWorkOnLink: null, draftProgress:{}, activityLoaded:false, activityError:null };
 const LIVE_REVISION_MS = 2000;
 const LIVE_REVISION_RETRY_MS = 1000;
-const LIVE_MARKER_SYNC_MS = 5000;
-const LIVE_MARKER_BATCH_SIZE = 3;
+const DRAFT_REFRESH_MS = 75000; // Read the linked Google Doc, not any verified PDF checkpoint.
+let draftRefreshTimer = null;
+let draftRefreshInFlight = false;
+let draftBatchOffset = 0;
 let liveSyncTimer = null;
 let liveSyncInFlight = false;
 let liveRevisionInFlight = false;
-let markerSyncInFlight = false;
-let markerSyncCursor = 0;
-let lastMarkerSyncAt = 0;
 let liveSyncStarted = false;
 let activitySyncInFlight = false;
 let activityRefreshPending = false;
@@ -868,22 +867,54 @@ function translationDisplayPages(p) {
   const total=Math.max(0,Number(p.pages || 0));
   return isTranslated(p) && p.page_count_verified && total>0 && done<total ? total : done;
 }
-function translationProgressMarkup(p, compact=false, showZero=false) {
-  const storedDone=Math.max(0,Number(p.translated_pages || 0));
-  const done=translationDisplayPages(p);
-  const total=Math.max(0,Number(p.pages || 0));
-  if (!p.page_count_verified) {
-    if (!showZero && !storedDone) return '';
-    return `<div class="book-translation-progress ${compact?'compact':''} unverified" aria-label="${storedDone} source pages translated; total page count unverified">
-      <div class="book-progress-copy"><span>${storedDone} pages translated</span><strong>Total unverified</strong></div>
-    </div>`;
-  }
-  if (!total || (!showZero && !done)) return '';
-  const percent=Math.min(100,Math.round((done/total)*100));
-  return `<div class="book-translation-progress ${compact?'compact':''} ${done===0?'zero':''}" aria-label="${done} of ${total} source pages translated">
-    <div class="book-progress-copy"><span>${done}/${total} pages translated</span><strong>${percent}%</strong></div>
-    <div class="book-progress-track"><span style="width:${percent}%"></span></div>
+// One visible track carries two explicitly different kinds of progress:
+// draft share of a documented text edition (sage), verified physical PDF (wine).
+function combinedProgressTrack(p, trackClass) {
+  const view=WorkbenchCore.translationProgressDisplay(p,state.draftProgress[p.id]);
+  const translatedPercent=view.translationPercent??0;
+  const verifiedPercent=view.verifiedPercent??0;
+  return `<div class="${trackClass} combined-progress-track" data-progress-track-for="${p.id}" role="img"
+    aria-label="${escapeHtml(combinedProgressAccessibleLabel(p))}">
+    <span class="draft-fill" style="width:${translatedPercent}%"></span>
+    <span class="verified-fill" style="width:${verifiedPercent}%"></span>
   </div>`;
+}
+function compactProgressLabel(p) {
+  const v=WorkbenchCore.translationProgressDisplay(p,state.draftProgress[p.id]);
+  if(v.translatedStatus){
+    if(v.verifiedTotal!==null && v.verifiedPages===v.verifiedTotal)
+      return `Verified · ${v.verifiedPages}/${v.verifiedTotal} pages`;
+    return 'Translated · 100%';
+  }
+  if(v.draftPercent!==null)
+    return `Draft · ${v.draftPages}/${v.draftTotal} · ${v.draftPercent}%`;
+  if(p.status==='in_progress'&&p.google_doc_url) return 'Draft · syncing…';
+  return v.verifiedTotal===null
+    ? `Verified · ${v.verifiedPages} pages`
+    : `Verified · ${v.verifiedPages}/${v.verifiedTotal} pages`;
+}
+function compactProgressMarkup(p,tag='span'){
+  const label=escapeHtml(compactProgressLabel(p));
+  return `<${tag} data-progress-summary-for="${p.id}">${label}</${tag}>`;
+}
+function translationProgressMarkup(p, compact=false, showZero=false) {
+  const view=WorkbenchCore.translationProgressDisplay(p,state.draftProgress[p.id]);
+  const isDraft=p.status==='in_progress'&&Boolean(p.google_doc_url);
+  if(!showZero&&!view.verifiedPages&&!isDraft&&!view.translatedStatus)return '';
+  return `<div class="book-translation-progress ${compact?'compact':''}"
+     aria-label="${escapeHtml(combinedProgressAccessibleLabel(p))}">
+    <div class="book-progress-copy">${compactProgressMarkup(p)}</div>
+    ${combinedProgressTrack(p,'book-progress-track')}
+  </div>`;
+}
+function combinedProgressAccessibleLabel(p){
+  const v=WorkbenchCore.translationProgressDisplay(p,state.draftProgress[p.id]);
+  const translation=v.translatedStatus?'Workflow-reported translation 100 percent':
+    v.draftPercent===null?'Draft percentage unverified':
+    `Draft ${v.draftPages} of ${v.draftTotal} text-edition pages, ${v.draftPercent} percent`;
+  const verification=v.verifiedTotal===null?'Physical PDF denominator not verified':
+    `Source-certified ${v.verifiedPages} of ${v.verifiedTotal} physical PDF pages`;
+  return `${translation}. ${verification}. Open book for details.`;
 }
 function assignedProjectMarkup(p) {
   const due = p.due_date ? dateText(p.due_date) : 'No deadline';
@@ -931,14 +962,11 @@ function renderTranslationLive() {
     .slice(0,5);
   $('live-progress-summary').textContent=`${assigned.length} assigned · updates live`;
   const assignedMarkup=assigned.length ? assigned.map(p=>{
-    const storedDone=Math.max(0,Number(p.translated_pages || 0));
-    const done=translationDisplayPages(p), total=Number(p.pages || 0);
-    const verified=Boolean(p.page_count_verified && total>0);
-    const percent=verified ? Math.min(100,Math.round(done/total*100)) : 0;
-    const progressText=verified ? `${done}/${total} pages` : `${storedDone} pages · total unverified`;
+    const done=translationDisplayPages(p);
+    const verified=Boolean(p.page_count_verified && Number(p.pages)>0);
     return `<button type="button" class="live-translation-row ${done===0?'zero':''} ${verified?'':'unverified'}" data-live-project="${p.id}">
-      <div class="live-translation-copy">${bookTitleMarkup(p,{compact:true})}<strong>${progressText}</strong></div>
-      ${verified ? `<div class="live-translation-track"><span style="width:${percent}%"></span></div>` : ''}
+      <div class="live-translation-copy">${bookTitleMarkup(p,{compact:true})}${compactProgressMarkup(p,'strong')}</div>
+      ${combinedProgressTrack(p,'live-translation-track')}
     </button>`;
   }).join('') : '<div class="live-empty">No books are assigned here yet.</div>';
   const feedMarkup=latest.length ? latest.map(a=>{
@@ -1922,10 +1950,46 @@ async function refreshActivityData() {
   }
 }
 
+async function refreshDraftProgress() {
+  if (document.hidden || draftRefreshInFlight) return;
+  const eligible=state.projects.filter(p=>p.status==='in_progress'&&p.google_doc_url);
+  if(!eligible.length) return;
+  draftRefreshInFlight=true;
+  // Rotating bounded batches avoid hammering Google Docs when many books are active.
+  const batch=Array.from({length:Math.min(6,eligible.length)},(_,i)=>eligible[(draftBatchOffset+i)%eligible.length]);
+  draftBatchOffset=(draftBatchOffset+batch.length)%eligible.length;
+  try{
+    await Promise.all(batch.map(async p=>{
+      try{
+        const data=await api(`/api/projects/${p.id}/draft-progress`);
+        const current=state.projects.find(q=>q.id===p.id);
+        if(!current||current.status!=='in_progress'||!current.google_doc_url?.includes('/d/'+data.google_doc_id+'/'))return;
+        state.draftProgress[p.id]=data;
+      }catch(error){
+        state.draftProgress[p.id]={...state.draftProgress[p.id],stale:true,error:String(error?.message||error)};
+      }
+      const current=state.projects.find(q=>q.id===p.id);
+      if(!current)return;
+      document.querySelectorAll(`[data-progress-summary-for="${p.id}"]`).forEach(el=>{
+        el.outerHTML=compactProgressMarkup(current,el.tagName==='STRONG'?'strong':'span');
+      });
+      document.querySelectorAll(`[data-progress-track-for="${p.id}"]`).forEach(el=>{
+        el.outerHTML=combinedProgressTrack(current,el.classList.contains('live-translation-track')?'live-translation-track':'book-progress-track');
+      });
+    }));
+  }finally{draftRefreshInFlight=false;}
+}
+function scheduleDraftRefresh() {
+  if(draftRefreshTimer)clearTimeout(draftRefreshTimer);
+  draftRefreshTimer=setTimeout(async()=>{
+    try{await refreshDraftProgress();}finally{scheduleDraftRefresh();}
+  },DRAFT_REFRESH_MS);
+}
 async function loadData() {
   const next=await fetchSharedData();
   applySharedData(next,{force:true});
   void refreshActivityData();
+  void refreshDraftProgress();
 }
 
 async function syncSharedData({allowHidden=false}={}) {
@@ -1944,51 +2008,9 @@ async function syncSharedData({allowHidden=false}={}) {
 }
 
 async function syncVerifiedTranslationMarkers() {
-  if (document.hidden || markerSyncInFlight) return true;
-  const now=Date.now();
-  if (now-lastMarkerSyncAt < LIVE_MARKER_SYNC_MS) return true;
-  lastMarkerSyncAt=now;
-
-  const candidates=state.projects
-    .filter(p=>
-      p.google_doc_url &&
-      p.page_count_verified &&
-      (
-        (p.status==='in_progress' && (p.assignee===state.actor || p.assignee==='Both')) ||
-        (p.status==='not_started' && (p.assignee===state.actor || p.assignee==='Both'))
-      )
-    )
-    .sort((a,b)=>{
-      const active=Number(b.status==='in_progress')-Number(a.status==='in_progress');
-      if (active) return active;
-      const recent=String(b.translation_progress_at || '').localeCompare(String(a.translation_progress_at || ''));
-      if (recent) return recent;
-      return Number(a.id)-Number(b.id);
-    });
-
-  if (!candidates.length) {
-    markerSyncCursor=0;
-    return true;
-  }
-  const start=markerSyncCursor % candidates.length;
-  const batchSize=Math.min(LIVE_MARKER_BATCH_SIZE,candidates.length);
-  const batch=Array.from({length:batchSize},(_,offset)=>candidates[(start+offset)%candidates.length]);
-  markerSyncCursor=(start+batchSize)%candidates.length;
-
-  markerSyncInFlight=true;
-  let ok=true;
-  try {
-    for (const project of batch) {
-      try {
-        await api(`/api/projects/${project.id}/progress-sync`,{method:'POST'});
-      } catch {
-        ok=false;
-      }
-    }
-  } finally {
-    markerSyncInFlight=false;
-  }
-  return ok;
+  // A WBPROGRESS marker is only a draft signal. Verified progress is published
+  // by the evidence-bound runner after QA and revision/checkpoint readback.
+  return true;
 }
 
 async function pollLiveRevision() {
@@ -2020,9 +2042,10 @@ function startLiveSync() {
   if (liveSyncStarted) return;
   liveSyncStarted=true;
   scheduleLiveRevisionPoll();
-  window.addEventListener('focus',()=>syncSharedData({allowHidden:true}));
+  scheduleDraftRefresh();
+  window.addEventListener('focus',()=>{void syncSharedData({allowHidden:true});void refreshDraftProgress();});
   document.addEventListener('visibilitychange',()=>{
-    if (!document.hidden) syncSharedData({allowHidden:true});
+    if (!document.hidden) {void syncSharedData({allowHidden:true});void refreshDraftProgress();}
   });
 }
 async function refreshProjects() {
