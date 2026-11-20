@@ -113,7 +113,10 @@ export function planNativeDraftBatch({document,projectId,manifest,proposed,tabId
 }
 
 export function planPopulateNativeNotes({firstPhaseResult,privateNotePlan,tabId}){
-  const revision=firstPhaseResult?.revisionId||firstPhaseResult?.writeControl?.requiredRevisionId;
+  // Never fall back to the ORIGINAL requiredRevisionId. That value can be
+  // present even when phase 1 did not confirm a successful native write.
+  const revision=firstPhaseResult?.revisionId;
+  if(!validStr(tabId))fail('MISSING_TAB_ID');
   if(!validStr(revision)||revision.length<12)fail('NO_CONFIRMED_WRITE_REVISION');
   if(!Array.isArray(firstPhaseResult?.replies)||!Array.isArray(privateNotePlan?.notes)||
       !positiveInt(privateNotePlan.replyOffset))fail('MISSING_CREATE_NOTE_REPLIES');
