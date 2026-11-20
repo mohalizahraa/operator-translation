@@ -7,6 +7,12 @@ on:
       - '.github/workflows/workbench-english-target-guard.yml'
   workflow_dispatch:
 
+concurrency:
+  group: workbench-english-target-${{ github.event.pull_request.number || github.ref }}
+  # The active PR/head supersedes older checks; do not burn scarce self-hosted
+  # runner capacity on a stale commit. Separate branches/PRs remain isolated.
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
