@@ -1,6 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {planNativeDraftBatch,planPopulateNativeNotes} from './prepare-native-draft-batch.mjs';
+import {mkdtempSync,writeFileSync,readFileSync,rmSync} from 'node:fs';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
+import {spawnSync} from 'node:child_process';
+import {fileURLToPath} from 'node:url';
 const sha='a'.repeat(64), revision='revision-verifiable-123456789';
 const unit={mode:'append',projectId:12,sourceUnitId:'p115-120',fromPage:115,toPage:120,sourceSha256:sha,currentTargetRevision:revision};
 const manifest={projectId:12,sourceSha256:sha,targetRevision:revision,coverageAudited:true,existingUnits:[{sourceUnitId:'prior',fromPage:1,toPage:114}]};
@@ -91,4 +96,21 @@ test('note phase refuses a stale echoed requiredRevisionId when write success re
   const replies=p.requests.map(()=>({}));
   replies[p.privateNotePlan.replyOffset]={createFootnote:{footnoteId:'kix.synthetic'}};
   assert.throws(()=>planPopulateNativeNotes({firstPhaseResult:{writeControl:{requiredRevisionId:revision},replies},privateNotePlan:p.privateNotePlan,tabId:'t.0'}),/NO_CONFIRMED_WRITE_REVISION/);
+});
+
+test('the --populate CLI parses all three file arguments and creates a private plan',()=>{
+  const p=planNativeDraftBatch(specimen());
+  const phase1={revisionId:'confirmed-after-phase1-ABC',replies:p.requests.map(()=>({}))};
+  phase1.replies[p.privateNotePlan.replyOffset]={createFootnote:{footnoteId:'kix.synthetic-id'}};
+  const dir=mkdtempSync(join(tmpdir(),'native-draft-populate-'));
+  try{
+    const first=join(dir,'phase1.json'),plan=join(dir,'plan.json'),out=join(dir,'phase2.json');
+    writeFileSync(first,JSON.stringify(phase1));
+    writeFileSync(plan,JSON.stringify({privateNotePlan:p.privateNotePlan,tabId:'t.0'}));
+    const script=fileURLToPath(new URL('./prepare-native-draft-batch.mjs',import.meta.url));
+    const run=spawnSync(process.execPath,[script,'--populate',first,plan,out],{encoding:'utf8'});
+    assert.equal(run.status,0,run.stderr);
+    assert.equal(JSON.parse(readFileSync(out,'utf8')).requests.length,2);
+    assert.equal(run.stdout.includes('Primary source attribution'),false);
+  }finally{rmSync(dir,{recursive:true,force:true});}
 });
