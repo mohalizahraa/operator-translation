@@ -123,3 +123,13 @@ test('English-only drafts reject Arabic-script OCR leakage and hidden bidi overr
   const override=specimen();override.entries[0].text='Hidden \u202E override';
   assert.throws(()=>planNativeDraftBatch(override),/INVALID_PARAGRAPH_TEXT_OR_TYPE/);
 });
+
+test('note-free batch deliberately omits second native write',()=>{
+  const x=specimen();x.notes=[];
+  const p=planNativeDraftBatch(x);
+  const response={revisionId:'confirmed-note-free-phase1',replies:p.requests.map(()=>({}))};
+  const next=planPopulateNativeNotes({firstPhaseResult:response,privateNotePlan:p.privateNotePlan,tabId:'t.0'});
+  assert.deepEqual(next.requests,[]);
+  assert.equal(next.privateReceipt.skipPhase2,true);
+  assert.equal(next.writeControl.requiredRevisionId,response.revisionId);
+});
