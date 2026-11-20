@@ -114,3 +114,12 @@ test('the --populate CLI parses all three file arguments and creates a private p
     assert.equal(run.stdout.includes('Primary source attribution'),false);
   }finally{rmSync(dir,{recursive:true,force:true});}
 });
+
+test('English-only drafts reject Arabic-script OCR leakage and hidden bidi overrides before any write',()=>{
+  const source=specimen();source.entries[1].text='Visible English and العربية source leakage.';
+  assert.throws(()=>planNativeDraftBatch(source),/INVALID_PARAGRAPH_TEXT_OR_TYPE/);
+  const note=specimen();note.notes[0].text='Reference citation ناس';
+  assert.throws(()=>planNativeDraftBatch(note),/INVALID_NOTE_CONTROL_OR_ARABIC_SCRIPT/);
+  const override=specimen();override.entries[0].text='Hidden \u202E override';
+  assert.throws(()=>planNativeDraftBatch(override),/INVALID_PARAGRAPH_TEXT_OR_TYPE/);
+});
