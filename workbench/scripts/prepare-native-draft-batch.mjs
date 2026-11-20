@@ -26,7 +26,7 @@ const STYLES=new Map([
 const fail=(code)=>{throw new Error('NATIVE_DRAFT_BATCH_BLOCKED:'+code);};
 const validStr=(v)=>typeof v==='string'&&v.trim().length>0;
 const positiveInt=(v)=>Number.isSafeInteger(v)&&v>=0;
-const normalText=(s)=>typeof s==='string'&&s.length>0&&!s.includes('\n')&&!s.includes('\r')&&s===s.trim();
+const normalText=(s)=>typeof s==='string'&&s.length>0&&!/[\n\r\t\u0000-\u0008\u000b\u000c]/u.test(s)&&s===s.trim();
 
 function targetTab(document,tabId){
   if(!validStr(tabId))fail('MISSING_TAB_ID');
@@ -76,17 +76,20 @@ export function planNativeDraftBatch({document,projectId,manifest,proposed,tabId
   if(text.length>MAX_TEXT)fail('BATCH_TOO_LARGE');
   const spans=[];let pos=insertIndex;
   for(const entry of entries){const end=pos+entry.text.length+1;spans.push({start:pos,end});pos=end;}
-  // One bulk insert, one bulk normalizer (prevents inherited 1pt styles),
-  // then paragraph styles and their heading overrides.
+  // IMPORTANT ORDER: the live Docs pilot showed that updateParagraphStyle and
+  // createParagraphBullets can clear explicit runs set earlier in the batch.
+  // Set all paragraph/list structure first. Apply the complete body text style
+  // LAST, then override headings, before inserting footnote anchors. This is
+  // independently verified by a native Docs readback, not just unit tests.
   const requests=[
     {insertText:{endOfSegmentLocation:{tabId},text}},
-    fullStyle(insertIndex,pos,tabId,14),
     ...entries.map((entry,i)=>({updateParagraphStyle:{range:range(spans[i].start,spans[i].end,tabId),
       paragraphStyle:{namedStyleType:STYLES.get(entry.type).namedStyleType},fields:'namedStyleType'}})),
+    ...listGroups(entries,spans,tabId),
+    fullStyle(insertIndex,pos,tabId,14),
     ...entries.flatMap((entry,i)=>entry.type==='heading'?[
       fullStyle(spans[i].start,spans[i].end-1,tabId,18,true)
     ]:[]),
-    ...listGroups(entries,spans,tabId),
   ];
   const anchors=notes.map((note,index)=>{
     if(!positiveInt(note?.entryIndex)||note.entryIndex>=entries.length || !validStr(note?.text) ||
