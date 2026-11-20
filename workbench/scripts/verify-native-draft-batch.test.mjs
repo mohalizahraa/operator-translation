@@ -2,6 +2,11 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {planNativeDraftBatch} from './prepare-native-draft-batch.mjs';
 import {inspectNativeDraftBatch} from './verify-native-draft-batch.mjs';
+import {mkdtempSync,writeFileSync,rmSync} from 'node:fs';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
+import {spawnSync} from 'node:child_process';
+import {fileURLToPath} from 'node:url';
 const rev='revision-verified-src-12345', finalRev='revision-final-verified-ABCDE',sha='a'.repeat(64);
 const entries=[{type:'heading',text:'A synthetic heading'},{type:'body',text:'Alpha 😀 footnote appears here.'},{type:'bullet',text:'First point'},{type:'bullet',text:'Second point'},{type:'numbered',text:'What is correct?'},{type:'numbered',text:'What is not?'}];
 const notes=[{entryIndex:1,anchorText:'footnote',text:'One synthetic source note.'}];
@@ -63,4 +68,19 @@ test('wrong note placement is rejected even with matching text and reference ID'
   p.elements[0].textRun.content=first.slice(0,-1);
   p.elements[2].textRun.content=first.slice(-1)+p.elements[2].textRun.content;
   assert.throws(()=>inspectNativeDraftBatch(f),/NOTE_ANCHOR_POSITION_MISMATCH/);
+});
+
+test('the read-only verifier CLI consumes only private input files and emits a source-incomplete receipt',()=>{
+  const f=fixture(),dir=mkdtempSync(join(tmpdir(),'native-qa-cli-'));
+  try{
+    const paths=['doc.json','batch.json','plan.json','first.json','second.json'].map(p=>join(dir,p));
+    const objs=[f.document,{entries:f.entries,notes:f.notes},f.phase1Plan,f.phase1Result,f.phase2Result];
+    paths.forEach((p,i)=>writeFileSync(p,JSON.stringify(objs[i])));
+    const script=fileURLToPath(new URL('./verify-native-draft-batch.mjs',import.meta.url));
+    const run=spawnSync(process.execPath,[script,...paths,'t.0'],{encoding:'utf8'});
+    assert.equal(run.status,0,run.stderr);
+    assert.ok(run.stdout.includes('NATIVE_BATCH_QA_RESULT'));
+    assert.ok(run.stdout.includes('NOT_CHECKED'));
+    assert.equal(run.stdout.includes('A synthetic heading'),false);
+  }finally{rmSync(dir,{recursive:true,force:true});}
 });
