@@ -9,6 +9,8 @@ on:
       - 'workbench/engine/**'
       - 'workbench/package.json'
       - 'workbench/schema.sql'
+      - 'workbench/TRANSLATION-WORKFLOW.md'
+      - '.github/workflows/workbench-acceptance.yml'
 
 concurrency:
   group: workbench-acceptance-${{ github.ref }}
