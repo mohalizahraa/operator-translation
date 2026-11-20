@@ -84,3 +84,18 @@ test('the read-only verifier CLI consumes only private input files and emits a s
     assert.equal(run.stdout.includes('A synthetic heading'),false);
   }finally{rmSync(dir,{recursive:true,force:true});}
 });
+
+test('note-free source batch verifies after phase one without inventing a phase-two revision',()=>{
+  const f=fixture();
+  const revised=planNativeDraftBatch({document:docBefore,projectId:12,manifest,proposed,tabId:'t.0',entries,notes:[]});
+  f.phase1Plan=revised;
+  f.phase1Result={revisionId:'confirmed-note-free-revision',replies:revised.requests.map(()=>({}))};
+  f.phase2Result=null;
+  f.notes=[];
+  f.document.revisionId=f.phase1Result.revisionId;
+  f.document.tabs[0].footnotes={};
+  f.document.tabs[0].body.content[3].paragraph.elements=[{textRun:{content:entries[1].text+'\n',textStyle:{weightedFontFamily:{fontFamily:'Amiri'},fontSize:{magnitude:14,unit:'PT'},bold:false}}}];
+  const result=inspectNativeDraftBatch(f);
+  assert.equal(result.nativeStructureVerified,true);
+  assert.equal(result.notes,0);
+});
