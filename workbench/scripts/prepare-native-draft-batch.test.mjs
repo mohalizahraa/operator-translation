@@ -85,3 +85,10 @@ test('leading or embedded tabs are rejected before Google Docs list creation can
   const x=specimen();x.entries[2].text='One\tethical practice';
   assert.throws(()=>planNativeDraftBatch(x),/INVALID_PARAGRAPH_TEXT_OR_TYPE/);
 });
+
+test('note phase refuses a stale echoed requiredRevisionId when write success revision is missing',()=>{
+  const p=planNativeDraftBatch(specimen());
+  const replies=p.requests.map(()=>({}));
+  replies[p.privateNotePlan.replyOffset]={createFootnote:{footnoteId:'kix.synthetic'}};
+  assert.throws(()=>planPopulateNativeNotes({firstPhaseResult:{writeControl:{requiredRevisionId:revision},replies},privateNotePlan:p.privateNotePlan,tabId:'t.0'}),/NO_CONFIRMED_WRITE_REVISION/);
+});
