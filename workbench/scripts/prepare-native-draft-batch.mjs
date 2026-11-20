@@ -26,7 +26,11 @@ const STYLES=new Map([
 const fail=(code)=>{throw new Error('NATIVE_DRAFT_BATCH_BLOCKED:'+code);};
 const validStr=(v)=>typeof v==='string'&&v.trim().length>0;
 const positiveInt=(v)=>Number.isSafeInteger(v)&&v>=0;
-const normalText=(s)=>typeof s==='string'&&s.length>0&&!/[\n\r\t\u0000-\u0008\u000b\u000c]/u.test(s)&&s===s.trim();
+// English-only publication contract: reject corrupt Arabic-source fragments and
+// hidden bidi overrides before mutating the native target. Transliteration using
+// Latin combining marks is deliberately allowed.
+const UNSAFE_TARGET_SCRIPT=/[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF\u202A-\u202E\u2066-\u2069\u200F]/u;
+const normalText=(s)=>typeof s==='string'&&s.length>0&&!/[\n\r\t\u0000-\u0008\u000b\u000c]/u.test(s)&&!UNSAFE_TARGET_SCRIPT.test(s)&&s===s.trim();
 
 function targetTab(document,tabId){
   if(!validStr(tabId))fail('MISSING_TAB_ID');
@@ -94,7 +98,7 @@ export function planNativeDraftBatch({document,projectId,manifest,proposed,tabId
   const anchors=notes.map((note,index)=>{
     if(!positiveInt(note?.entryIndex)||note.entryIndex>=entries.length || !validStr(note?.text) ||
        !validStr(note.anchorText)||note.text.length>50_000)fail('INVALID_NOTE');
-    if(/[\u0000-\u0008]/u.test(note.text))fail('INVALID_NOTE_CONTROL_CHARACTER');
+    if(/[\u0000-\u0008\u000b\u000c]/u.test(note.text)||UNSAFE_TARGET_SCRIPT.test(note.text))fail('INVALID_NOTE_CONTROL_OR_ARABIC_SCRIPT');
     const target=entries[note.entryIndex].text;
     const at=target.indexOf(note.anchorText);
     if(at<0||target.indexOf(note.anchorText,at+1)!==-1)fail('AMBIGUOUS_OR_ABSENT_NOTE_ANCHOR');
