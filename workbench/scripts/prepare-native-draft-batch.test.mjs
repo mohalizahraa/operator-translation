@@ -16,6 +16,13 @@ test('batch plans one insert, native headings, grouped lists, and notes without 
   const normalizer=p.requests.find(r=>r.updateTextStyle?.range.startIndex===20&&r.updateTextStyle?.textStyle.fontSize.magnitude===14);
   assert.ok(normalizer);
   assert.equal(normalizer.updateTextStyle.textStyle.weightedFontFamily.fontFamily,'Amiri');
+  // Live Google Docs pilot: structural operations erase prior explicit body styles.
+  // Normalize after *all* paragraph and list operations, before note anchors.
+  const normalizeAt=p.requests.indexOf(normalizer);
+  const lastStructural=Math.max(...p.requests.map((r,i)=>
+    r.updateParagraphStyle||r.createParagraphBullets?i:-1));
+  const firstNote=p.requests.findIndex(r=>!!r.createFootnote);
+  assert.ok(normalizeAt>lastStructural && normalizeAt<firstNote);
   const heading=p.requests.find(r=>r.updateTextStyle?.textStyle?.fontSize?.magnitude===18);
   assert.equal(heading.updateTextStyle.textStyle.bold,true);
   assert.equal(p.requests.at(-1).createFootnote.location.index,20+'New chapter\n'.length+'A very good footnote '.length+'anchor'.length);
@@ -72,4 +79,9 @@ test('UTF-16 offsets preserve astral characters and cross-note descending order'
   assert.equal(noteReq[0].createFootnote.location.index,expectedSecond);
   assert.ok(noteReq[0].createFootnote.location.index>noteReq[1].createFootnote.location.index);
   assert.equal(p.privateNotePlan.notes[0].text,'Source B');
+});
+
+test('leading or embedded tabs are rejected before Google Docs list creation can delete tabs and shift note positions',()=>{
+  const x=specimen();x.entries[2].text='One\tethical practice';
+  assert.throws(()=>planNativeDraftBatch(x),/INVALID_PARAGRAPH_TEXT_OR_TYPE/);
 });
