@@ -138,7 +138,7 @@ export function planPopulateNativeNotes({firstPhaseResult,privateNotePlan,tabId}
     delete requests.at(-1).updateTextStyle.range.tabId;
   }
   return {writeControl:{requiredRevisionId:revision},requests,
-    privateReceipt:{notesToPopulate:ids.size,sourceAcceptance:'OPEN'}};
+    privateReceipt:{notesToPopulate:ids.size,skipPhase2:ids.size===0,sourceAcceptance:'OPEN'}};
 }
 
 if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href){
