@@ -107,7 +107,7 @@ export function planNativeDraftBatch({document,projectId,manifest,proposed,tabId
   const noteReplyOffset=requests.length;
   requests.push(...anchors.map(a=>({createFootnote:{location:{index:a.at,tabId}}})));
   return {writeControl:{requiredRevisionId:document.revisionId},requests,
-    privateNotePlan:{replyOffset:noteReplyOffset,notes:anchors.map(a=>({noteIndex:a.noteIndex,text:a.text}))},
+    privateNotePlan:{replyOffset:noteReplyOffset,insertIndex,notes:anchors.map(a=>({noteIndex:a.noteIndex,text:a.text}))},
     privateReceipt:{projectId,sourceUnitId:proposed.sourceUnitId,sourcePages:[proposed.fromPage,proposed.toPage],
       entries:entries.length,notes:notes.length,utf16Units:text.length,sourceAcceptance:'OPEN'}};
 }
@@ -140,8 +140,8 @@ export function planPopulateNativeNotes({firstPhaseResult,privateNotePlan,tabId}
 if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href){
   try {
     if(process.argv[2]==='--populate'){
-      if(process.argv.length!==5)fail('USAGE_POPULATE');
-      const [, , phaseFile, planFile, outputFile]=process.argv;
+      if(process.argv.length!==6)fail('USAGE_POPULATE');
+      const [, , , phaseFile, planFile, outputFile]=process.argv;
       const phase=JSON.parse(readFileSync(phaseFile,'utf8'));
       const plan=JSON.parse(readFileSync(planFile,'utf8'));
       const res=planPopulateNativeNotes({firstPhaseResult:phase,privateNotePlan:plan.privateNotePlan,tabId:plan.tabId});
