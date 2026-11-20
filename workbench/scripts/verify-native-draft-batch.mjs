@@ -104,13 +104,17 @@ export function inspectNativeDraftBatch({document,tabId,entries,notes=[],phase1P
 }
 if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href){
   try{
-    if(process.argv.length!==8)fail('USAGE_SIX_PRIVATE_JSON_FILES');
-    const [docFile,batchFile,planFile,phase1File,phase2File,tabId]=process.argv.slice(2);
+    if(![7,8].includes(process.argv.length))fail('USAGE_FIVE_OR_SIX_PRIVATE_ARGUMENTS');
+    // Note-free source units have no second write and no phase-two response.
+    const parts=process.argv.slice(2);
+    const [docFile,batchFile,planFile,phase1File]=parts;
+    const phase2File=parts.length===6?parts[4]:null;
+    const tabId=parts.at(-1);
     const doc=JSON.parse(readFileSync(docFile,'utf8')),
       batch=JSON.parse(readFileSync(batchFile,'utf8')),
       plan=JSON.parse(readFileSync(planFile,'utf8')),
       phase1=JSON.parse(readFileSync(phase1File,'utf8')),
-      phase2=JSON.parse(readFileSync(phase2File,'utf8'));
+      phase2=phase2File?JSON.parse(readFileSync(phase2File,'utf8')):null;
     console.log('NATIVE_BATCH_QA_RESULT '+JSON.stringify(inspectNativeDraftBatch({document:doc,tabId,
       entries:batch.entries,notes:batch.notes,phase1Plan:plan,phase1Result:phase1,phase2Result:phase2})));
   }catch(e){
