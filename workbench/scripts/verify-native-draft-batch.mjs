@@ -48,7 +48,9 @@ function inspectNote(note,expectedText){
   }
 }
 export function inspectNativeDraftBatch({document,tabId,entries,notes=[],phase1Plan,phase1Result,phase2Result}){
-  const confirmed=phase2Result?.revisionId;
+  const hasNotes=Array.isArray(phase1Plan?.privateNotePlan?.notes)&&
+    phase1Plan.privateNotePlan.notes.length>0;
+  const confirmed=hasNotes?phase2Result?.revisionId:phase1Result?.revisionId;
   if(!nonblank(confirmed)||confirmed!==document?.revisionId||!nonblank(phase1Result?.revisionId))
     fail('UNCONFIRMED_FINAL_REVISION');
   if(!nonblank(tabId)||!Array.isArray(entries)||!Array.isArray(notes)||
