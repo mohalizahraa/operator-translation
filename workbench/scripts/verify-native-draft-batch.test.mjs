@@ -36,7 +36,7 @@ function fixture(){
     const end=idx+e.text.length+1+(i===1?1:0);
     body.push({startIndex:idx,endIndex:end,paragraph:p});idx=end;
   }
-  body.push({startIndex:idx,endIndex:idx+1,paragraph:{elements:[{textRun:{content:'\n'}}]}}});
+  body.push({startIndex:idx,endIndex:idx+1,paragraph:{elements:[{textRun:{content:'\n'}}]}});
   const footnotes={[noteId]:{content:[{paragraph:{elements:[{textRun:{content:' '+notes[0].text+'\n',textStyle:{weightedFontFamily:{fontFamily:'Amiri'},fontSize:{magnitude:10,unit:'PT'}}}}]}}]}};
   const document={revisionId:finalRev,tabs:[{tabId:'t.0',body:{content:body},footnotes}]};
   return {document,tabId:'t.0',entries,notes,phase1Plan:plan,phase1Result,phase2Result};
