@@ -1,0 +1,81 @@
+name: One-time 143-book canonical source recovery
+on:
+  push:
+    branches: [workbench-source-recovery-143-20261127]
+    paths: ['.github/workflows/one-time-source-recovery-143.yml']
+permissions:
+  contents: read
+jobs:
+  recover:
+    if: github.repository == 'mohalizahraa/operator-translation' && github.ref == 'refs/heads/workbench-source-recovery-143-20261127'
+    runs-on: [self-hosted, operator-translation, macOS, ARM64]
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        shard: [0,1,2,3,4,5,6,7,8,9,10,11]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Recover verified exact-project public PDFs (no site or manuscript writes)
+        env:
+          SHARD: ${{ matrix.shard }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test workbench/scripts/fetch-workbench-source.test.mjs
+          mkdir -p "$RUNNER_TEMP/wb143-$SHARD"
+          node --input-type=module <<'NODE'
+          import {assertCompleteWorkbenchSnapshot, planWorkQueue} from './workbench/scripts/plan-workbench-priority.mjs';
+          import {fetchWorkbenchSource} from './workbench/scripts/fetch-workbench-source.mjs';
+          import {writeFile} from 'node:fs/promises';
+          import {join} from 'node:path';
+          const shard=Number(process.env.SHARD);
+          if (!Number.isInteger(shard)||shard<0||shard>=12) throw Error('invalid shard');
+          const response=await fetch('https://haydari-translation-workbench.pages.dev/api/projects',{headers:{accept:'application/json','cache-control':'no-cache'},signal:AbortSignal.timeout(30000)});
+          if(!response.ok) throw Error('live catalogue unavailable');
+          const data=await response.json();
+          assertCompleteWorkbenchSnapshot(data.projects);
+          const plan=planWorkQueue(data.projects);
+          const zahraa=plan.phases[1].projects;
+          const rest=plan.phases[2].projects;
+          if(zahraa.length!==9||rest.length!==134) throw Error('live queue changed; reconcile scope before recovery');
+          const selected=[...zahraa,...rest].filter((p,i)=>i%12===shard);
+          if(selected.some(p=>[90,106].includes(p.id)||!['not_started','in_progress'].includes(p.status))) throw Error('excluded project in shard');
+          const dir=join(process.env.RUNNER_TEMP,'wb143-'+shard);
+          const receipts=[];
+          for(const p of selected){
+            try {
+              const x=await fetchWorkbenchSource({projectId:p.id,outputPath:join(dir,'project-'+p.id+'.pdf')});
+              receipts.push({id:p.id,title:p.title_en,expectedPhysicalPages:p.pages,bytes:x.bytes,sha256:x.sha256,status:'fetched'});
+            } catch(e) {
+              receipts.push({id:p.id,title:p.title_en,status:'blocked',error:String(e.message).slice(0,180)});
+            }
+          }
+          await writeFile(join(dir,'manifest.json'),JSON.stringify({observedAt:new Date().toISOString(),shard,queueCount:143,receipts},null,2));
+          console.log('WB143_SOURCE_SHARD '+JSON.stringify({shard,selected:selected.map(p=>p.id),fetched:receipts.filter(x=>x.status==='fetched').map(x=>x.id),blocked:receipts.filter(x=>x.status==='blocked').map(x=>x.id)}));
+          NODE
+      - name: Upload one-day source handoff
+        uses: actions/upload-artifact@v4
+        with:
+          name: wb143-source-shard-${{ matrix.shard }}
+          path: ${{ runner.temp }}/wb143-${{ matrix.shard }}
+          retention-days: 1
+          if-no-files-found: error
+      - name: Check receipt completeness
+        shell: bash
+        env:
+          SHARD: ${{ matrix.shard }}
+        run: |
+          node --input-type=module -e 'import fs from "node:fs"; const m=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+"/wb143-"+process.env.SHARD+"/manifest.json")); if(m.receipts.some(x=>x.status!=="fetched")) process.exitCode=1;'
+      - name: Remove temporary runner bytes
+        if: always()
+        env:
+          SHARD: ${{ matrix.shard }}
+        shell: bash
+        run: rm -rf "$RUNNER_TEMP/wb143-$SHARD"
